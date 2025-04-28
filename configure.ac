@@ -1,14 +1,11 @@
 #
 #
-AC_INIT([BashCompiler],[0.0],[PROJ],[BashCompiler])
+AC_INIT([BashCompiler],[0.1.1],[PROJ],[BashCompiler])
 
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AC_PROG_CXX
-
 AM_INIT_AUTOMAKE
-
 AC_PROG_CC
-AC_HEADER_STDC
 
 AC_SUBST(CFLAGS)
 AC_SUBST(CPPFLAGS)
@@ -35,5 +32,5 @@ PKG_CHECK_MODULES(QTCORE, $QTCORE_MODULES)
 AC_SUBST(QTCORE_CFLAGS)
 AC_SUBST(QTCORE_LIBS)
 
-AC_OUTPUT(Makefile BashCompiler/app/Makefile)
-
+AC_CONFIG_FILES(Makefile BashCompiler/app/Makefile)
+AC_OUTPUT
