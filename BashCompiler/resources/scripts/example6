@@ -1,0 +1,22 @@
+#!/bin/bash -e
+
+if [[   21 -eq 10+10+1 ]]
+then
+	echo xxxxyyyzzz
+fi
+
+XVAR="$(ls -1 /tmp)"
+YVAR="AAA"
+ZVAR=123
+
+#echo "$XVAR $XVAR 12345"
+
+YVAR="yesz"
+XVAR="yesz2"
+
+if [[  "yesz" = ${XVAR} ]]   ;			then  		
+	echo ">>>>" "$YVAR"
+else
+	echo "no match"
+fi
+

@@ -1,0 +1,14 @@
+#!/bin/bash -e
+
+aaaa="ababa"
+bbb="cacacac"
+qqq="wawawa"
+
+PROCSUBVAR="aaaa"
+PROCSUBVAR="$aaaa"
+PROCSUBVAR="${aaaa}"
+PROCSUBVAR="aaa${aaaa}ddd"
+PROCSUBVAR="${aaaa}ddd $bbb         XXXX$qqq"
+
+echo $PROCSUBVAR
+
