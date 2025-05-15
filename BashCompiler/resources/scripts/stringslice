@@ -1,0 +1,9 @@
+#!/bin/bash -e
+
+HASTACK="100abc:::"
+PART="ABBA"
+echo $HASTACK $PART
+#TODO
+#NEEDLE=${HASTACK//abc/${PART//"AB"/"ab"}}
+NEEDLE=${HASTACK//abc/${PART}}
+echo $NEEDLE

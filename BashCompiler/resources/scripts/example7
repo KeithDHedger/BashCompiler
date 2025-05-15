@@ -1,0 +1,25 @@
+#!/bin/bash -e
+
+
+cnt=0
+
+while [[ $cnt -lt 10 ]]
+ do
+#cnt=std::to_string(stol(std::string(cnt),NULL,0)+1);
+		cnt=$(( $cnt + 1 ))
+		echo $cnt $(($cnt + 1 ))
+ done
+
+
+SCALL=$(ls -1 /tmp)
+echo "retcode from ls -1 /tmp=$?"
+
+ls -1 /tmpx
+
+echo "bad retcode=$?"
+
+
+HASTACK="100abc:::"
+echo $HASTACK
+NEEDLE=${HASTACK//abc/--}
+echo $NEEDLE
