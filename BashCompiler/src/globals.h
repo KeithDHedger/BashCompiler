@@ -29,21 +29,19 @@
 class parseFileClass;
 class commandsClass;
 
+enum commandName {EXTERNALCOMMAND=0,BASHECHO,BASHIF,BASHTHEN,BASHELSE,BASHFI,BASHWHILE,BASHDO,BASHDONE};
 
-enum dataType {INVALID=0,CONSTSTR,STRVAR,PROCSUB,NEGATE,CONSTDATA};
-//static const char *typeAsText[]={"INVALID","CONSTSTR","STRVAR","PROCSUB","NEGATE","CONSTDATA"};
-
-struct lineData
-{
-	QString		data="";
-	dataType		dtype=INVALID;
-	qsizetype	argLen=0;
-};
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+static const char*	bashmath[]={"-gt","-lt","-eq","-ne","-le","-ge","=","!=","<",">",">=","<=",NULL};
+static const char*	cmath[]={">","<","==","!=","<-",">=","==","!=","<",">",">=","<=",NULL};
+#pragma GCC diagnostic pop
 
 #include "commands.h"
 #include "parseFile.h"
 
 extern parseFileClass	*mainParseClass;
 extern commandsClass		*mainCommandsClass;
+extern QString			bashOptsAtStart;
 
 #endif

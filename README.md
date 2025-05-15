@@ -41,6 +41,12 @@ external commands, see example 2.
 Process substitution, see example 5.  
 if/then/else/fi, see 'To do', see example 6.  
 ######
+
+### Ongoing in no particular order. 
+Return value from command ( '$?' ), only gives exit code of external commands, see example 6.  
+while loops  
+###
+
 ### To do ( loads! ) in no particular order.  
 
 Add options to bashcompiler.  
@@ -55,13 +61,16 @@ fi
 
 C style assign/for etc.  
 read.  
-while loops  
 case.  
 for loops.  
 Command redirection.  
 export.  
-string slicing.  
+String slicing.  
 arrays.  
 regex.  
+Backgrounding ( '&' ).  
+###
+All special '$'s  
+Logical ops.  
 
 

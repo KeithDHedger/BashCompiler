@@ -8,7 +8,7 @@ ZVAR=$YVAR
 AVAR="${XVAR}${YVAR} 123456"
 XVAR="666"
 YVAR="xxx 111 333"
-echo "$XVAR $XVAR"
+    echo			 "$XVAR $XVAR"
 echo $ZVAR
 echo $AVAR
 #>>>>>>>>>>>>>>>>>>
@@ -30,3 +30,4 @@ PROCSUBVAR="${PROCSUBVAR}$(ls -1 /home) $(ls -1 /usr)"
 echo "$PROCSUBVAR"
 PROCSUBVAR=$XVAR
 echo $PROCSUBVAR
+

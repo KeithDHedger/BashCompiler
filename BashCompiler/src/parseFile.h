@@ -32,20 +32,22 @@ class parseFileClass
 //control
 		bool					verboseCompile=false;
 		bool					verboseCCode=false;
-		void					parseFile(void);
 
-		QString				cFile;
+		QString				cFile="";
 		QStringList			cFileDeclares;
-		QVector<lineData>	dataArray;
 		QStringList			lineParts;
 
-		void					parseLineAsParams(QString line);
+		void					parseFile(void);
+		QString				parseExprString(QString line,bool isnumexpr);
+		QString				setSpecialDollars(QChar dollar);
+
 	private:
 		QFile				mainBashFile;
+		commandName			bashCommand=EXTERNALCOMMAND;
 
 		bool					parseLine(QString line);
-		QString				createCommand(QString line);
-		QString				dataArrayToString(void);
+		QString				parseVar(QString line);
+		void					createCommand(QString line);
 };
 
 #endif

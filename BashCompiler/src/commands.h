@@ -29,16 +29,21 @@ class commandsClass
 		commandsClass();
 		~commandsClass();
 
-		QString	makeEcho(QString line);
-		QString	makeIf(QString line);
-		QString	makeThen(QString line);
-		QString	makeFi(QString line);
+//external command
 		QString	makeExternalCommand(QString line);
 
+//if/then/else/fi
+		bool		makeIf(QString line);
+		bool		makeThen(QString line);
+		bool		makeElse(QString line);
+		bool		makeFi(QString line);
+//while/do/done
+		bool		makeWhile(QString line);
+		bool		makeDo(QString line);
+		bool		makeDone(QString line);
+
 	private:
-		lineData	parseStr(QString line);
-		QString	makeIntCompare(QVector<lineData> da);
-		QString	makeStrCompare(QVector<lineData> da);
+
 };
 
 #endif

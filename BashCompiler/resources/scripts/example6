@@ -1,22 +1,43 @@
 #!/bin/bash -e
 
-if [[   21 -eq 10+10+1 ]]
-then
+XVAR="yes"
+YVAR="no"
+ZVAR=9
+
+if [[   21 -eq 10+10+1 ]];then
 	echo xxxxyyyzzz
 fi
 
-XVAR="$(ls -1 /tmp)"
-YVAR="AAA"
-ZVAR=123
 
-#echo "$XVAR $XVAR 12345"
-
-YVAR="yesz"
-XVAR="yesz2"
-
-if [[  "yesz" = ${XVAR} ]]   ;			then  		
-	echo ">>>>" "$YVAR"
+if [[ ${XVAR} = "$YVAR" ]];then
+	echo "true"
 else
-	echo "no match"
+	echo "false"
 fi
 
+if [[ ${ZVAR}0 -eq 100 ]]
+then
+echo "${ZVAR}0 true"
+#qDebug()<<QString("%1%2").arg(ZVAR).arg(0);
+else
+echo NOPE
+fi
+
+ZVAR=8
+
+ZVAR=$(($ZVAR + 2))
+echo ">>> $ZVAR <<<<"
+
+if [[ "${ZVAR}0 + 1" -ge 100 ]];then
+echo "${ZVAR}0 + 1 true $((${ZVAR}  + 2))"
+echo "${ZVAR}0 + 1 true $((${ZVAR}))"
+
+#echo "${ZVAR}0 + 1 true $((${ZVAR}0))" TODO
+#echo "${ZVAR}0 + 1 true $((${ZVAR}0  + 2))"
+#qDebug()<<QString("%1%2").arg(ZVAR).arg(0);
+else
+echo NOPE
+fi
+
+echo "$(basename \"/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac\" .flac)
+echo "$(dirname \"/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac\")

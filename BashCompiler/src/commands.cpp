@@ -30,293 +30,177 @@ commandsClass::commandsClass()
 
 QString commandsClass::makeExternalCommand(QString line)
 {
-	return(QString("fflush(NULL);\nsystem(\"%1\");").arg(line));
+	return(QString("fflush(NULL);\nexitstatus=QString::number(system(\"%1\"));").arg(line));
 }
 
-QString commandsClass::makeIntCompare(QVector<lineData> da)
+bool commandsClass::makeIf(QString line)
 {
-	QString compstr="";
-	int doneg=0;
+	QString					tstr;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	QString					leftstr;
+	QString					midstr;
+	QString					ritestr;
+	int						cnt=0;
+	bool						donumexpr=true;
+	bool						singlelinethen=false;
 
-	for(int j=0;j<da.count();j++)
+	re.setPattern("(if)\\s+\\[+(.*)\\s+\\]+\\s*;*\\s*(.*)");
+	match=re.match(line);
+	if((match.hasMatch()) && (match.captured(1).trimmed().compare("if")==0))
 		{
-			switch(da.at(j).dtype)
+			if(match.captured(3).trimmed().compare("then")==0)
+				singlelinethen=true;
+			QString	expr=match.captured(1).replace(QRegularExpression("\\[+|\\]+"),0).trimmed();
+			expr=match.captured(2).trimmed();
+			tstr="";
+			while(bashmath[cnt]+=NULL)
+				tstr+=bashmath[cnt++]+QString("|");
+
+			tstr=tstr.left(tstr.length()-1);
+			tstr="\\s*(.*)\\s+("+tstr+")\\s\\s*(.*)\\s*";
+
+			re.setPattern(tstr);
+			match=re.match(expr);
+			if(match.hasMatch())
 				{
-					case INVALID:
-						break;
-					case CONSTSTR:
-						break;
-					case STRVAR:
-						compstr+="std::stol(std::string("+da.at(j).data+"),NULL,0)";
-						break;
-					case PROCSUB:
-						break;
-					case NEGATE:
-						compstr+="!(";
-						doneg++;
-						break;
-					case CONSTDATA:
-						{
-							QString comp=da.at(j).data;
+					leftstr=match.captured(1).trimmed();
+					leftstr.replace(QRegularExpression("^\"|\"$"),0);
+					leftstr.replace(QRegularExpression("^\"|\"$"),0);
+					leftstr.replace(QRegularExpression("\\\""),"\\\"");
+					midstr=match.captured(2).trimmed();
+					ritestr=match.captured(3).trimmed();
+					ritestr.replace(QRegularExpression("^\"|\"$"),0);
+					ritestr.replace(QRegularExpression("\\\""),"\\\"");
 
-							if(da.at(j).data.compare("-eq")==0)
-								comp="==";
-							if(da.at(j).data.compare("-lt")==0)
-								comp="<";
-							if(da.at(j).data.compare("-le")==0)
-								comp="<=";
-							if(da.at(j).data.compare("-gt")==0)
-								comp=">";
-							if(da.at(j).data.compare("-ge")==0)
-								comp=">=";
-							if(da.at(j).data.compare("-ne")==0)
-								comp="!=";
-							compstr+=" "+comp+" ";
-						}
-						break;
-				}
-		}
-	for(int j=0;j<doneg;j++)
-		compstr+=")";
-
-	//fprintf(stderr,">>>%s<<<\n",compstr.toStdString().c_str());
-	return(compstr);
-}
-
-QString commandsClass::makeStrCompare(QVector<lineData> da)
-{
-	QString compstr="";
-	int doneg=0;
-	QString compnumberstr;
-	QString leftstr="";
-	QString ritestr="";
-
-	for(int j=0;j<da.count();j++)
-		{
-			switch(da.at(j).dtype)
-				{
-					case INVALID:
-						break;
-					case CONSTSTR:
-						if(leftstr.length()==0)
-							leftstr="std::string("+da.at(j).data+")";
-						else
-							ritestr=da.at(j).data;
-						break;
-					case STRVAR:
-						if(leftstr.length()==0)
-							leftstr=da.at(j).data;
-						else
-							ritestr=da.at(j).data;
-						break;
-					case PROCSUB:
-						break;
-					case NEGATE:
-						compstr+="!(";
-						doneg++;
-						break;
-					case CONSTDATA:
-						{
-							if(da.at(j).data.compare("=")==0)
-								compnumberstr="==0";
-							if(da.at(j).data.compare("!=")==0)
-								compnumberstr="!=0";
-							if(da.at(j).data.compare("<")==0)
-								compnumberstr="<0";
-							if(da.at(j).data.compare(">")==0)
-								compnumberstr=">0";
-						}
-						break;
-				}
-		}
-	compstr+=leftstr+".compare("+ritestr+")"+compnumberstr;
-
-	for(int j=0;j<doneg;j++)
-		compstr+=")";
-
-//	fprintf(stderr,"--->>>%s<<<---\n",compstr.toStdString().c_str());
-	return(compstr);
-}
-
-QString commandsClass::makeIf(QString line)
-{
-	QVector<lineData>	dataArray;
-	QString				expstr="";
-	lineData				lnd;
-	QString				res;
-	bool					singlelinethen=false;
-	
-	//clean line
-	expstr=line;
-
-	expstr.replace("if ","");
-
-	if(expstr.endsWith("then"))
-		{
-			singlelinethen=true;
-			expstr=expstr.replace(QRegularExpression(";[[:space:]]*then.*$"),"").trimmed();
-		}
-	expstr=expstr.replace(QRegularExpression("^\\[[\\[]|\\][\\]]$"),"").trimmed();
-
-	bool		isstringexp=false;
-	while(expstr.length()>0)
-		{
-			if(lnd.dtype==CONSTDATA)
-				{
-					if(lnd.data.compare("=")==0)
-						isstringexp=true;
-					else if(lnd.data.compare("<")==0)
-						isstringexp=true;
-					else if(lnd.data.compare(">")==0)
-						isstringexp=true;
-					else if(lnd.data.compare("==")==0)
-						isstringexp=true;
-					else if(lnd.data.compare("!=")==0)
-						isstringexp=true;
+					if(midstr.at(0)=='-')
+						donumexpr=true;
 					else
-						isstringexp=false;
+						donumexpr=false;
+//parseExprString
+					leftstr=mainParseClass->parseExprString(leftstr,donumexpr);
+					ritestr=mainParseClass->parseExprString(ritestr,donumexpr);
+
+					cnt=0;
+					while(bashmath[cnt]+=NULL)
+						{
+							if(midstr.compare(bashmath[cnt])==0)
+								midstr=cmath[cnt];
+							cnt++;		
+						}
+					mainParseClass->cFile+="if("+leftstr+midstr+ritestr+")\n";
+					if(singlelinethen==true)
+						mainParseClass->cFile+="{\n";
 				}
-			lnd=parseStr(expstr);
-			dataArray.push_back(lnd);
-			expstr=expstr.sliced(lnd.argLen).trimmed();
+			return(true);
 		}
-
-	if(isstringexp==false)
-		res="if("+makeIntCompare(dataArray)+")";
-	else
-		res="if("+makeStrCompare(dataArray)+")";
-	if(singlelinethen==true)
-		res+="\n{";
-
-	return(res);
+	return(false);
 }
 
-lineData commandsClass::parseStr(QString line)
+bool commandsClass::makeThen(QString line)
 {
-	QString	part="";
-	lineData	lnd={"",INVALID};
-	bool		openquote=false;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
 
-	for(int j=0;j<line.length();j++)
+	re.setPattern("\\s*(then)");
+	match=re.match(line);
+	if(match.hasMatch())
 		{
-			switch(line.at(j).toLatin1())
-				{
-					case '!':
-						if(openquote==false)
-							{
-								lnd={"!",NEGATE,1};
-								return(lnd);
-							}
-						break;
-					case ' ':
-						if((part.length()>0) && (openquote==false))
-							{
-								if(part.at(0)=='"')
-									lnd={part,CONSTSTR,part.length()};
-								else
-									lnd={part,CONSTDATA,part.length()};
-								return(lnd);
-							}
-						if(openquote==true)
-							{
-								part+=" ";
-								continue;
-							}
-						break;
-					case '"':
-						openquote=!openquote;
-						part+=line.at(j).toLatin1();
-						continue;
-						break;
-					case '$':
-						if(part.length()>0)
-							{
-								if(part.at(0)=='"')
-									lnd={part,CONSTSTR,part.length()};
-								else
-									lnd={part,CONSTDATA,part.length()};
-								return(lnd);
-							}
-
-						j++;
-						if(line.at(j).toLatin1()=='{')//is a var
-							{
-								j++;
-								part="";
-								while((j<line.length()) && (line.at(j).toLatin1()!='}'))
-									{
-										part+=line.at(j).toLatin1();
-										j++;
-									}
-								lnd={part,STRVAR,part.length()+3};
-								return(lnd);
-							}
-						if(line.at(j)=='(')//is a proc sub
-							{
-								part="";
-								j++;
-								while((j<line.length()) && (line.at(j).toLatin1()!=')'))
-									{
-										part+=line.at(j).toLatin1();
-										j++;
-									}
-								lnd={part,PROCSUB,part.length()+3};
-								return(lnd);
-							}
-
-						part="";
-						while((j<line.length()) && ((line.at(j).isLetterOrNumber()==true) || (line.at(j).toLatin1()=='_')))
-							{
-								if(line.at(j).toLatin1()==' ')
-									break;
-								else
-									part+=line.at(j).toLatin1();
-
-								j++;
-							}
-						j--;
-						lnd={part,STRVAR,part.length()+1};
-						return(lnd);
-						continue;
-					
-					default:
-						part+=line.at(j).toLatin1();
-				}
+			mainParseClass->cFile+="{\n";
+			return(true);
 		}
-	if(part.length()>0)
-		{
-			if(part.at(0)=='"')
-				lnd={part,CONSTSTR,part.length()};
-			else
-				lnd={part,CONSTDATA,part.length()};
-		}
-	return(lnd);
+	return(false);
 }
 
-QString commandsClass::makeEcho(QString line)
+bool commandsClass::makeElse(QString line)
 {
-	QString format="";
-	QString param="";
-	QString tstr="";
-	QString com="";
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
 
-	tstr=line;
-	tstr.replace("echo ","");
-	tstr.replace(QRegularExpression("^\"|\"$"),"");
-	mainParseClass->parseLineAsParams(tstr);
-
-	com="printf(\"";
-	for(int l=0;l<mainParseClass->dataArray.count();l++)
+	re.setPattern("\\s*(else)");
+	match=re.match(line);
+	if(match.hasMatch())
 		{
-			if(mainParseClass->dataArray.at(l).dtype==CONSTDATA)
-				format+=mainParseClass->dataArray.at(l).data;
-			else
-				{
-					format+="%s";
-					//convert nl to spaces //TODO//
-					param+=","+mainParseClass->dataArray.at(l).data+".c_str()";
-				}
+			mainParseClass->cFile+="}\nelse\n{\n";
+			return(true);
 		}
-	com+=format+"\\n\""+param+");";
-	return(com);
+	return(false);
+}
+bool commandsClass::makeFi(QString line)
+{
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+
+	re.setPattern("\\s*(fi)");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			mainParseClass->cFile+="}\n";
+			return(true);
+		}
+	return(false);
+}
+
+bool commandsClass::makeWhile(QString line)
+{
+	QString					tstr;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	QString					leftstr;
+	QString					midstr;
+	QString					ritestr;
+	int						cnt=0;
+	bool						donumexpr=true;
+	bool						singlelinethen=false;
+
+	re.setPattern("(while)\\s+\\[+(.*)\\s+\\]+\\s*;*\\s*(.*)");
+	match=re.match(line);
+	if((match.hasMatch()) && (match.captured(1).trimmed().compare("while")==0))
+		{
+			if(match.captured(3).trimmed().compare("do")==0)
+				singlelinethen=true;
+			QString	expr=match.captured(1).replace(QRegularExpression("\\[+|\\]+"),0).trimmed();
+			expr=match.captured(2).trimmed();
+			tstr="";
+			while(bashmath[cnt]+=NULL)
+				tstr+=bashmath[cnt++]+QString("|");
+
+			tstr=tstr.left(tstr.length()-1);
+			tstr="\\s*(.*)\\s+("+tstr+")\\s\\s*(.*)\\s*";
+
+			re.setPattern(tstr);
+			match=re.match(expr);
+			if(match.hasMatch())
+				{
+					leftstr=match.captured(1).trimmed();
+					leftstr.replace(QRegularExpression("^\"|\"$"),0);
+					leftstr.replace(QRegularExpression("^\"|\"$"),0);
+					leftstr.replace(QRegularExpression("\\\""),"\\\"");
+					midstr=match.captured(2).trimmed();
+					ritestr=match.captured(3).trimmed();
+					ritestr.replace(QRegularExpression("^\"|\"$"),0);
+					ritestr.replace(QRegularExpression("\\\""),"\\\"");
+
+					if(midstr.at(0)=='-')
+						donumexpr=true;
+					else
+						donumexpr=false;
+//parseExprString
+					leftstr=mainParseClass->parseExprString(leftstr,donumexpr);
+					ritestr=mainParseClass->parseExprString(ritestr,donumexpr);
+
+					cnt=0;
+					while(bashmath[cnt]+=NULL)
+						{
+							if(midstr.compare(bashmath[cnt])==0)
+								midstr=cmath[cnt];
+							cnt++;		
+						}
+					mainParseClass->cFile+="while("+leftstr+midstr+ritestr+")\n";
+					if(singlelinethen==true)
+						mainParseClass->cFile+="{\n";
+				}
+			return(true);
+		}
+	return(false);
 }

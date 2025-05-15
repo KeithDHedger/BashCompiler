@@ -22,6 +22,7 @@
 
 parseFileClass	*mainParseClass=NULL;
 commandsClass	*mainCommandsClass=NULL;
+QString			bashOptsAtStart="";//TODO//for later
 
 int main(int argc,char **argv)
 {
@@ -36,24 +37,32 @@ int main(int argc,char **argv)
 
 	mainParseClass->cFileDeclares.removeDuplicates();
 
-	QString functions="std::string procsub(std::string proc)\n\
+	//QString specialvars="QString exitstatus;\nQString shelloptions("+bashOptsAtStart+");\n";
+	QString specialvars="QString exitstatus;\n";
+	QString headers="#include <QTextStream>\n#include <QCoreApplication>\n#include <QDebug>\n\n";
+	QString functions="\n\
+QString procsub(QString proc)\n\
 {\n\
-FILE *fp;\n\
-char *buffer=(char*)alloca(1024);\n\
-std::string retstr=\"\";\n\
-fp=popen(proc.c_str(),\"r\");\n\
+FILE		*fp;\n\
+char		*buffer=(char*)alloca(1024);\n\
+QString	retstr=\"\";\n\
+\n\
+fp=popen(proc.toStdString().c_str(),\"r\");\n\
 if(fp!=NULL)\n\
 {\n\
 buffer[0]=0;\n\
 while(fgets(buffer,1024,fp))\n\
 retstr+=buffer;\n\
-retstr.erase(retstr.length()-1,1);\n\
-pclose(fp);\n\
+retstr.resize(retstr.length()-1);\n\
+exitstatus=QString::number(pclose(fp));\n\
 }\n\
 return(retstr);\n\
-}\n";
+};\n\n";
 
-	printf("//C File\n#include <string>\n#include <cstdio>\nbool inQuotes=false;\n%s\n%s\nint main(int argc,char **argv)\n{\n%s\n}\n",functions.toStdString().c_str(),mainParseClass->cFileDeclares.join("\n").toStdString().c_str(),mainParseClass->cFile.toStdString().c_str());
+QTextStream(stdout)<<"//C file for "<<argv[1]<<"\n\n"<<headers<<specialvars<<functions<<mainParseClass->cFileDeclares.join("\n")<<"\n"<<"int main(int argc, char **argv)\n{\n"<<"QCoreApplication myapp(argc,argv);\n";
+QTextStream(stdout)<<mainParseClass->cFile<<"\n";
+QTextStream(stdout)<<"return(0);\n}\n\n";
+
 
 	delete mainParseClass;
 	delete mainCommandsClass;

@@ -42,195 +42,292 @@ void parseFileClass::parseFile(void)
 	while (!this->mainBashFile.atEnd())
 		{
 			line=this->mainBashFile.readLine().trimmed();
-			this->parseLine(line);
+			if(this->parseLine(line)==false)
+				{
+					qDebug()<<"Error parsing line:\n"<<line;
+					return;
+				}
 		}
 }
 
 bool parseFileClass::parseLine(QString line)
 {
-	QString	namecom="";
-	bool		isassign=false;
+	QString					tstr;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
 
-	//check for comment or 0 len
+	if(this->verboseCompile==true)
+		qDebug()<<"processing "<<line;
+	
 	if(line.startsWith('#'))
 		{
 			if(this->verboseCCode==true)
 				this->cFile+="//"+line.remove(0,1)+"\n";
-			return(false);
+			return(true);
 		}
 	if(line.length()==0)
 		{
-			return(false);
+			return(true);
 		}
-
-	this->lineParts=line.split(" ");
 
 	if(this->verboseCCode==true)
 		this->cFile+=QString("//%1\n").arg(line);
 
-	if(this->verboseCompile==true)
-		qDebug()<<"processing "<<line;
-
-	for(int j=0;j<this->lineParts.count();j++)
+//check for assign
+	re.setPattern("^([[:alnum:]_]+)[[:space:]]*(=)(.*)");
+	match=re.match(line);
+	if(match.hasMatch())
 		{
-			namecom="";
-			isassign=false;
-			//check for assign
-			for(int k=0;k<this->lineParts.at(j).length();k++)
-				{
-					if(this->lineParts.at(j).at(k)=='=')
-						{
-							isassign=true;
-							break;
-						}
-					namecom+=this->lineParts.at(j).at(k);
-				}
-
-		if(isassign==true)
-			{
-				QString tstr="";
-				QString assignparam="";
-
-				this->cFileDeclares<<"std::string "+namecom+";";
-				this->cFile+=namecom+"=";
-				tstr=line;
-				tstr.replace(namecom+"=","");
-				tstr.replace(QRegularExpression("^\"|\"$"),"");
-				this->parseLineAsParams(tstr);
-
-				assignparam=this->dataArrayToString();
-				if(assignparam.at(assignparam.length()-1)!=';')
-					assignparam+=";";
-				this->cFile+=assignparam+"\n";
-				return(true);
-			}
-		else
-			{
-				QString	com=this->createCommand(line);
-				this->cFile+=com+"\n";
-				return(true);
-			}
+			this->cFileDeclares<<QString("QString %1;").arg(match.captured(1));
+			tstr=match.captured(3).replace(QRegularExpression("^\"|\"$"),0);
+			QString pal=this->parseExprString(tstr,false);
+			this->cFile+=QString("%1=%2;\n").arg(match.captured(1)).arg(pal);
+			return(true);
 		}
+	else
+		{
+			this->createCommand(line);
+//external command
+			if(this->bashCommand==EXTERNALCOMMAND)
+				{
+					this->cFile+=mainCommandsClass->makeExternalCommand(line);
+					return(true);
+				}
+			else
+				{
+					return(true);
+				}
+		}
+//should never get here!
 	return(false);
 }
 
-QString parseFileClass::dataArrayToString(void)
+QString parseFileClass::parseVar(QString line)
 {
-	QString		cline="";
-	int			lastpart=this->dataArray.count();
-	const char	*add="+";
+	QString varname;
+	QString haystack;
+	QString needle;
+	QString retcode;
+	QRegularExpression re;
+	QRegularExpressionMatch match;
 
-	for(int j=0;j<lastpart;j++)
+
+	if(line.contains(QRegularExpression("[[:alnum:]_]*(/*).*"))==true) //*/is ${XX//haystack/needle}
 		{
-			if(j==lastpart-1)
-				add="";
+			re.setPattern("([[:alnum:]_]*)/+(.*)/(.*)\\}");
+			match=re.match(line);
 
-			switch(this->dataArray.at(j).dtype)
+			if(match.hasMatch())
 				{
-					case CONSTDATA:
-						cline+="\""+this->dataArray.at(j).data+"\""+add;
-						break;
-					case STRVAR:
-						cline+=this->dataArray.at(j).data+add;
-						break;
-					case PROCSUB:
-						cline+=QString("procsub(\"%1\")%2").arg(this->dataArray.at(j).data).arg(add);
-						break;
-					case INVALID:
-						break;
-					default:
-						break;
+					varname=match.captured(1).trimmed();
+					haystack=match.captured(2).trimmed();
+					needle=match.captured(3).trimmed();
+
+					needle=needle.remove(QRegularExpression("^\"|\"$"));
+					haystack=haystack.remove(QRegularExpression("^\"|\"$"));
+
+					needle=parseExprString(needle,false);
+					haystack=parseExprString(haystack,false);
+
+					retcode=varname+".replace("+haystack+","+needle+")";
+					return(retcode);
 				}
+
 		}
-	return(cline);
+	return("");
 }
 
-QString parseFileClass::createCommand(QString line)
+QString parseFileClass::parseExprString(QString line,bool isnumexpr)
 {
-	if(this->lineParts.at(0)=="echo")
-		return(mainCommandsClass->makeEcho(line));
+	QStringList	parts;
+	QString		tstr;
+	int			lastletter;
+	QString		complete="";
+	int			j=0;
 
-	if(this->lineParts.at(0)=="if")
-		return(mainCommandsClass->makeIf(line));
-	if(this->lineParts.at(0)=="then")
-		return(QString("{"));
-	if(this->lineParts.at(0)=="else")
-		return(QString("}\nelse\n{"));
-
-	if(this->lineParts.at(0)=="fi")
-		return(QString("}"));
-
-	return(mainCommandsClass->makeExternalCommand(line));
-}
-
-void parseFileClass::parseLineAsParams(QString line)
-{
-	QVector<lineData>	dataArray;
-	QString part="";
-
-	for(int j=0;j<line.length();j++)
+	while(j<line.length())
 		{
-			switch(line.at(j).toLatin1())
+			if(line.at(j)!='$')
 				{
-					case '$':
-						if(part.length()>0)
-							{
-								dataArray.push_back({part,CONSTDATA});
-								part="";
-							}
-
-						j++;
-						if(line.at(j).toLatin1()=='{')//is a var
-							{
-								j++;
-								part="";
-								while((j<line.length()) && (line.at(j).toLatin1()!='}'))
-									{
-										part+=line.at(j).toLatin1();
-										j++;
-									}
-								dataArray.push_back({part,STRVAR});
-								part="";
-								continue;
-							}
-						if(line.at(j)=='(')//is a proc sub
-							{
-								part="";
-								j++;
-								while((j<line.length()) && (line.at(j).toLatin1()!=')'))
-									{
-										part+=line.at(j).toLatin1();
-										j++;
-									}
-								dataArray.push_back({part,PROCSUB});
-								part="";
-								continue;
-							}
-						part="";
-						while((j<line.length()) && ((line.at(j).isLetterOrNumber()==true) || (line.at(j).toLatin1()=='_')))
-							{
-								if(line.at(j).toLatin1()==' ')
-									break;
-								else
-									part+=line.at(j).toLatin1();
-								j++;
-							}
-						j--;
-						dataArray.push_back({part,STRVAR});
-						part="";
-						continue;
-						break;
-					
-					default:
-						part+=line.at(j).toLatin1();
+					lastletter=line.indexOf('$',0);
+					if(lastletter==-1)
+						lastletter=line.length();
+					if(isnumexpr==false)
+						parts<<"\""+line.left(lastletter)+"\"";
+					else
+						{
+							parts<<line.left(lastletter).remove(QRegularExpression("^\"|\"$"));
+						}
+					line=line.mid(lastletter);
+					j=0;
+					continue;
 				}
+			if(line.at(j)=="$")
+				{
+					if(this->setSpecialDollars(line.at(j+1)).isEmpty()==false)
+						{
+							parts<<"exitstatus";
+							line=line.right(line.length()-2);
+							j=0;
+							continue;
+						}
+
+					if((line.at(j+1)=="(") && (line.at(j+2)=="("))
+						{
+							lastletter=line.indexOf("))");
+							tstr=line.mid(j+3,lastletter-3);
+							tstr.replace(QRegularExpression("\\$([[:alnum:]_{}]*)"),"\\1.toInt(nullptr,0)");
+							tstr.remove(QRegularExpression("[{}]"));
+							parts<<tstr;
+							line=line.right(line.length()-lastletter-2);
+							j=0;
+							continue;
+						}
+					else if(line.at(j+1)=="(")
+						{
+							lastletter=line.indexOf(")");
+							tstr=line.mid(j+2,lastletter-2);
+							line=line.right(line.length()-lastletter-1);
+
+							if(isnumexpr==true)
+								parts<<"procsub(\""+tstr+"\").toInt(nullptr,0)";
+							else
+								parts<<"procsub(\""+tstr+"\")";
+
+							j=0;
+							continue;
+						}
+					else if(line.at(j+1)=="{")
+						{
+							tstr=parseVar(line);
+							if(tstr.isEmpty()==false)
+								{
+									parts<<tstr;
+									lastletter=line.indexOf("}");
+									line=line.right(line.length()-lastletter-1);
+									j=0;
+									if((line.length()>0) && (line.at(j)=="}"))
+										line=line.right(line.length()-1);	
+									continue;
+								}
+							lastletter=line.indexOf("}");
+							tstr=line.mid(j+2,lastletter-2);
+							line=line.right(line.length()-lastletter-1);
+							parts<<tstr;
+							j=0;
+							continue;
+						}
+					else
+						{
+							lastletter=line.indexOf(QRegularExpression("([^[:alnum:]_{}])"),1);
+							if(lastletter==-1)
+								lastletter=line.length();
+							tstr=line.mid(1,lastletter);
+							line=line.right(line.length()-lastletter);
+							tstr.remove(QRegularExpression("[\\\\{\\s}]"));
+							parts<<tstr;
+							j=0;
+							continue;
+						}
+				}
+			
+			j++;
+		}
+	QString outstr="";
+	QString outfmt="QString(\"";
+	for(int j=0;j<parts.count();j++)
+		{
+			outfmt+="%"+ QString::number(j+1);
+			outstr+=".arg("+parts.at(j)+")";
+		}
+	outfmt+="\")";
+	complete=outfmt+outstr;
+	if(isnumexpr==true)
+		complete="("+complete+").toInt(nullptr,0)";
+	return(complete);
+}
+
+void parseFileClass::createCommand(QString line)
+{
+	QString					tstr;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	QString					leftstr;
+	QString					midstr;
+	QString					ritestr;
+
+	this->bashCommand=EXTERNALCOMMAND;
+
+//check for echo
+	re.setPattern("^echo[[:space:]]*(.*)");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			this->bashCommand=BASHECHO;
+			tstr=match.captured(1);
+			tstr.replace(QRegularExpression("^\"|\"$"),0);
+			QString pal=this->parseExprString(tstr,false);
+			this->cFile+=QString("QTextStream(stdout)<<%1<<Qt::endl;\n").arg(pal);
+			return;
 		}
 
-	if((part.length()>0) )
-		dataArray.push_back({part,CONSTDATA});
+//if then else fi
+	if(mainCommandsClass->makeIf(line)==true)
+		{
+			this->bashCommand=BASHIF;
+			return;
+		}
 
-//	for(int j=0;j<dataArray.count();j++)
-//		fprintf(stderr,">>%s<< %s\n",dataArray.at(j).data.toStdString().c_str(),typeAsText[dataArray.at(j).dtype]);
+	if(mainCommandsClass->makeThen(line)==true)
+		{
+			this->bashCommand=BASHTHEN;
+			return;
+		}
+	if(mainCommandsClass->makeElse(line)==true)
+		{
+			this->bashCommand=BASHELSE;
+			return;
+		}
+	if(mainCommandsClass->makeFi(line)==true)
+		{
+			this->bashCommand=BASHFI;
+			return;
+		}
 
-	this->dataArray=dataArray;
+//while do done
+	if(mainCommandsClass->makeWhile(line)==true)
+		{
+			this->bashCommand=BASHWHILE;
+			return;
+		}
+	re.setPattern("\\s*(do\\b)");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			this->cFile+="{\n";
+			this->bashCommand=BASHDO;
+			return;
+		}
+	re.setPattern("\\s*(done\\b)");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			this->cFile+="}\n";
+			this->bashCommand=BASHDONE;
+			return;
+		}
 }
+
+QString parseFileClass::setSpecialDollars(QChar dollar)
+{
+	switch(dollar.toLatin1())
+		{
+			case '?':
+				return("exitstatus");
+				break;
+			default:
+				break;
+		}
+	return("");
+}
+
