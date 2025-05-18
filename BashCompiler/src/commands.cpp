@@ -30,7 +30,9 @@ commandsClass::commandsClass()
 
 QString commandsClass::makeExternalCommand(QString line)
 {
-	return(QString("fflush(NULL);\nexitstatus=QString::number(system(\"%1\"));").arg(line));
+	QString tstr=line;
+	tstr.replace("\"","\\\"");
+	return(QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system(\"%1\")) & 0xff);").arg(tstr));
 }
 
 bool commandsClass::makeIf(QString line)

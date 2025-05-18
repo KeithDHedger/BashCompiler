@@ -39,14 +39,15 @@ class parseFileClass
 
 		void					parseFile(void);
 		QString				parseExprString(QString line,bool isnumexpr);
-		QString				setSpecialDollars(QChar dollar);
 
 	private:
 		QFile				mainBashFile;
 		commandName			bashCommand=EXTERNALCOMMAND;
 
+		QString				setSpecialDollars(QChar dollar);
 		bool					parseLine(QString line);
 		QString				parseVar(QString line);
+		QString				cleanVar(QString line);
 		void					createCommand(QString line);
 };
 

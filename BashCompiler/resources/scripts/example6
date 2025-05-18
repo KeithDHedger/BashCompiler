@@ -39,5 +39,7 @@ else
 echo NOPE
 fi
 
-echo "$(basename \"/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac\" .flac)
-echo "$(dirname \"/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac\")
+RESULT=$(basename "/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac" .flac)
+echo $RESULT
+dirname "/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac"
+echo $(dirname "/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac")

@@ -18,7 +18,6 @@ The bashcompiler executable can be installed or run directly from the BashCompil
 ### Caveates:  
 BASH is weakly typed so you MUST use "=, ==, <, or >" for string comparisons.  
 You MUST use "-gt, -ge ... etc for numeric comparisons.  
-the '!' operator is available in comparisons.  
 ######
 'eval' is NOT supported and almost certainly will never be, not because of any supposed "eval=evil" but simply it would need the compiler available at runtime and probably a JIT compiler.  
 ######
@@ -28,7 +27,7 @@ All examples in BashCompiler/resources/scripts will compile and run.
 ````
 bashcompiler /PATH/TO/SCRIPT > /tmp/x.cpp
 pushd /tmp
-g++ x.cpp
+g++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC x.cpp
 ./a.out
 popd
 ````
@@ -40,22 +39,27 @@ echo, assumes quotes see example 3.
 external commands, see example 2.  
 Process substitution, see example 5.  
 if/then/else/fi, see 'To do', see example 6.  
+while/do/done, see 'To do', see example 7.  
+$? see example 7.  
 ######
 
 ### Ongoing in no particular order. 
-Return value from command ( '$?' ), only gives exit code of external commands, see example 6.  
-while loops  
+String slicing. see example stringslice.  
 ###
 
 ### To do ( loads! ) in no particular order.  
 
 Add options to bashcompiler.  
 
-Multi line commands, at the moment the only command that supports ';' is 'if' eg:
+Multi line commands, at the moment the only commands that supports ';' is 'if' and while eg:
 ````
-if [ VAR -gt 100 ]];then
-	echo 100
+if [ $VAR -gt 100 ]];then
+	echo $VAR
 fi
+
+while [ $VAR -gt 100 ]];do
+	echo $VAR
+done
 
 ````
 
@@ -65,7 +69,6 @@ case.
 for loops.  
 Command redirection.  
 export.  
-String slicing.  
 arrays.  
 regex.  
 Backgrounding ( '&' ).  

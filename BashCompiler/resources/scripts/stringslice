@@ -1,9 +1,30 @@
 #!/bin/bash -e
 
-HASTACK="100abc:::"
+HAYSTACK="100abcd:::abcd:::abcd"
 PART="ABBA"
-echo $HASTACK $PART
-#TODO
-#NEEDLE=${HASTACK//abc/${PART//"AB"/"ab"}}
-NEEDLE=${HASTACK//abc/${PART}}
+FIND="abcd"
+POS=5
+LEN=4
+echo $HAYSTACK $PART $FIND $LEN
+#TODO nested slicing
+#NEEDLE=${HAYSTACK//abc/${PART//"AB"/"ab"}}
+
+NEEDLE="${HAYSTACK//${FIND}/$PART} << {qwerty}  \"done\""
+echo $HAYSTACK
 echo $NEEDLE
+echo ${#NEEDLE}
+
+RESULT=${HAYSTACK:2}
+echo $HAYSTACK
+echo $RESULT
+echo ${#RESULT}
+
+RESULT=${HAYSTACK:${POS}}
+echo $HAYSTACK
+echo $RESULT
+echo ${#RESULT}
+
+RESULT=${HAYSTACK:${POS}:$LEN}
+echo $HAYSTACK
+echo $RESULT
+echo ${#RESULT}

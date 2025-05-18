@@ -39,6 +39,7 @@ int main(int argc,char **argv)
 
 	//QString specialvars="QString exitstatus;\nQString shelloptions("+bashOptsAtStart+");\n";
 	QString specialvars="QString exitstatus;\n";
+	QString globalvars="QTextStream	outop(stdout);\n";
 	QString headers="#include <QTextStream>\n#include <QCoreApplication>\n#include <QDebug>\n\n";
 	QString functions="\n\
 QString procsub(QString proc)\n\
@@ -59,7 +60,7 @@ exitstatus=QString::number(pclose(fp));\n\
 return(retstr);\n\
 };\n\n";
 
-QTextStream(stdout)<<"//C file for "<<argv[1]<<"\n\n"<<headers<<specialvars<<functions<<mainParseClass->cFileDeclares.join("\n")<<"\n"<<"int main(int argc, char **argv)\n{\n"<<"QCoreApplication myapp(argc,argv);\n";
+QTextStream(stdout)<<"//C file for "<<argv[1]<<"\n\n"<<headers<<specialvars<<globalvars<<functions<<mainParseClass->cFileDeclares.join("\n")<<"\n"<<"int main(int argc, char **argv)\n{\n"<<"QCoreApplication myapp(argc,argv);\n";
 QTextStream(stdout)<<mainParseClass->cFile<<"\n";
 QTextStream(stdout)<<"return(0);\n}\n\n";
 

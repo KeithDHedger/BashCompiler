@@ -102,6 +102,30 @@ bool parseFileClass::parseLine(QString line)
 	return(false);
 }
 
+QString parseFileClass::cleanVar(QString line)
+{
+	QRegularExpression		re("([[:alnum:] \"]*)|\\$\\{*([[:alnum:]]*)}*");
+	QRegularExpressionMatch	match;
+	QString					retval=line;
+
+	re.setPattern("^\\$\\{*([[:alnum:]#_]*)}*");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			retval=match.captured(1).trimmed();
+			return(retval);
+	}
+
+	re.setPattern("^(\\\"[^\"]*\\\")");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			retval=match.captured(1).trimmed();
+			return(retval);
+		}
+	return(retval);
+}
+
 QString parseFileClass::parseVar(QString line)
 {
 	QString varname;
@@ -111,29 +135,88 @@ QString parseFileClass::parseVar(QString line)
 	QRegularExpression re;
 	QRegularExpressionMatch match;
 
+//${string#substring}
+//${string##substring}
+//${string%substring}
+//${string%%substring}
 
-	if(line.contains(QRegularExpression("[[:alnum:]_]*(/*).*"))==true) //*/is ${XX//haystack/needle}
+	re.setPattern("^\\$\\{[[:alnum:]_\"]+([/#%:]{1,2}).*}");
+	match=re.match(line);
+	if(match.hasMatch())
 		{
-			re.setPattern("([[:alnum:]_]*)/+(.*)/(.*)\\}");
-			match=re.match(line);
+//${string:position}/${string:position:length}
+			if(match.captured(1).trimmed()==":")
+				{//{
+//${string:position:length}
+					re.setPattern("\\${([[:alnum:]_]+):([[:alnum:]_\\$\"\\{\\}]+):([[:alnum:]_\\$\"\\{\\}]+)}");
+					match=re.match(line);
+					if(match.hasMatch())
+						{
+							varname=match.captured(1).trimmed();
+							haystack=this->cleanVar(match.captured(2).trimmed());
+							needle=this->cleanVar(match.captured(3).trimmed());
+							retcode="QString(\"%1\").arg(QString("+varname+").mid(QString(\"%1\").arg("+haystack+").toInt(nullptr,0),QString(\"%1\").arg("+needle+").toInt(nullptr,0)))";
+							return(retcode);
+						}
+					else
+						{//{
+//${string:position}
+							re.setPattern("([[:alnum:]_]*):(.*)}");
+							match=re.match(line);
+							if(match.hasMatch())
+								{
+									varname=match.captured(1).trimmed();
+									needle=this->cleanVar(match.captured(2).trimmed());
+									retcode="QString(\"%1\").arg(QString("+varname+").mid(QString(\"%1\").arg("+needle+").toInt(nullptr,0)))";
+//errop<<retcode<<"\n";
+									return(retcode);
+								}
+						}
+				}
 
+//${string/substring/replacement}
+//${string//substring/replacement}
+			if(match.captured(1).trimmed()=="//")
+				{//{
+					re.setPattern("([[:alnum:]_]*)/+(.*)/(.*)\\}");
+					match=re.match(line);
+					if(match.hasMatch())
+						{
+							varname=match.captured(1).trimmed();
+							needle=this->cleanVar(match.captured(3).trimmed());
+							haystack=this->cleanVar(match.captured(2).trimmed());
+							retcode="QString("+varname+").replace("+haystack+","+needle+")";
+							return(retcode);
+						}
+				}
+
+			if(match.captured(1).trimmed()=="/")
+				{//{
+					re.setPattern("([[:alnum:]_]*)/(.*)/(.*)\\}");
+					match=re.match(line);
+					if(match.hasMatch())
+						{
+							varname=match.captured(1).trimmed();
+							needle=this->cleanVar(match.captured(3).trimmed());
+							haystack=this->cleanVar(match.captured(2).trimmed());
+
+							retcode=QString("QString(%1).remove(%1.indexOf(%2,0),QString(%2).length()).insert(%1.indexOf(%2,0),%3)").arg(varname).arg(haystack).arg(needle); 
+							return(retcode);
+						}
+				}
+		}
+	else
+		{
+			re.setPattern("\\$\\{*#([[:alnum:]_]*)");//}
+			match=re.match(line);
 			if(match.hasMatch())
 				{
 					varname=match.captured(1).trimmed();
-					haystack=match.captured(2).trimmed();
-					needle=match.captured(3).trimmed();
-
-					needle=needle.remove(QRegularExpression("^\"|\"$"));
-					haystack=haystack.remove(QRegularExpression("^\"|\"$"));
-
-					needle=parseExprString(needle,false);
-					haystack=parseExprString(haystack,false);
-
-					retcode=varname+".replace("+haystack+","+needle+")";
+					retcode=varname+".length()";
 					return(retcode);
 				}
-
 		}
+
 	return("");
 }
 
@@ -187,6 +270,7 @@ QString parseFileClass::parseExprString(QString line,bool isnumexpr)
 						{
 							lastletter=line.indexOf(")");
 							tstr=line.mid(j+2,lastletter-2);
+							tstr.replace("\"","\\\"");
 							line=line.right(line.length()-lastletter-1);
 
 							if(isnumexpr==true)
@@ -202,12 +286,12 @@ QString parseFileClass::parseExprString(QString line,bool isnumexpr)
 							tstr=parseVar(line);
 							if(tstr.isEmpty()==false)
 								{
+									//QRegularExpression	re("^(\\$\\{[[:alnum:]_\\\"]+/+[[:print:]]+/[^}]+\\}+)");
+									//QRegularExpression	re("^(\\$\\{#*[[:alnum:]_\"]+/+[[:print:]]+/[^}]+\\}+)|(\\$\\{*#*[[:alnum:]_\"]+\\})");
+									QRegularExpression	re("^(\\$\\{#*[[:alnum:]_\"]+/+[[:print:]]+/[^}]+\\}+)|(\\$\\{*#*[[:alnum:]_\"]+\\})|(\\$\\{([[:alnum:]_]*):.*\\})");
+									line=line.remove(re);
 									parts<<tstr;
-									lastletter=line.indexOf("}");
-									line=line.right(line.length()-lastletter-1);
 									j=0;
-									if((line.length()>0) && (line.at(j)=="}"))
-										line=line.right(line.length()-1);	
 									continue;
 								}
 							lastletter=line.indexOf("}");
@@ -267,7 +351,7 @@ void parseFileClass::createCommand(QString line)
 			tstr=match.captured(1);
 			tstr.replace(QRegularExpression("^\"|\"$"),0);
 			QString pal=this->parseExprString(tstr,false);
-			this->cFile+=QString("QTextStream(stdout)<<%1<<Qt::endl;\n").arg(pal);
+			this->cFile+=QString("outop<<%1<<Qt::endl;\n").arg(pal);
 			return;
 		}
 

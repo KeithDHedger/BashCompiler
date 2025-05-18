@@ -25,6 +25,7 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QVector>
+#include <QTextStream>
 
 class parseFileClass;
 class commandsClass;
@@ -35,6 +36,8 @@ enum commandName {EXTERNALCOMMAND=0,BASHECHO,BASHIF,BASHTHEN,BASHELSE,BASHFI,BAS
 #pragma GCC diagnostic ignored "-Wunused-variable"
 static const char*	bashmath[]={"-gt","-lt","-eq","-ne","-le","-ge","=","!=","<",">",">=","<=",NULL};
 static const char*	cmath[]={">","<","==","!=","<-",">=","==","!=","<",">",">=","<=",NULL};
+static QTextStream	errop(stderr);
+static QTextStream	outop(stdout);
 #pragma GCC diagnostic pop
 
 #include "commands.h"
