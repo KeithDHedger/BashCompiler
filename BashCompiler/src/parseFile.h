@@ -33,7 +33,6 @@ class parseFileClass
 		bool					verboseCompile=false;
 		bool					verboseCCode=false;
 
-		QString				cFile="";
 		QStringList			cFileDeclares;
 		QStringList			lineParts;
 

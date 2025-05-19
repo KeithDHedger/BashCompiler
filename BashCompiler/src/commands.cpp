@@ -90,9 +90,9 @@ bool commandsClass::makeIf(QString line)
 								midstr=cmath[cnt];
 							cnt++;		
 						}
-					mainParseClass->cFile+="if("+leftstr+midstr+ritestr+")\n";
+					cCode<<"if("+leftstr+midstr+ritestr+")\n";
 					if(singlelinethen==true)
-						mainParseClass->cFile+="{\n";
+						cCode<<"{\n";
 				}
 			return(true);
 		}
@@ -108,7 +108,7 @@ bool commandsClass::makeThen(QString line)
 	match=re.match(line);
 	if(match.hasMatch())
 		{
-			mainParseClass->cFile+="{\n";
+			cCode<<"{\n";
 			return(true);
 		}
 	return(false);
@@ -123,7 +123,7 @@ bool commandsClass::makeElse(QString line)
 	match=re.match(line);
 	if(match.hasMatch())
 		{
-			mainParseClass->cFile+="}\nelse\n{\n";
+			cCode<<"}\nelse\n{\n";
 			return(true);
 		}
 	return(false);
@@ -137,7 +137,7 @@ bool commandsClass::makeFi(QString line)
 	match=re.match(line);
 	if(match.hasMatch())
 		{
-			mainParseClass->cFile+="}\n";
+			cCode<<"}\n";
 			return(true);
 		}
 	return(false);
@@ -198,9 +198,9 @@ bool commandsClass::makeWhile(QString line)
 								midstr=cmath[cnt];
 							cnt++;		
 						}
-					mainParseClass->cFile+="while("+leftstr+midstr+ritestr+")\n";
+					cCode<<"while("+leftstr+midstr+ritestr+")\n";
 					if(singlelinethen==true)
-						mainParseClass->cFile+="{\n";
+						cCode<<"{\n";
 				}
 			return(true);
 		}

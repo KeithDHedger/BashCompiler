@@ -46,5 +46,6 @@ static QTextStream	outop(stdout);
 extern parseFileClass	*mainParseClass;
 extern commandsClass		*mainCommandsClass;
 extern QString			bashOptsAtStart;
+extern QVector<QString>	cCode;
 
 #endif

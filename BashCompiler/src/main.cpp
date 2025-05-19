@@ -23,6 +23,7 @@
 parseFileClass	*mainParseClass=NULL;
 commandsClass	*mainCommandsClass=NULL;
 QString			bashOptsAtStart="";//TODO//for later
+QVector<QString>	cCode;
 
 int main(int argc,char **argv)
 {
@@ -60,9 +61,29 @@ exitstatus=QString::number(pclose(fp));\n\
 return(retstr);\n\
 };\n\n";
 
-QTextStream(stdout)<<"//C file for "<<argv[1]<<"\n\n"<<headers<<specialvars<<globalvars<<functions<<mainParseClass->cFileDeclares.join("\n")<<"\n"<<"int main(int argc, char **argv)\n{\n"<<"QCoreApplication myapp(argc,argv);\n";
-QTextStream(stdout)<<mainParseClass->cFile<<"\n";
-QTextStream(stdout)<<"return(0);\n}\n\n";
+//QTextStream(stdout)<<"//C file for "<<argv[1]<<"\n\n"<<headers<<specialvars<<globalvars<<functions<<mainParseClass->cFileDeclares.join("\n")<<"\n"<<"int main(int argc, char **argv)\n{\n"<<"QCoreApplication myapp(argc,argv);\n";
+//
+//QTextStream(stdout)<<mainParseClass->cFile<<"\n";
+//QTextStream(stdout)<<"return(0);\n}\n\n";
+
+
+
+//write code
+cCode.prepend("QCoreApplication myapp(argc,argv);\n");
+cCode.prepend("int main(int argc, char **argv)\n{\n");
+cCode.prepend(functions);
+cCode.prepend(globalvars);
+cCode.prepend(mainParseClass->cFileDeclares.join("\n"));
+cCode.prepend(specialvars);
+cCode.prepend(headers);
+cCode.prepend(QString("//C file for %1\n").arg(argv[1]));
+cCode<<"return(0);\n}\n\n\n";
+
+for(int j=0;j<cCode.size();j++)
+{
+	QTextStream(stdout)<<cCode.at(j);
+}
+
 
 
 	delete mainParseClass;

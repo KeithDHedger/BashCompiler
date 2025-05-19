@@ -62,7 +62,7 @@ bool parseFileClass::parseLine(QString line)
 	if(line.startsWith('#'))
 		{
 			if(this->verboseCCode==true)
-				this->cFile+="//"+line.remove(0,1)+"\n";
+				cCode<<"//"+line.remove(0,1)+"\n";
 			return(true);
 		}
 	if(line.length()==0)
@@ -71,7 +71,7 @@ bool parseFileClass::parseLine(QString line)
 		}
 
 	if(this->verboseCCode==true)
-		this->cFile+=QString("//%1\n").arg(line);
+		cCode<<QString("//%1\n").arg(line);
 
 //check for assign
 	re.setPattern("^([[:alnum:]_]+)[[:space:]]*(=)(.*)");
@@ -81,7 +81,7 @@ bool parseFileClass::parseLine(QString line)
 			this->cFileDeclares<<QString("QString %1;").arg(match.captured(1));
 			tstr=match.captured(3).replace(QRegularExpression("^\"|\"$"),0);
 			QString pal=this->parseExprString(tstr,false);
-			this->cFile+=QString("%1=%2;\n").arg(match.captured(1)).arg(pal);
+			cCode<<QString("%1=%2;\n").arg(match.captured(1)).arg(pal);
 			return(true);
 		}
 	else
@@ -90,7 +90,7 @@ bool parseFileClass::parseLine(QString line)
 //external command
 			if(this->bashCommand==EXTERNALCOMMAND)
 				{
-					this->cFile+=mainCommandsClass->makeExternalCommand(line);
+					cCode<<mainCommandsClass->makeExternalCommand(line);
 					return(true);
 				}
 			else
@@ -351,7 +351,7 @@ void parseFileClass::createCommand(QString line)
 			tstr=match.captured(1);
 			tstr.replace(QRegularExpression("^\"|\"$"),0);
 			QString pal=this->parseExprString(tstr,false);
-			this->cFile+=QString("outop<<%1<<Qt::endl;\n").arg(pal);
+			cCode<<QString("outop<<%1<<Qt::endl;\n").arg(pal);
 			return;
 		}
 
@@ -388,7 +388,7 @@ void parseFileClass::createCommand(QString line)
 	match=re.match(line);
 	if(match.hasMatch())
 		{
-			this->cFile+="{\n";
+			cCode<<"{\n";
 			this->bashCommand=BASHDO;
 			return;
 		}
@@ -396,7 +396,7 @@ void parseFileClass::createCommand(QString line)
 	match=re.match(line);
 	if(match.hasMatch())
 		{
-			this->cFile+="}\n";
+			cCode<<"}\n";
 			this->bashCommand=BASHDONE;
 			return;
 		}
