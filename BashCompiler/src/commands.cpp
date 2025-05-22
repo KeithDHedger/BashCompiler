@@ -32,12 +32,14 @@ QString commandsClass::makeExternalCommand(QString line)
 {
 	QString tstr=line;
 	tstr.replace("\"","\\\"");
-	return(QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system(\"%1\")) & 0xff);").arg(tstr));
+	return(QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system(\"%1\")) & 0xff);\n").arg(tstr));
 }
 
-bool commandsClass::makeIf(QString line)
+#if 1
+bool commandsClass::makeIf(QString qline)
 {
 	QString					tstr;
+	QString					line;
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
 	QString					leftstr;
@@ -47,6 +49,55 @@ bool commandsClass::makeIf(QString line)
 	bool						donumexpr=true;
 	bool						singlelinethen=false;
 
+	line=qline;
+	mainParseClass->lineParts.clear();
+//^(if)[[:space:]]*\[+[[:space:]]*(.*)[[:space:]]*(-eq)[[:space:]]*([^\]]*).*(then)$
+	while(bashmath[cnt]+=NULL)
+		tstr+=bashmath[cnt++]+QString("|");
+	tstr=tstr.left(tstr.length()-1);
+	//errop<<"^(if)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^\\]]*).*(then)$\n";
+	re.setPattern("^(if)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^\\]]*).*(then)$");
+	match=re.match(line);
+	if((match.hasMatch()) && (match.captured(1).trimmed().compare("if")==0))
+		{
+			if(match.captured(5).trimmed().compare("then")==0)
+				singlelinethen=true;
+			//QString	expr=match.captured(1).replace(QRegularExpression("\\[+|\\]+"),0).trimmed();
+			//expr=match.captured(2).trimmed();
+			//tstr="";
+
+			//tstr=tstr.left(tstr.length()-1);
+			//tstr="\\s*(.*)\\s+("+tstr+")\\s\\s*(.*)\\s*";
+			
+			//errop<<">>>>"<<match.captured(2).trimmed()<<"<<<<<\n";
+			mainParseClass->bashCommand=BASHDONE;
+			mainParseClass->parseLine(match.captured(2).trimmed());
+			mainParseClass->bashCommand=BASHDONE;
+			leftstr=mainParseClass->parseExprString(donumexpr);
+			mainParseClass->parseLine(match.captured(4).trimmed());
+			ritestr=mainParseClass->parseExprString(donumexpr);
+qDebug()<<leftstr<<"----"<<ritestr;
+			exit(100);
+		}
+	else
+		return(false);
+	return(true);	
+}
+#else
+bool commandsClass::makeIf(QString qline)
+{
+	QString					tstr;
+	QString					line;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	QString					leftstr;
+	QString					midstr;
+	QString					ritestr;
+	int						cnt=0;
+	bool						donumexpr=true;
+	bool						singlelinethen=false;
+
+	line=qline;
 	re.setPattern("(if)\\s+\\[+(.*)\\s+\\]+\\s*;*\\s*(.*)");
 	match=re.match(line);
 	if((match.hasMatch()) && (match.captured(1).trimmed().compare("if")==0))
@@ -82,6 +133,8 @@ bool commandsClass::makeIf(QString line)
 //parseExprString
 					leftstr=mainParseClass->parseExprString(leftstr,donumexpr);
 					ritestr=mainParseClass->parseExprString(ritestr,donumexpr);
+					qDebug()<<"llllllllllllll="<<leftstr;
+					qDebug()<<"rrrrrrrrrrrrrrrrr="<<ritestr;
 
 					cnt=0;
 					while(bashmath[cnt]+=NULL)
@@ -93,12 +146,13 @@ bool commandsClass::makeIf(QString line)
 					cCode<<"if("+leftstr+midstr+ritestr+")\n";
 					if(singlelinethen==true)
 						cCode<<"{\n";
+					qDebug()<<">>>>>>>>>>>"<<"if("+leftstr+midstr+ritestr+")\n";
 				}
 			return(true);
 		}
 	return(false);
 }
-
+#endif
 bool commandsClass::makeThen(QString line)
 {
 	QRegularExpression		re;
@@ -188,8 +242,10 @@ bool commandsClass::makeWhile(QString line)
 					else
 						donumexpr=false;
 //parseExprString
-					leftstr=mainParseClass->parseExprString(leftstr,donumexpr);
-					ritestr=mainParseClass->parseExprString(ritestr,donumexpr);
+					//leftstr=mainParseClass->parseExprString(leftstr,donumexpr);
+					leftstr=mainParseClass->parseExprString(donumexpr);
+					//ritestr=mainParseClass->parseExprString(ritestr,donumexpr);
+					ritestr=mainParseClass->parseExprString(donumexpr);
 
 					cnt=0;
 					while(bashmath[cnt]+=NULL)

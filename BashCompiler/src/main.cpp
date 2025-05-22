@@ -40,8 +40,8 @@ int main(int argc,char **argv)
 
 	//QString specialvars="QString exitstatus;\nQString shelloptions("+bashOptsAtStart+");\n";
 	QString specialvars="QString exitstatus;\n";
-	QString globalvars="QTextStream	outop(stdout);\n";
-	QString headers="#include <QTextStream>\n#include <QCoreApplication>\n#include <QDebug>\n\n";
+	QString globalvars="QTextStream	outop(stdout);\n\n";
+	QString headers="#include <QCoreApplication>\n#include <QTextStream>\n\n";
 	QString functions="\n\
 QString procsub(QString proc)\n\
 {\n\
@@ -61,32 +61,22 @@ exitstatus=QString::number(pclose(fp));\n\
 return(retstr);\n\
 };\n\n";
 
-//QTextStream(stdout)<<"//C file for "<<argv[1]<<"\n\n"<<headers<<specialvars<<globalvars<<functions<<mainParseClass->cFileDeclares.join("\n")<<"\n"<<"int main(int argc, char **argv)\n{\n"<<"QCoreApplication myapp(argc,argv);\n";
-//
-//QTextStream(stdout)<<mainParseClass->cFile<<"\n";
-//QTextStream(stdout)<<"return(0);\n}\n\n";
-
-
-
 //write code
-cCode.prepend("QCoreApplication myapp(argc,argv);\n");
-cCode.prepend("int main(int argc, char **argv)\n{\n");
-cCode.prepend(functions);
-cCode.prepend(globalvars);
-cCode.prepend(mainParseClass->cFileDeclares.join("\n"));
-cCode.prepend(specialvars);
-cCode.prepend(headers);
-cCode.prepend(QString("//C file for %1\n").arg(argv[1]));
-cCode<<"return(0);\n}\n\n\n";
+	cCode.prepend("QCoreApplication myapp(argc,argv);\n");
+	cCode.prepend("int main(int argc, char **argv)\n{\n");
+	cCode.prepend(functions);
+	cCode.prepend(QString("%1\n").arg(mainParseClass->cFileDeclares.join("\n")));
+	cCode.prepend(globalvars);
+	cCode.prepend(specialvars);
+	cCode.prepend(headers);
+	cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC /PATH/TO/THIS/FILE\nCreated on %2\n*/\n").arg(argv[1]).arg(QDate::currentDate().toString()));
+	cCode<<"\nreturn(0);\n}\n";
 
-for(int j=0;j<cCode.size();j++)
-{
-	QTextStream(stdout)<<cCode.at(j);
-}
-
-
+	for(int j=0;j<cCode.size();j++)
+		QTextStream(stdout)<<cCode.at(j);
 
 	delete mainParseClass;
 	delete mainCommandsClass;
+
 	return(0);
 }

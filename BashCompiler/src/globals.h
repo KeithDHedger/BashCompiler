@@ -26,14 +26,23 @@
 #include <QRegularExpression>
 #include <QVector>
 #include <QTextStream>
+#include <QDate>
 
 class parseFileClass;
 class commandsClass;
 
-enum commandName {EXTERNALCOMMAND=0,BASHECHO,BASHIF,BASHTHEN,BASHELSE,BASHFI,BASHWHILE,BASHDO,BASHDONE};
+enum commandName {EXTERNALCOMMAND=0,BASHASSIGN,BASHECHO,BASHIF,BASHTHEN,BASHELSE,BASHFI,BASHWHILE,BASHDO,BASHDONE};
+enum dataType {UNKNOWN=0,WHITESPACE,DOUBLEQUOTESTRING,SINGLEQUOTSTRING,COMMAND,VARIABLE,VARIABLEINCURLYS,BRACKETS,SQUAREBRACKETS,STRINGDATA,VARNAME};
+
+struct lineData
+{
+	QString		data;
+	dataType		typeHint;
+};
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+static const char* typeText[]={"UNKNOWN","WHITESPACE","DOUBLEQUOTESTRING","SINGLEQUOTSTRING","COMMAND","VARIABLE","VARIABLEINCURLYS","BRACKETS","SQUAREBRACKETS","STRINGDATA","VARNAME"};
 static const char*	bashmath[]={"-gt","-lt","-eq","-ne","-le","-ge","=","!=","<",">",">=","<=",NULL};
 static const char*	cmath[]={">","<","==","!=","<-",">=","==","!=","<",">",">=","<=",NULL};
 static QTextStream	errop(stderr);
