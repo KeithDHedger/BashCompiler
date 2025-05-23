@@ -22,17 +22,21 @@
 
 parseFileClass::~parseFileClass()
 {
-	this->mainBashFile.close();
+	if(this->mainBashFile.isOpen()==true)
+		this->mainBashFile.close();
 }
 
 parseFileClass::parseFileClass(QString filepath)
 {
-	this->mainBashFile.setFileName(filepath);
+	if(filepath.isEmpty()==false)
+		{
+			this->mainBashFile.setFileName(filepath);
 
-	if(!this->mainBashFile.open(QIODevice::ReadOnly | QIODevice::Text))
-         return;
+			if(!this->mainBashFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		         return;
 
-	qDebug()<<"parseFileClass"<<this->mainBashFile.fileName();
+			qDebug()<<"parseFileClass"<<this->mainBashFile.fileName();
+		}
 }
 
 void parseFileClass::parseFile(void)
@@ -48,56 +52,6 @@ void parseFileClass::parseFile(void)
 					return;
 				}
 		}
-}
-
-QVector<lineData> parseFileClass::parseString(QString qline)
-{
-	QVector<lineData>	ld;
-	QString				currentPart="";
-	int					linePosition=0;
-	bool					preserveWhitespace=false;
-	commandName			bashCommand=EXTERNALCOMMAND;
-
-	ld.clear();
-	line=qline;
-qDebug()<<"==============================";
-
-	while(linePosition<line.length())
-		{
-			if(line.at(linePosition).toLatin1()=='"')
-				{
-					this->parseQuotedString(line);
-					continue;
-				}
-			if(line.at(linePosition).toLatin1()=='$')
-				{
-					this->parseDollar(line);
-					continue;
-				}
-					
-			if((line.at(linePosition).isSpace()==true) && (preserveWhitespace==false))
-				{
-					this->parseWhitespace(line);
-					continue;
-				}
-
-			if(line.at(linePosition).toLatin1()=='[')
-				{
-					this->parseSquareBraces(line);
-					continue;
-				}
-
-			currentPart+=line.at(linePosition);
-			linePosition++;
-		}
-
-	if(currentPart.isEmpty()==false)
-		ld.append({currentPart,STRINGDATA});
-
-	for(int j=0;j<ld.size();j++)
-		QTextStream(stderr)<<">>"<<ld.at(j).data<<"<< "<<typeText[ld.at(j).typeHint]<<"\n";
-
-	return(ld);
 }
 
 bool parseFileClass::parseLine(QString qline)
@@ -156,49 +110,47 @@ bool parseFileClass::parseLine(QString qline)
 						}
 				}
 		}
-//qDebug()<<"==============================";
-//	while(this->linePosition<line.length())
-//		{
-//			if(line.at(this->linePosition).toLatin1()=='"')
-//				{
-//					this->parseQuotedString(line);
-//					continue;
-//				}
-//			if(line.at(this->linePosition).toLatin1()=='$')
-//				{
-//					this->parseDollar(line);
-//					continue;
-//				}
-//					
-//			if((line.at(this->linePosition).isSpace()==true) && (this->preserveWhitespace==false))
-//				{
-//					this->parseWhitespace(line);
-//					continue;
-//				}
-//
-//			if(line.at(this->linePosition).toLatin1()=='[')
-//				{
-//					this->parseSquareBraces(line);
-//					continue;
-//				}
-//
-//			this->currentPart+=line.at(this->linePosition);
-//			this->linePosition++;
-//		}
-//
-//	if(this->currentPart.isEmpty()==false)
-//		this->lineParts.append({this->currentPart,STRINGDATA});
-//
-//	for(int j=0;j<lineParts.size();j++)
-//		QTextStream(stderr)<<">>"<<lineParts.at(j).data<<"<< "<<typeText[lineParts.at(j).typeHint]<<"\n";
 
+	while(this->linePosition<line.length())
+		{
+			if(line.at(this->linePosition).toLatin1()=='"')
+				{
+					this->parseString(line);
+					continue;
+				}
+			if(line.at(this->linePosition).toLatin1()=='$')
+				{
+					this->parseDollar(line);
+					continue;
+				}
+					
+			if((line.at(this->linePosition).isSpace()==true) && (this->preserveWhitespace==false))
+				{
+					this->parseWhitespace(line);
+					continue;
+				}
+
+			if(line.at(this->linePosition).toLatin1()=='[')
+				{
+					this->parseSquareBraces(line);
+					continue;
+				}
+
+			this->currentPart+=line.at(this->linePosition);
+			this->linePosition++;
+		}
+
+	if(this->currentPart.isEmpty()==false)
+		this->lineParts.append({this->currentPart,STRINGDATA});
+
+	//for(int j=0;j<lineParts.size();j++)
+	//	QTextStream(stderr)<<"-->>"<<lineParts.at(j).data<<"<< "<<typeText[lineParts.at(j).typeHint]<<"<<--\n";
 
 	switch(this->bashCommand)
 		{
 			case BASHASSIGN:
 				{
 					this->cFileDeclares<<QString("QString %1;").arg(match.captured(1));
-					//QString pal=this->parseExprString(line,false);
 					QString pal=this->parseExprString(false);
 					cCode<<QString("%1=%2;\n").arg(match.captured(1)).arg(pal);
 					return(true);
@@ -206,21 +158,29 @@ bool parseFileClass::parseLine(QString qline)
 				break;
 			case BASHECHO:
 				{
-					//QString pal=this->parseExprString(line,false);
 					QString pal=this->parseExprString(false);
 					cCode<<QString("outop<<%1<<Qt::endl;\n").arg(pal);
 					return(true);
 				}
 				break;
+//			case BASHIF:
+//			case BASHELSE:
+//			case BASHFI:
+//			qDebug()<<"this->createCommand(line)";
+//				return(true);
+//				break;
+
 			case BASHDONE:
 				return(true);
 				break;
+
 			default:
 				this->createCommand(line);
 //external command
 				if(this->bashCommand==EXTERNALCOMMAND)
 					{
-						cCode<<mainCommandsClass->makeExternalCommand(line);
+						if(this->noCodeOP==false)
+							cCode<<mainCommandsClass->makeExternalCommand(line);
 						return(true);
 					}
 				else
@@ -351,14 +311,12 @@ QString parseFileClass::parseVar(QString line)
 	return(retcode);
 }
 
-#if 1
-//QString parseFileClass::parseExprString(QString line,bool isnumexpr)
 QString parseFileClass::parseExprString(bool isnumexpr)
 {
 	QStringList	parts;
 	QString		complete="";
 	QString		tstr;
-						qDebug()<<"-========---->>>>>>>>>"<<this->lineParts.count();
+	bool			isnumber=isnumexpr;
 
 	for(int j=0;j<this->lineParts.count();j++)
 		{
@@ -371,13 +329,22 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 						parts<<this->lineParts.at(j).data;
 						break;
 					case VARIABLEINCURLYS:
-						qDebug()<<"--------->>>>>>>>>"<<this->lineParts.at(j).data;
 						parts<<this->parseVar(this->lineParts.at(j).data);
 						break;
 					case BRACKETS:
+						//if((this->lineParts.at(j).data.at(2)=='(') && (isnumexpr==true))
+						if((this->lineParts.at(j).data.at(2)=='('))
+						 //&& (isnumexpr==true))
+							{
+								isnumber=true;
+								tstr=this->lineParts.at(j).data;
+								tstr.replace(QRegularExpression("^\\$\\(*|\\)*$"),"");
+								parts<<tstr;
+								break;
+							}
 						tstr=this->lineParts.at(j).data;
 						tstr.replace(QRegularExpression("^\\$\\(*|\\)*$"),"");
-						if(isnumexpr==true)
+						if(isnumber==true)
 							parts<<"procsub(\""+tstr+"\").toInt(nullptr,0)";
 						else
 							parts<<"procsub(\""+tstr+"\")";
@@ -400,123 +367,10 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 		}
 	outfmt+="\")";
 	complete=outfmt+outstr;
-	if(isnumexpr==true)
+	if(isnumber==true)
 		complete="("+complete+").toInt(nullptr,0)";
 	return(complete);
 }
-
-#else
-QString parseFileClass::parseExprStringxx(QString line,bool isnumexpr)
-{
-	QStringList	parts;
-	QString		tstr;
-	int			lastletter;
-	QString		complete="";
-	int			j=0;
-
-	while(j<line.length())
-		{
-			if(line.at(j)!='$')
-				{
-					lastletter=line.indexOf('$',0);
-					if(lastletter==-1)
-						lastletter=line.length();
-					if(isnumexpr==false)
-						parts<<"\""+line.left(lastletter)+"\"";
-					else
-						{
-							parts<<line.left(lastletter).remove(QRegularExpression("^\"|\"$"));
-						}
-					line=line.mid(lastletter);
-					j=0;
-					continue;
-				}
-			if(line.at(j)=="$")
-				{
-					if(this->setSpecialDollars(line.at(j+1)).isEmpty()==false)
-						{
-							parts<<"exitstatus";
-							line=line.right(line.length()-2);
-							j=0;
-							continue;
-						}
-
-					if((line.at(j+1)=="(") && (line.at(j+2)=="("))
-						{
-							lastletter=line.indexOf("))");
-							tstr=line.mid(j+3,lastletter-3);
-							tstr.replace(QRegularExpression("\\$([[:alnum:]_{}]*)"),"\\1.toInt(nullptr,0)");
-							tstr.remove(QRegularExpression("[{}]"));
-							parts<<tstr;
-							line=line.right(line.length()-lastletter-2);
-							j=0;
-							continue;
-						}
-					else if(line.at(j+1)=="(")
-						{
-							lastletter=line.indexOf(")");
-							tstr=line.mid(j+2,lastletter-2);
-							tstr.replace("\"","\\\"");
-							line=line.right(line.length()-lastletter-1);
-
-							if(isnumexpr==true)
-								parts<<"procsub(\""+tstr+"\").toInt(nullptr,0)";
-							else
-								parts<<"procsub(\""+tstr+"\")";
-
-							j=0;
-							continue;
-						}
-					else if(line.at(j+1)=="{")
-						{
-							tstr=parseVar(line);
-							if(tstr.isEmpty()==false)
-								{
-									//QRegularExpression	re("^(\\$\\{[[:alnum:]_\\\"]+/+[[:print:]]+/[^}]+\\}+)");
-									//QRegularExpression	re("^(\\$\\{#*[[:alnum:]_\"]+/+[[:print:]]+/[^}]+\\}+)|(\\$\\{*#*[[:alnum:]_\"]+\\})");
-									QRegularExpression	re("^(\\$\\{#*[[:alnum:]_\"]+/+[[:print:]]+/[^}]+\\}+)|(\\$\\{*#*[[:alnum:]_\"]+\\})|(\\$\\{([[:alnum:]_]*):.*\\})");
-									line=line.remove(re);
-									parts<<tstr;
-									j=0;
-									continue;
-								}
-							lastletter=line.indexOf("}");
-							tstr=line.mid(j+2,lastletter-2);
-							line=line.right(line.length()-lastletter-1);
-							parts<<tstr;
-							j=0;
-							continue;
-						}
-					else
-						{
-							lastletter=line.indexOf(QRegularExpression("([^[:alnum:]_{}])"),1);
-							if(lastletter==-1)
-								lastletter=line.length();
-							tstr=line.mid(1,lastletter);
-							line=line.right(line.length()-lastletter);
-							tstr.remove(QRegularExpression("[\\\\{\\s}]"));
-							parts<<tstr;
-							j=0;
-							continue;
-						}
-				}
-			
-			j++;
-		}
-	QString outstr="";
-	QString outfmt="QString(\"";
-	for(int j=0;j<parts.count();j++)
-		{
-			outfmt+="%"+ QString::number(j+1);
-			outstr+=".arg("+parts.at(j)+")";
-		}
-	outfmt+="\")";
-	complete=outfmt+outstr;
-	if(isnumexpr==true)
-		complete="("+complete+").toInt(nullptr,0)";
-	return(complete);
-}
-#endif
 
 void parseFileClass::createCommand(QString line)
 {
@@ -527,25 +381,8 @@ void parseFileClass::createCommand(QString line)
 	QString					midstr;
 	QString					ritestr;
 
-	//this->bashCommand=EXTERNALCOMMAND;
-//check for echo
-//	re.setPattern("^echo[[:space:]](.*)");
-//	match=re.match(line);
-//	if(match.hasMatch())
-//	if(this->bashCommand==BASHECHO)
-//		{
-//			//this->bashCommand=BASHECHO;
-//			//tstr=match.captured(1);
-//			//tstr.replace(QRegularExpression("^\"|\"$"),"");
-//			//this->lineParts.remove(0);
-//			//QString pal=this->parseExprString(tstr,false);
-//			tstr=line;
-//			tstr.replace(QRegularExpression("^\"|\"$"),"");
-//			QString pal=this->parseExprString(tstr,false);
-//			cCode<<QString("outop<<%1<<Qt::endl;\n").arg(pal);
-//			this->bashCommand=EXTERNALCOMMAND;
-//			return;
-//		}
+	this->bashCommand=EXTERNALCOMMAND;
+
 
 //if then else fi
 	if(mainCommandsClass->makeIf(line)==true)
@@ -607,7 +444,7 @@ QString parseFileClass::setSpecialDollars(QChar dollar)
 	return("");
 }
 
-void parseFileClass::parseQuotedString(QString line)
+void parseFileClass::parseString(QString line)
 {
 	QString	strdata="\"";
 
@@ -632,8 +469,6 @@ void parseFileClass::parseQuotedString(QString line)
 		}
 	strdata+="\"";
 	this->lineParts.append({strdata,DOUBLEQUOTESTRING});
-						//errop<<">>>>>>>>>>>>>"<<strdata<<"<<<<<<<<<<\n";
-
 	this->linePosition++;
 }
 
@@ -644,7 +479,7 @@ void parseFileClass::parseDollar(QString line)
 	QChar	braceopen;
 	QChar	braceclose;
 	dataType	dtype=VARIABLE;
-qDebug()<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
+
 	if(this->currentPart.isEmpty()==false)
 		{
 			this->lineParts.append({this->currentPart,STRINGDATA});
@@ -669,7 +504,6 @@ qDebug()<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
 //do curly braces
 	if(line.at(this->linePosition+1).toLatin1()==braceopen)
 		{
-	qDebug()<<"parsedollar"<<line;
 			this->linePosition+=2;
 			while(this->linePosition<line.length())
 				{
@@ -682,7 +516,6 @@ qDebug()<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
 							dollardata+=line.at(this->linePosition);
 							this->lineParts.append({dollardata,dtype});
 							this->linePosition++;
-	qDebug()<<"parsedollar"<<line<<dollardata;
 							return;
 						}
 					dollardata+=line.at(this->linePosition);
@@ -690,13 +523,11 @@ qDebug()<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
 				}
 			this->lineParts.append({dollardata,dtype});
 			this->linePosition++;
-	qDebug()<<"parsedollar"<<dollardata;
 			return;
 		}
 
 	while(this->linePosition<line.length() && (line.at(this->linePosition).isSpace()==false))
 		dollardata+=line.at(this->linePosition++);
-	qDebug()<<"parsedollar"<<dollardata;
 	this->lineParts.append({dollardata,dtype});
 }
 
