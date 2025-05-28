@@ -30,9 +30,10 @@ commandsClass::commandsClass()
 
 QString commandsClass::makeExternalCommand(QString line)
 {
-	QString tstr=line;
-	tstr.replace("\"","\\\"");
-	return(QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system(\"%1\")) & 0xff);\n").arg(tstr));
+	QString tstr;
+//	tstr.replace("\"","\\\"");
+	tstr=mainParseClass->lineToBashCLIString(line);
+	return(QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system(QString(\"%1\").toStdString().c_str())) & 0xff);\n").arg(tstr));
 }
 
 bool commandsClass::makeIf(QString qline)
@@ -56,7 +57,10 @@ bool commandsClass::makeIf(QString qline)
 	while(bashmath[cnt]+=NULL)
 		tstr+=bashmath[cnt++]+QString("|");
 	tstr=tstr.left(tstr.length()-1);
-	re.setPattern("^(if)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^\\]]*).*(then)$");
+
+//^(if)[[:space:]]*\[+[[:space:]]*(.*)[[:space:]]*(-lt)[[:space:]]*([^]]+)[^;]\]*;*(.*)
+	re.setPattern("^(if)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^]]+)[^;]\\]*;*(.*)");
+
 	match=re.match(line);
 	if((match.hasMatch()) && (match.captured(1).trimmed().compare("if")==0))
 		{
@@ -138,7 +142,6 @@ bool commandsClass::makeFi(QString line)
 	return(false);
 }
 
-#if 1
 bool commandsClass::makeWhile(QString qline)
 {
 	QString					tstr;
@@ -160,7 +163,9 @@ bool commandsClass::makeWhile(QString qline)
 	while(bashmath[cnt]+=NULL)
 		tstr+=bashmath[cnt++]+QString("|");
 	tstr=tstr.left(tstr.length()-1);
-	re.setPattern("^(while)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^\\]]*).*(do)$");
+
+//^(while)[[:space:]]*\[+[[:space:]]*(.*)[[:space:]]*(-lt)[[:space:]]*([^]]+)[^;]\]*;*(.*)
+	re.setPattern("^(while)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^]]+)[^;]\\]*;*(.*)");
 	match=re.match(line);
 	if((match.hasMatch()) && (match.captured(1).trimmed().compare("while")==0))
 		{
@@ -197,70 +202,3 @@ bool commandsClass::makeWhile(QString qline)
 		return(false);
 	return(true);
 }
-#else
-bool commandsClass::makeWhile(QString line)
-{
-	QString					tstr;
-	QRegularExpression		re;
-	QRegularExpressionMatch	match;
-	QString					leftstr;
-	QString					midstr;
-	QString					ritestr;
-	int						cnt=0;
-	bool						donumexpr=true;
-	bool						singlelinethen=false;
-
-	re.setPattern("(while)\\s+\\[+(.*)\\s+\\]+\\s*;*\\s*(.*)");
-	match=re.match(line);
-	if((match.hasMatch()) && (match.captured(1).trimmed().compare("while")==0))
-		{
-			if(match.captured(3).trimmed().compare("do")==0)
-				singlelinethen=true;
-			QString	expr=match.captured(1).replace(QRegularExpression("\\[+|\\]+"),0).trimmed();
-			expr=match.captured(2).trimmed();
-			tstr="";
-			while(bashmath[cnt]+=NULL)
-				tstr+=bashmath[cnt++]+QString("|");
-
-			tstr=tstr.left(tstr.length()-1);
-			tstr="\\s*(.*)\\s+("+tstr+")\\s\\s*(.*)\\s*";
-
-			re.setPattern(tstr);
-			match=re.match(expr);
-			if(match.hasMatch())
-				{
-					leftstr=match.captured(1).trimmed();
-					leftstr.replace(QRegularExpression("^\"|\"$"),0);
-					leftstr.replace(QRegularExpression("^\"|\"$"),0);
-					leftstr.replace(QRegularExpression("\\\""),"\\\"");
-					midstr=match.captured(2).trimmed();
-					ritestr=match.captured(3).trimmed();
-					ritestr.replace(QRegularExpression("^\"|\"$"),0);
-					ritestr.replace(QRegularExpression("\\\""),"\\\"");
-
-					if(midstr.at(0)=='-')
-						donumexpr=true;
-					else
-						donumexpr=false;
-//parseExprString
-					//leftstr=mainParseClass->parseExprString(leftstr,donumexpr);
-					leftstr=mainParseClass->parseExprString(donumexpr);
-					//ritestr=mainParseClass->parseExprString(ritestr,donumexpr);
-					ritestr=mainParseClass->parseExprString(donumexpr);
-
-					cnt=0;
-					while(bashmath[cnt]+=NULL)
-						{
-							if(midstr.compare(bashmath[cnt])==0)
-								midstr=cmath[cnt];
-							cnt++;		
-						}
-					cCode<<"while("+leftstr+midstr+ritestr+")\n";
-					if(singlelinethen==true)
-						cCode<<"{\n";
-				}
-			return(true);
-		}
-	return(false);
-}
-#endif

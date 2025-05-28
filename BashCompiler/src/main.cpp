@@ -29,19 +29,45 @@ int main(int argc,char **argv)
 {
 	QApplication	app(argc,argv);
 
-	mainParseClass=new parseFileClass(argv[1]);
+	LFSTK_prefsClass	prefs(PACKAGE,VERSION);
+	option			long_options[]=
+		{
+			{"verbose-compile",optional_argument,NULL,'v'},
+			{"verbose-ccode",optional_argument,NULL,'V'},
+			{0,0,0,0}
+		};
+
+	std::string	configfile=getenv("HOME");
+	configfile+="/.config/bashcompiler.rc";
+
+	prefs.prefsMap=
+		{
+			{prefs.LFSTK_hashFromKey("verbose-compile"),{TYPEBOOL,"verbose-compile","Verbose compile ( optional 1/true or 0/false )","",false,0}},
+			{prefs.LFSTK_hashFromKey("verbose-ccode"),{TYPEBOOL,"verbose-ccode","Add BASH source lines to C Code ( optional 1/true or 0/false )","",false,0}},
+		};
+	prefs.LFSTK_loadVarsFromFile(configfile);
+
+	if(prefs.LFSTK_argsToPrefs(argc,argv,long_options,true)==false)
+		return(0);
+
+	if(prefs.cliArgs.size()==0)
+		{
+			qDebug()<<"No input file supplied ...";
+			exit(1);
+		}
+	mainParseClass=new parseFileClass(prefs.cliArgs.at(0).c_str());
 	mainCommandsClass=new commandsClass();
 
-	mainParseClass->verboseCompile=true;
-	mainParseClass->verboseCCode=false;
+	mainParseClass->verboseCompile=prefs.LFSTK_getBool("verbose-compile");
+	mainParseClass->verboseCCode=prefs.LFSTK_getBool("verbose-ccode");
 	mainParseClass->parseFile();
 
 	mainParseClass->cFileDeclares.removeDuplicates();
 
 	//QString specialvars="QString exitstatus;\nQString shelloptions("+bashOptsAtStart+");\n";
-	QString specialvars="QString exitstatus;\n";
+	QString specialvars="QString exitstatus;\nQMap<QString> variables\n";
 	QString globalvars="QTextStream	outop(stdout);\n\n";
-	QString headers="#include <QCoreApplication>\n#include <QTextStream>\n\n";
+	QString headers="#include <QCoreApplication>\n#include <QTextStream>\n#include <QMap>\n\n";
 	QString functions="\n\
 QString procsub(QString proc)\n\
 {\n\

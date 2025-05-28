@@ -43,10 +43,12 @@ class parseFileClass
 		void					parseFile(void);
 		bool					parseLine(QString line);
 		QString				parseExprString(bool isnumexpr);
+		QString				lineToBashCLIString(QString qline);
 
 	private:
 		QFile				mainBashFile;
 		bool					preserveWhitespace=false;
+		int					currentLine=0;
 
 		QString				setSpecialDollars(QChar dollar);
 		//QVector<lineData>	parseString(QString qline,int *linePosition,QString currentPart);

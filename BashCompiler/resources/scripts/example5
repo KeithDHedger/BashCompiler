@@ -1,7 +1,9 @@
 #!/bin/bash -e
 
+#echo always preserves whitespace ( for now! )
+
 PROCSUBVAR="$(ls /)-$(ls /home)"
-echo "$PROCSUBVAR"
+echo $PROCSUBVAR
 PROCSUBVAR=$(ls ${HOME})
 echo "$PROCSUBVAR"
 

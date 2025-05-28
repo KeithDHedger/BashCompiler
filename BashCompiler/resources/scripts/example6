@@ -1,45 +1,72 @@
 #!/bin/bash -e
+#
+#XVAR="yes"
+#YVAR="no"
+#ZVAR=9
+#
+#if [[   $((21)) -eq $((10+10+1)) ]];then
+#	echo xxxxyyyzzz
+#fi
+#
+#
+#if [[ ${XVAR} = "$YVAR" ]];then
+#	echo "true"
+#else
+#	echo "false"
+#fi
+#
+#if [[ ${ZVAR}0 -eq 100 ]]
+#then
+#echo "${ZVAR}0 true"
+##qDebug()<<QString("%1%2").arg(ZVAR).arg(0);
+#else
+#echo NOPE
+#fi
+#
+#ZVAR=8
+#
+#ZVAR=$((ZVAR + 2))
+#echo ">>> $ZVAR <<<<"
+##
+#
+#if [[ ${ZVAR}0 -ge 100 ]];then
+#echo "${ZVAR}0 + 1 true $((${ZVAR}  + 2))"
+#echo "${ZVAR}0 + 1 true $((${ZVAR}))"
+#echo "true"
+##echo "${ZVAR}0 + 1 true $((${ZVAR}0))" TODO
+##echo "${ZVAR}0 + 1 true $((${ZVAR}0  + 2))"
+##qDebug()<<QString("%1%2").arg(ZVAR).arg(0);
+#else
+#echo NOPE
+#fi
+##
+#
+#RESULT=$(basename '/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac' .flac)
+#echo $RESULT
+#dirname "/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac"
+#echo $(dirname '/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac')
+#echo $(basename "/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac" .flac)
+APATH="/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac"
+echo $APATH
+#X=$(dirname "${APATH}")
+#echo $X
+#//SUFFIX=".flac"
+#echo $(basename "/media/MediaStore/Music/Flacs/Music/Abba/Gold/\"01 Dancing Queen.flac\"" ".flac" )
+#echo $(basename '/media/MediaStore/Music/Flacs/Music/Abba/Gold/'"01 Dancing Queen.flac" ".flac" )
+echo $(basename "/tmp/a \"test\" file" ".txt")
 
-XVAR="yes"
-YVAR="no"
-ZVAR=9
+#outop<<QString("%1").arg(procsub("basename  '"+APATH+"' \".flac\""))<<Qt::endl;
+echo $(basename "${APATH}" ".flac")
+#throws error
+echo ">>>>>>>>>>"
+echo $(basename ${APATH} .flac)
+echo "<<<<<<<<<<"
+echo "Still wrong"
+dirname ${APATH}
+echo "That's OK"
+basename "${APATH}" ".flac"
+echo $?
 
-if [[   21 -eq 10+10+1 ]];then
-	echo xxxxyyyzzz
-fi
-
-
-if [[ ${XVAR} = "$YVAR" ]];then
-	echo "true"
-else
-	echo "false"
-fi
-
-if [[ ${ZVAR}0 -eq 100 ]]
-then
-echo "${ZVAR}0 true"
-#qDebug()<<QString("%1%2").arg(ZVAR).arg(0);
-else
-echo NOPE
-fi
-
-ZVAR=8
-
-ZVAR=$(($ZVAR + 2))
-echo ">>> $ZVAR <<<<"
-
-if [[ "${ZVAR}0 + 1" -ge 100 ]];then
-echo "${ZVAR}0 + 1 true $((${ZVAR}  + 2))"
-echo "${ZVAR}0 + 1 true $((${ZVAR}))"
-
-#echo "${ZVAR}0 + 1 true $((${ZVAR}0))" TODO
-#echo "${ZVAR}0 + 1 true $((${ZVAR}0  + 2))"
-#qDebug()<<QString("%1%2").arg(ZVAR).arg(0);
-else
-echo NOPE
-fi
-
-RESULT=$(basename "/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac" .flac)
-echo $RESULT
-dirname "/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac"
-echo $(dirname "/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac")
+dirname "${APATH}"
+dirname "$(dirname ${APATH})"
+dirname "$(dirname $(dirname ${APATH}))"

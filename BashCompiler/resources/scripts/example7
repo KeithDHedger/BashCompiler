@@ -3,11 +3,10 @@
 
 cnt=0
 
-while [[ $cnt -lt 10 ]]
- do
+while [[ $cnt -lt 10 ]];do
 #cnt=std::to_string(stol(std::string(cnt),NULL,0)+1);
-		cnt=$(( $cnt + 1 ))
-		echo $cnt $(($cnt + 1 ))
+		cnt=$(( cnt + 1 ))
+		echo $cnt $((cnt + 1 ))
  done
 
 

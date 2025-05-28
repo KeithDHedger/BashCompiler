@@ -28,16 +28,28 @@
 #include <QTextStream>
 #include <QDate>
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string>
+#include <vector>
+#include <map>
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+
+#include "config.h"
+#include "LFSTKPrefsClass.h"
+
 class parseFileClass;
 class commandsClass;
 
 enum commandName {EXTERNALCOMMAND=0,BASHASSIGN,BASHECHO,BASHIF,BASHTHEN,BASHELSE,BASHFI,BASHWHILE,BASHDO,BASHDONE,SKIPLINE};
-enum dataType {UNKNOWN=0,WHITESPACE,DOUBLEQUOTESTRING,SINGLEQUOTSTRING,COMMAND,VARIABLE,VARIABLEINCURLYS,BRACKETS,SQUAREBRACKETS,STRINGDATA,VARNAME};
+enum parseDataType {UNKNOWN=0,WHITESPACE,DOUBLEQUOTESTRING,SINGLEQUOTSTRING,COMMAND,VARIABLE,VARIABLEINCURLYS,BRACKETS,SQUAREBRACKETS,STRINGDATA,VARNAME};
 
 struct lineData
 {
 	QString		data;
-	dataType		typeHint;
+	parseDataType		typeHint;
 };
 
 #pragma GCC diagnostic push

@@ -1,4 +1,4 @@
 #!/bin/bash -e
 
 PROCSUBVAR="@@@@@$(ls /home)----$(ls /tmp)<<<<"
-echo $PROCSUBVAR
+echo "$PROCSUBVAR"

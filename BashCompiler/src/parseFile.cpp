@@ -34,8 +34,6 @@ parseFileClass::parseFileClass(QString filepath)
 
 			if(!this->mainBashFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		         return;
-
-			qDebug()<<"parseFileClass"<<this->mainBashFile.fileName();
 		}
 }
 
@@ -62,8 +60,10 @@ bool parseFileClass::parseLine(QString qline)
 	QRegularExpressionMatch	match;
 
 	line=qline;
+	currentLine++;
+
 	if(this->verboseCompile==true)
-		qDebug()<<"processing "<<line;
+		qDebug()<<"processing line "<<this->currentLine<<line;
 	
 	if(line.startsWith('#'))
 		{
@@ -224,6 +224,10 @@ QString parseFileClass::parseVar(QString line)
 	QRegularExpression re;
 	QRegularExpressionMatch match;
 
+//check for special vars 1st
+	retcode=setSpecialDollars(line.at(1));
+	if(retcode.isEmpty()==false)
+		return(retcode);
 //${string#substring}
 //${string##substring}
 //${string%substring}
@@ -257,7 +261,6 @@ QString parseFileClass::parseVar(QString line)
 									varname=match.captured(1).trimmed();
 									needle=this->cleanVar(match.captured(2).trimmed());
 									retcode="QString(\"%1\").arg(QString("+varname+").mid(QString(\"%1\").arg("+needle+").toInt(nullptr,0)))";
-//errop<<retcode<<"\n";
 									return(retcode);
 								}
 						}
@@ -311,6 +314,66 @@ QString parseFileClass::parseVar(QString line)
 	return(retcode);
 }
 
+QString parseFileClass::lineToBashCLIString(QString qline)
+{
+	QString	newline=qline;
+	QString	tstr="";
+
+	newline.replace("\\\"","\\\\\\\"");
+	for(int j=0;j<newline.length();j++)
+		{
+			if((newline.at(j).toLatin1()=='"')&& (newline.at(j-1).toLatin1()!='\\'))
+				tstr+="\\";	
+			tstr+=newline.at(j).toLatin1();
+		}
+	tstr.replace(QRegularExpression("\\$\\{*([[:alnum:]_]+)\\}"),"\"+\\1+\"");
+
+	return(tstr);
+}
+
+#if 0
+QString parseFileClass::lineToBashCLIString(QString qline)
+{
+	QString	newline=qline;
+	QString	tstr="";
+
+	newline.replace("\\\"","\\\\\\\"");
+	newline.replace(QRegularExpression("\\$\\{*([[:alnum:]_]+)\\}"),"\"+\\1+\"");//BAD HACK//TODO//
+	for(int j=0;j<newline.length();j++)
+		{
+			if((newline.at(j).toLatin1()=='"')&& (newline.at(j-1).toLatin1()!='\\'))
+				tstr+="\\";	
+			tstr+=newline.at(j).toLatin1();
+		}
+
+	tstr.replace("IN/"," '\"");
+	tstr.replace("OUT/","\"' ");
+
+	return(tstr);
+}
+QString parseFileClass::lineToBashCLIString(QString qline)
+{
+	QString	newline=qline;
+	QString	tstr="";
+
+	newline.replace("\\\"","\\\\\\\"");
+	//newline.replace(QRegularExpression("\"*\\$\\{*([[:alnum:]_]+)\\}\"*"),"IN/+\\1+OUT/");//BAD HACK//TODO//
+	//newline.replace(QRegularExpression("\\$\\{*([[:alnum:]_]+)\\}"),"\"+\\1+\"");//BAD HACK//TODO//
+	for(int j=0;j<newline.length();j++)
+		{
+			if((newline.at(j).toLatin1()=='"')&& (newline.at(j-1).toLatin1()!='\\'))
+				tstr+="\\";	
+			tstr+=newline.at(j).toLatin1();
+		}
+
+	tstr.replace("IN/"," \"");
+	tstr.replace("OUT/","\" ");
+	tstr.replace(QRegularExpression("\\$\\{*([[:alnum:]_]+)\\}"),"\"+\\1+\"");//BAD HACK//TODO//
+
+	return(tstr);
+}
+#endif
+
 QString parseFileClass::parseExprString(bool isnumexpr)
 {
 	QStringList	parts;
@@ -332,18 +395,19 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 						parts<<this->parseVar(this->lineParts.at(j).data);
 						break;
 					case BRACKETS:
-						//if((this->lineParts.at(j).data.at(2)=='(') && (isnumexpr==true))
 						if((this->lineParts.at(j).data.at(2)=='('))
-						 //&& (isnumexpr==true))
 							{
-								isnumber=true;
 								tstr=this->lineParts.at(j).data;
 								tstr.replace(QRegularExpression("^\\$\\(*|\\)*$"),"");
+								tstr.replace(QRegularExpression("\\$\\{*|\\}*"),"");
+								tstr.replace(QRegularExpression("\\b([[:alpha:]][[:alnum:]_]*)\\b"),"\\1.toInt(nullptr,0)");
+								tstr=tstr.trimmed();
 								parts<<tstr;
 								break;
 							}
 						tstr=this->lineParts.at(j).data;
 						tstr.replace(QRegularExpression("^\\$\\(*|\\)*$"),"");
+						tstr=this->lineToBashCLIString(tstr);
 						if(isnumber==true)
 							parts<<"procsub(\""+tstr+"\").toInt(nullptr,0)";
 						else
@@ -478,7 +542,7 @@ void parseFileClass::parseDollar(QString line)
 	QString	dollardata="";
 	QChar	braceopen;
 	QChar	braceclose;
-	dataType	dtype=VARIABLE;
+	parseDataType	dtype=VARIABLE;
 
 	if(this->currentPart.isEmpty()==false)
 		{
