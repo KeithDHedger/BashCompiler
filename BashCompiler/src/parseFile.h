@@ -34,7 +34,6 @@ class parseFileClass
 		bool					verboseCCode=false;
 		bool					noCodeOP=false;
 	
-		QStringList			cFileDeclares;
 		QVector<lineData>	lineParts;
 		commandName			bashCommand=EXTERNALCOMMAND;
 		QString				currentPart="";

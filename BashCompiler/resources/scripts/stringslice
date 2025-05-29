@@ -6,10 +6,10 @@ FIND="abcd"
 POS=5
 LEN=4
 echo $HAYSTACK $PART $FIND $LEN
-#TODO nested slicing
-#NEEDLE=${HAYSTACK//abc/${PART//"AB"/"ab"}}
-
-NEEDLE="${HAYSTACK//${FIND}/$PART} << {qwerty}  \"done\""
+##TODO nested slicing
+##NEEDLE=${HAYSTACK//abc/${PART//"AB"/"ab"}}
+#needs doing
+NEEDLE="${HAYSTACK//${FIND}/$PART} xxx {rtret} \"XXX\" << {qwerty}  \"done\""
 echo $HAYSTACK
 echo $NEEDLE
 echo ${#NEEDLE}

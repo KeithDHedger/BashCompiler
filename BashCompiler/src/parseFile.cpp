@@ -86,6 +86,8 @@ bool parseFileClass::parseLine(QString qline)
 	this->preserveWhitespace=false;
 	this->bashCommand=EXTERNALCOMMAND;
 
+	//line.replace("\\\"","'");
+
 //check for assign
 	re.setPattern("^([[:alnum:]_]+)=(.*)");
 	match=re.match(line);
@@ -113,6 +115,13 @@ bool parseFileClass::parseLine(QString qline)
 
 	while(this->linePosition<line.length())
 		{
+		//skip escaped quote
+			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='"'))
+				{
+					this->currentPart+="\\\"";
+					this->linePosition+=2;
+					continue;
+				}
 			if(line.at(this->linePosition).toLatin1()=='"')
 				{
 					this->parseString(line);
@@ -150,9 +159,8 @@ bool parseFileClass::parseLine(QString qline)
 		{
 			case BASHASSIGN:
 				{
-					this->cFileDeclares<<QString("QString %1;").arg(match.captured(1));
 					QString pal=this->parseExprString(false);
-					cCode<<QString("%1=%2;\n").arg(match.captured(1)).arg(pal);
+					cCode<<QString("variables[\"%1\"]=%2;\n").arg(match.captured(1)).arg(pal);
 					return(true);
 				}
 				break;
@@ -201,7 +209,7 @@ QString parseFileClass::cleanVar(QString line)
 	match=re.match(line);
 	if(match.hasMatch())
 		{
-			retval=match.captured(1).trimmed();
+			retval="variables[\""+match.captured(1).trimmed()+"\"]";
 			return(retval);
 	}
 
@@ -248,7 +256,9 @@ QString parseFileClass::parseVar(QString line)
 							varname=match.captured(1).trimmed();
 							haystack=this->cleanVar(match.captured(2).trimmed());
 							needle=this->cleanVar(match.captured(3).trimmed());
-							retcode="QString(\"%1\").arg(QString("+varname+").mid(QString(\"%1\").arg("+haystack+").toInt(nullptr,0),QString(\"%1\").arg("+needle+").toInt(nullptr,0)))";
+							//errop<<">>>"<<varname<<" "<<haystack<<" "<<needle<<"<<<\n";
+							retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).mid(QString(\"%1\").arg("+haystack+").toInt(nullptr,0),QString(\"%1\").arg("+needle+").toInt(nullptr,0)))";
+							//errop<<">>>"<<retcode<<"<<<\n";
 							return(retcode);
 						}
 					else
@@ -260,7 +270,7 @@ QString parseFileClass::parseVar(QString line)
 								{
 									varname=match.captured(1).trimmed();
 									needle=this->cleanVar(match.captured(2).trimmed());
-									retcode="QString(\"%1\").arg(QString("+varname+").mid(QString(\"%1\").arg("+needle+").toInt(nullptr,0)))";
+									retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).mid(QString(\"%1\").arg("+needle+").toInt(nullptr,0)))";
 									return(retcode);
 								}
 						}
@@ -277,7 +287,7 @@ QString parseFileClass::parseVar(QString line)
 							varname=match.captured(1).trimmed();
 							needle=this->cleanVar(match.captured(3).trimmed());
 							haystack=this->cleanVar(match.captured(2).trimmed());
-							retcode="QString("+varname+").replace("+haystack+","+needle+")";
+							retcode="QString(variables[\""+varname+"\"]).replace("+haystack+","+needle+")";
 							return(retcode);
 						}
 				}
@@ -292,7 +302,7 @@ QString parseFileClass::parseVar(QString line)
 							needle=this->cleanVar(match.captured(3).trimmed());
 							haystack=this->cleanVar(match.captured(2).trimmed());
 
-							retcode=QString("QString(%1).remove(%1.indexOf(%2,0),QString(%2).length()).insert(%1.indexOf(%2,0),%3)").arg(varname).arg(haystack).arg(needle); 
+							retcode=QString("QString(%1).remove(%1.indexOf(%2,0),QString(%2).length()).insert(%1.indexOf(%2,0),%3)").arg("variables[\""+varname+"\"]").arg(haystack).arg(needle); 
 							return(retcode);
 						}
 				}
@@ -304,13 +314,14 @@ QString parseFileClass::parseVar(QString line)
 			if(match.hasMatch())
 				{
 					varname=match.captured(1).trimmed();
-					retcode=varname+".length()";
+					retcode="variables[\""+varname+"\"].length()";
 					return(retcode);
 				}
 		}
 
 	retcode=line;
 	retcode.replace(QRegularExpression("^\\$\\{*|\\}*$"),0);
+	retcode.replace(QRegularExpression("([[:alnum:]_]+)"),"variables[\"\\1\"]");
 	return(retcode);
 }
 
@@ -322,11 +333,11 @@ QString parseFileClass::lineToBashCLIString(QString qline)
 	newline.replace("\\\"","\\\\\\\"");
 	for(int j=0;j<newline.length();j++)
 		{
-			if((newline.at(j).toLatin1()=='"')&& (newline.at(j-1).toLatin1()!='\\'))
+			if((newline.at(j).toLatin1()=='"') && (newline.at(j-1).toLatin1()!='\\'))
 				tstr+="\\";	
 			tstr+=newline.at(j).toLatin1();
 		}
-	tstr.replace(QRegularExpression("\\$\\{*([[:alnum:]_]+)\\}"),"\"+\\1+\"");
+	tstr.replace(QRegularExpression("\\$\\{*([[:alnum:]_]+)\\}*"),"\"+variables[\"\\1\"]+\"");
 
 	return(tstr);
 }
@@ -389,7 +400,9 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 						parts<<QString("\"%1\"").arg(this->lineParts.at(j).data);
 						break;
 					case DOUBLEQUOTESTRING:
-						parts<<this->lineParts.at(j).data;
+						tstr=this->lineParts.at(j).data;
+						tstr.replace(QRegularExpression("\\$\\{*([[:alnum:]_]+)\\}*"),"\"+variables[\"\\1\"]+\"");
+						parts<<tstr;
 						break;
 					case VARIABLEINCURLYS:
 						parts<<this->parseVar(this->lineParts.at(j).data);
@@ -400,7 +413,7 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 								tstr=this->lineParts.at(j).data;
 								tstr.replace(QRegularExpression("^\\$\\(*|\\)*$"),"");
 								tstr.replace(QRegularExpression("\\$\\{*|\\}*"),"");
-								tstr.replace(QRegularExpression("\\b([[:alpha:]][[:alnum:]_]*)\\b"),"\\1.toInt(nullptr,0)");
+								tstr.replace(QRegularExpression("\\b([[:alpha:]][[:alnum:]_]*)\\b"),"variables[\"\\1\"].toInt(nullptr,0)");
 								tstr=tstr.trimmed();
 								parts<<tstr;
 								break;

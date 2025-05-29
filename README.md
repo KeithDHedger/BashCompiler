@@ -69,6 +69,7 @@ done
 
 ````
 
+env variables.
 C style assign/for etc.  
 read.  
 case.  

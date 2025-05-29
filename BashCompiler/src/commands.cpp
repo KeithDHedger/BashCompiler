@@ -31,7 +31,6 @@ commandsClass::commandsClass()
 QString commandsClass::makeExternalCommand(QString line)
 {
 	QString tstr;
-//	tstr.replace("\"","\\\"");
 	tstr=mainParseClass->lineToBashCLIString(line);
 	return(QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system(QString(\"%1\").toStdString().c_str())) & 0xff);\n").arg(tstr));
 }

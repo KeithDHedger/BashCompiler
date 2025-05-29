@@ -62,18 +62,17 @@ int main(int argc,char **argv)
 	mainParseClass->verboseCCode=prefs.LFSTK_getBool("verbose-ccode");
 	mainParseClass->parseFile();
 
-	mainParseClass->cFileDeclares.removeDuplicates();
-
 	//QString specialvars="QString exitstatus;\nQString shelloptions("+bashOptsAtStart+");\n";
-	QString specialvars="QString exitstatus;\nQMap<QString> variables\n";
-	QString globalvars="QTextStream	outop(stdout);\n\n";
+	QString specialvars="QString exitstatus;\nQHash<QString,QString> variables;\n";
+	QString globalvars="QTextStream	outop(stdout);\nQTextStream	errop(stderr);\n";
 	QString headers="#include <QCoreApplication>\n#include <QTextStream>\n#include <QMap>\n\n";
 	QString functions="\n\
 QString procsub(QString proc)\n\
 {\n\
-FILE		*fp;\n\
-char		*buffer=(char*)alloca(1024);\n\
-QString	retstr=\"\";\n\
+FILE *fp;\n\
+int exitnum=-1;\n\
+char *buffer=(char*)alloca(1024);\n\
+QString retstr=\"\";\n\
 \n\
 fp=popen(proc.toStdString().c_str(),\"r\");\n\
 if(fp!=NULL)\n\
@@ -82,16 +81,17 @@ buffer[0]=0;\n\
 while(fgets(buffer,1024,fp))\n\
 retstr+=buffer;\n\
 retstr.resize(retstr.length()-1);\n\
-exitstatus=QString::number(pclose(fp));\n\
+//exitstatus=QString::number(pclose(fp));\n\
+exitnum=pclose(fp)/256;\n\
+exitstatus=QString::number(exitnum);\n\
 }\n\
 return(retstr);\n\
 };\n\n";
 
 //write code
 	cCode.prepend("QCoreApplication myapp(argc,argv);\n");
-	cCode.prepend("int main(int argc, char **argv)\n{\n");
+	cCode.prepend("int main(int argc, char **argv)\n{\nvariables[\"dq\"]=\"\\\"\";\n");
 	cCode.prepend(functions);
-	cCode.prepend(QString("%1\n").arg(mainParseClass->cFileDeclares.join("\n")));
 	cCode.prepend(globalvars);
 	cCode.prepend(specialvars);
 	cCode.prepend(headers);
