@@ -57,8 +57,7 @@ bool commandsClass::makeIf(QString qline)
 		tstr+=bashmath[cnt++]+QString("|");
 	tstr=tstr.left(tstr.length()-1);
 
-//^(if)[[:space:]]*\[+[[:space:]]*(.*)[[:space:]]*(-lt)[[:space:]]*([^]]+)[^;]\]*;*(.*)
-	re.setPattern("^(if)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^]]+)[^;]\\]*;*(.*)");
+	re.setPattern("^[[:space:]]*(if)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^]]+)[^;]\\]*;*(.*)");
 
 	match=re.match(line);
 	if((match.hasMatch()) && (match.captured(1).trimmed().compare("if")==0))
@@ -102,7 +101,7 @@ bool commandsClass::makeThen(QString line)
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
 
-	re.setPattern("\\s*(then)");
+	re.setPattern("^[[:space:]]*(then)[[:space:]]*$");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
@@ -117,7 +116,7 @@ bool commandsClass::makeElse(QString line)
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
 
-	re.setPattern("\\s*(else)");
+	re.setPattern("^[[:space:]]*(else)[[:space:]]*$");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
@@ -131,7 +130,7 @@ bool commandsClass::makeFi(QString line)
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
 
-	re.setPattern("\\s*(fi)");
+	re.setPattern("^[[:space:]]*(fi)[[:space:]]*$");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
@@ -163,8 +162,7 @@ bool commandsClass::makeWhile(QString qline)
 		tstr+=bashmath[cnt++]+QString("|");
 	tstr=tstr.left(tstr.length()-1);
 
-//^(while)[[:space:]]*\[+[[:space:]]*(.*)[[:space:]]*(-lt)[[:space:]]*([^]]+)[^;]\]*;*(.*)
-	re.setPattern("^(while)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^]]+)[^;]\\]*;*(.*)");
+	re.setPattern("^[[:space:]]*(while)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^]]+)[^;]\\]*;*(.*)");
 	match=re.match(line);
 	if((match.hasMatch()) && (match.captured(1).trimmed().compare("while")==0))
 		{

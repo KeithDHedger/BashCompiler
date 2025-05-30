@@ -65,7 +65,7 @@ int main(int argc,char **argv)
 	//QString specialvars="QString exitstatus;\nQString shelloptions("+bashOptsAtStart+");\n";
 	QString specialvars="QString exitstatus;\nQHash<QString,QString> variables;\n";
 	QString globalvars="QTextStream	outop(stdout);\nQTextStream	errop(stderr);\n";
-	QString headers="#include <QCoreApplication>\n#include <QTextStream>\n#include <QMap>\n\n";
+	QString headers="#include <QCoreApplication>\n#include <QTextStream>\n#include <QMap>\n#include <QRegularExpression>\n\n";
 	QString functions="\n\
 QString procsub(QString proc)\n\
 {\n\
@@ -81,7 +81,6 @@ buffer[0]=0;\n\
 while(fgets(buffer,1024,fp))\n\
 retstr+=buffer;\n\
 retstr.resize(retstr.length()-1);\n\
-//exitstatus=QString::number(pclose(fp));\n\
 exitnum=pclose(fp)/256;\n\
 exitstatus=QString::number(exitnum);\n\
 }\n\
@@ -90,7 +89,7 @@ return(retstr);\n\
 
 //write code
 	cCode.prepend("QCoreApplication myapp(argc,argv);\n");
-	cCode.prepend("int main(int argc, char **argv)\n{\nvariables[\"dq\"]=\"\\\"\";\n");
+	cCode.prepend("int main(int argc, char **argv)\n{\n");
 	cCode.prepend(functions);
 	cCode.prepend(globalvars);
 	cCode.prepend(specialvars);

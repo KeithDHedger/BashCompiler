@@ -19,11 +19,6 @@ The bashcompiler executable can be installed or run directly from the BashCompil
 BASH is weakly typed so you MUST use "=, ==, <, or >" for string comparisons.  
 You MUST use "-gt, -ge ... etc for numeric comparisons.  
 All numerical expression MUST be enclosed by $(())  
-When passing args that contain spaces to external commands use ' rather than ", eg:  
-RESULT=$(basename '/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac' .flac)  
-NOT  
-RESULT=$(basename "/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac" .flac)  
-See example 6.  
 ######
 'eval' is NOT supported and almost certainly will never be, not because of any supposed "eval=evil" but simply it would need the compiler available at runtime and probably a JIT compiler.  
 ######
@@ -41,6 +36,8 @@ popd
 ### Done ( mostly! )
 
 Variable assignment.  
+When using ${string#substring} ( #/##/%/%% ) globas must be literal strings ( for now ), ie	echo ${avar#*.abc} NOT echo ${avar#${PATTERN}}  
+
 echo, assumes quotes see example 3.  
 external commands, see example 2.  
 Process substitution, see example 5.  

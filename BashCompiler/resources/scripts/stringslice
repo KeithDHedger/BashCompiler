@@ -28,3 +28,20 @@ RESULT=${HAYSTACK:${POS}:$LEN}
 echo $HAYSTACK
 echo $RESULT
 echo ${#RESULT}
+
+avar="abcdef1.abcdfe2.abcdef3.abcdef4"
+echo ${avar}
+echo ${avar#*.abc}
+echo ${avar##*.abc}
+echo
+echo ${avar%.abc*}
+echo ${avar%%.abc*}
+
+echo
+
+
+APATH="/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac"
+echo ${APATH#*/Music/}
+echo ${APATH##*/Music/}
+echo ${APATH##*/}
+echo ${APATH%."flac"}
