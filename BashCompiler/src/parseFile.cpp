@@ -237,6 +237,18 @@ QString parseFileClass::cleanVar(QString line)
 	return(retval);
 }
 
+QString parseFileClass::globToRX(QString glob,bool greedy)
+{
+	QString tstr=glob;
+	tstr.replace(".","\\\\.");
+	tstr.replace("?",".");
+	if(greedy==true)
+		tstr.replace("*",".*");
+	else
+		tstr.replace("*",".*?");
+	return(tstr);
+}
+
 QString parseFileClass::parseVar(QString line)
 {
 	QString varname;
@@ -266,8 +278,7 @@ QString parseFileClass::parseVar(QString line)
 						{
 							varname=match.captured(1).trimmed();
 							needle=this->cleanVar(match.captured(2).trimmed());
-							needle.replace(".","\\\\.");
-							needle.replace("*",".*");
+							needle=this->globToRX(needle,true);
 							needle="^"+needle+"(.*)$";
 							retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\"%1\").arg(\""+needle+"\")),\"\\\\1\"))";
 							return(retcode);
@@ -282,8 +293,7 @@ QString parseFileClass::parseVar(QString line)
 						{
 							varname=match.captured(1).trimmed();
 							needle=this->cleanVar(match.captured(2).trimmed());
-							needle.replace(".","\\\\.");
-							needle.replace("*",".*?");
+							needle=this->globToRX(needle,false);
 							needle="^"+needle+"(.*)$";
 							retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\"%1\").arg(\""+needle+"\")),\"\\\\1\"))";
 							return(retcode);
@@ -298,9 +308,7 @@ QString parseFileClass::parseVar(QString line)
 						{
 							varname=match.captured(1).trimmed();
 							needle=this->cleanVar(match.captured(2).trimmed());
-							needle.replace(".","\\\\.");
-							needle.replace("*",".*");
-							needle.replace("\"","");
+							needle=this->globToRX(needle,true);
 							needle="^(.*)"+needle;
 							retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\"%1\").arg(\""+needle+"\")),\"\\\\1\"))";
 							return(retcode);
@@ -315,8 +323,7 @@ QString parseFileClass::parseVar(QString line)
 						{
 							varname=match.captured(1).trimmed();
 							needle=this->cleanVar(match.captured(2).trimmed());
-							needle.replace(".","\\\\.");
-							needle.replace("*",".*");
+							needle=this->globToRX(needle,true);
 							needle="^(.*?)"+needle;
 							retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\"%1\").arg(\""+needle+"\")),\"\\\\1\"))";
 							return(retcode);

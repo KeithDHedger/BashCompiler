@@ -50,18 +50,14 @@ class parseFileClass
 		int					currentLine=0;
 
 		QString				setSpecialDollars(QChar dollar);
-		//QVector<lineData>	parseString(QString qline,int *linePosition,QString currentPart);
-		void 				parseString(QString qline);
 		QString				parseVar(QString line);
 		QString				cleanVar(QString line);
+		QString				globToRX(QString glob,bool greedy);
+		void 				parseString(QString qline);
 		void					createCommand(QString line);
 		void					parseSquareBraces(QString line);
 		void					parseDollar(QString line);
-
 		void					parseWhitespace(QString line);
-		//void					parseWhitespace(QString line,QString currentPart,int *linePosition,QVector<lineData> *lineParts);
-		//void					parseQuotedString(QString line,QString currentPart,int *linePosition,QVector<lineData> *lineParts);
-
 		void					parseQuotedString(QString line);
 };
 
