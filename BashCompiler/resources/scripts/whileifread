@@ -1,0 +1,47 @@
+#!/bin/bash
+no_file_copy=1
+if [ $no_file_copy -eq 1 ];then nocopy="XX";echo ">>>>>>"
+else nocopy="ZZZ";fi
+
+echo  $nocopy
+
+cnt=0
+while [[ $cnt -lt 10 ]];do cnt=$((cnt +1 ));echo $cnt;done
+
+cnt=10
+while [[ $cnt -gt 0 ]];do cnt=$((cnt -1 ));
+echo $cnt
+done
+
+ls -1 /usr|grep -i bin
+
+file="/home/keithhedger/.bashrc"
+
+while read
+do
+echo "$REPLY"
+done< <(cat ${file}|grep export)
+
+while read;do
+echo "$REPLY";done  <   <(cat /etc/fstab)
+
+#input to done ignored
+while [[ $cnt -ne 0 ]];do
+cnt=$((cnt -1 ))
+echo $cnt
+done<   <(cat /media/LinuxData/Development64/Projects/BashCompiler/BashCompiler/sources)
+
+file="/media/MediaStore/Music/Flacs/Music/Abba/Gold"
+echo $file
+#extra spaces in input to done ignored
+while read;do
+echo "$REPLY"
+echo ${REPLY%.*}
+done<    <(ls -1 $file)
+
+file="/home/keithhedger/Backgrounds"
+echo $file
+while read;do
+echo "$REPLY"
+echo ${REPLY%.*}
+done< <(ls -1 $file|sort)
