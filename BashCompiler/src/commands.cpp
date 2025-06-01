@@ -31,8 +31,12 @@ commandsClass::commandsClass()
 QString commandsClass::makeExternalCommand(QString line)
 {
 	QString tstr;
+	if(line.isEmpty()==true)
+		return("");
 	tstr=mainParseClass->lineToBashCLIString(line);
-	return(QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system(QString(\"%1\").toStdString().c_str())) & 0xff);\n").arg(tstr));
+	if(tstr.isEmpty()==false)
+		return(QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system(QString(\"%1\").toStdString().c_str())) & 0xff);\n").arg(tstr));
+	return("");
 }
 
 bool commandsClass::makeIf(QString qline)
@@ -140,6 +144,31 @@ bool commandsClass::makeFi(QString line)
 	return(false);
 }
 
+bool commandsClass::makeWhileRead(QString qline)
+{
+	QString					line=qline;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	QString					commstr;
+	QString					midstr;
+	QString					ritestr;
+
+	re.setPattern("^[[:space:]]*(while[[:space:]]*read)[[:space:]]*(.*)$");
+	match=re.match(line);
+	if((match.hasMatch()) && (match.captured(1).simplified().compare("while read")==0))
+		{
+			cCode<<"{\nFILE *fp;\n";
+			mainParseClass->whileReadLine.append(cCode.size());
+			cCode<<"fp=popen(proc.toStdString().c_str(),\"r\");\n";
+			cCode<<"QTextStream	inpop(fp);\n";
+			cCode<<"while(inpop.readLineInto(&variables[\"REPLY\"]))\n";
+			return(true);
+		}
+	else
+		return(false);
+	return(true);
+}
+
 bool commandsClass::makeWhile(QString qline)
 {
 	QString					tstr;
@@ -166,7 +195,7 @@ bool commandsClass::makeWhile(QString qline)
 	match=re.match(line);
 	if((match.hasMatch()) && (match.captured(1).trimmed().compare("while")==0))
 		{
-			mainParseClass->bashCommand=BASHIF;
+			mainParseClass->bashCommand=BASHWHILE;
 			if(match.captured(5).trimmed().compare("do")==0)
 				singlelinethen=true;
 
@@ -192,7 +221,7 @@ bool commandsClass::makeWhile(QString qline)
 				}
 			cCode<<"while("+leftstr+midstr+ritestr+")\n";
 			if(singlelinethen==true)
-				cCode<<"{\n";
+				cCode<<"{\n";//}
 			return(true);
 		}
 	else

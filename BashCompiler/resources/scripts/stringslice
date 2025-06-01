@@ -44,4 +44,4 @@ APATH="/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac"
 echo ${APATH#*/Music/}
 echo ${APATH##*/Music/}
 echo ${APATH##*/}
-echo ${APATH%."flac"}
+echo ${APATH%.flac}

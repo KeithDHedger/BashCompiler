@@ -27,8 +27,10 @@ All examples in BashCompiler/resources/scripts will compile and run.
 ### USAGE:
 ````
 bashcompiler /PATH/TO/SCRIPT > /tmp/x.cpp
+Or nice output:
+bashcompiler /PATH/TO/SCRIPT| astyle -A7 --indent=tab > /tmp/x.cpp
 pushd /tmp
-g++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC x.cpp
+g++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC -Ofast x.cpp
 ./a.out
 popd
 ````
@@ -36,7 +38,7 @@ popd
 ### Done ( mostly! )
 
 Variable assignment.  
-When using ${string#substring} ( #/##/%/%% ) globas must be literal strings ( for now ), ie	echo ${avar#*.abc} NOT echo ${avar#${PATTERN}}  
+When using ${string#substring} ( #/##/%/%% ) globs must be literal strings ( for now ), ie	echo ${avar#*.abc} NOT echo ${avar#${PATTERN}}  
 
 echo, assumes quotes see example 3.  
 external commands, see example 2.  
@@ -44,27 +46,15 @@ Process substitution, see example 5.
 if/then/else/fi, see 'To do', see example 6.  
 while/do/done, see 'To do', see example 7.  
 $? see example 7.  
+While read;do ... done see example whileifread ( ONLY default $REPLY variable used for now ).
 ######
 
 ### Ongoing in no particular order. 
 String slicing. see example stringslice.  
+Add options to bashcompiler.  
 ###
 
 ### To do ( loads! ) in no particular order.  
-
-Add options to bashcompiler.  
-
-Multi line commands, at the moment the only commands that supports ';' is 'if' and while eg:
-````
-if [ $VAR -gt 100 ]];then
-	echo $VAR
-fi
-
-while [ $VAR -gt 100 ]];do
-	echo $VAR
-done
-
-````
 
 env variables.
 C style assign/for etc.  

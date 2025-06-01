@@ -35,6 +35,8 @@ class parseFileClass
 		bool					noCodeOP=false;
 	
 		QVector<lineData>	lineParts;
+		QVector<int>			whileReadLine;
+		//QMap<int>			xwhileReadLine;
 		commandName			bashCommand=EXTERNALCOMMAND;
 		QString				currentPart="";
 		int					linePosition=0;

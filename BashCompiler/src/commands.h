@@ -41,6 +41,8 @@ class commandsClass
 		bool		makeWhile(QString line);
 		bool		makeDo(QString line);
 		bool		makeDone(QString line);
+//while read
+		bool		makeWhileRead(QString qline);
 
 	private:
 

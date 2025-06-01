@@ -39,15 +39,83 @@ parseFileClass::parseFileClass(QString filepath)
 
 void parseFileClass::parseFile(void)
 {
-	QString line;
+	QString		line;
+	QStringList	lines;
+	QString		tstr;
+	QStringList	ss;
+	QStringList	keywords;
+	bool			quotes=false;
 
+	keywords<<"then"<<"else"<<"do";
 	while (!this->mainBashFile.atEnd())
 		{
 			line=this->mainBashFile.readLine().trimmed();
-			if(this->parseLine(line)==false)
+			currentLine++;
+
+			if(this->verboseCompile==true)
+				qDebug()<<"processing line "<<this->currentLine<<line;
+
+			if(line.startsWith('#'))
 				{
-					qDebug()<<"Error parsing line:\n"<<line;
-					return;
+					if(this->verboseCCode==true)
+						cCode<<"//"+line.remove(0,1)+"\n";
+					continue;
+				}
+			if(line.length()==0)
+				continue;
+
+			for(int k=0;k<keywords.count();k++)
+				{
+					ss=line.split(QRegularExpression("[[:space:]]*"+keywords.at(k)+"[[:space:]]"));
+					if(ss.count()>1)
+						line+=";";
+				}
+
+			lines.clear();
+			tstr="";
+			quotes=false;
+			for(int j=0;j<line.length();j++)
+				{
+					if(line.at(j).toLatin1()=='\\')
+						{
+							tstr+=line.at(j++).toLatin1();
+							tstr+=line.at(j).toLatin1();
+							continue;
+						}
+					if(line.at(j).toLatin1()=='"')
+						{
+							quotes=!quotes;
+						}
+					if((line.at(j).toLatin1()==';') && (quotes==false))
+						{
+							for(int k=0;k<keywords.count();k++)
+								{
+									ss=tstr.split(QRegularExpression("[[:space:]]*"+keywords.at(k)+"[[:space:]]"));
+									if(ss.count()>1)
+										{
+											lines<<keywords.at(k);
+											lines<<ss.at(1);
+											tstr="";
+											goto escape;
+										}
+								}
+							lines<<tstr;
+escape:
+							tstr="";
+							continue;
+						}
+					tstr+=line.at(j).toLatin1();
+				}
+
+			if(tstr.length()>0)
+				lines<<tstr;
+			for(int j=0;j<lines.count();j++)
+				{
+					if(this->parseLine(lines.at(j).trimmed())==false)
+						{
+							qDebug()<<"Error parsing line:\n"<<line;
+							return;
+						}
 				}
 		}
 }
@@ -60,21 +128,6 @@ bool parseFileClass::parseLine(QString qline)
 	QRegularExpressionMatch	match;
 
 	line=qline;
-	currentLine++;
-
-	if(this->verboseCompile==true)
-		qDebug()<<"processing line "<<this->currentLine<<line;
-	
-	if(line.startsWith('#'))
-		{
-			if(this->verboseCCode==true)
-				cCode<<"//"+line.remove(0,1)+"\n";
-			return(true);
-		}
-	if(line.length()==0)
-		{
-			return(true);
-		}
 
 	if(this->verboseCCode==true)
 		cCode<<QString("//%1\n").arg(line);
@@ -85,8 +138,6 @@ bool parseFileClass::parseLine(QString qline)
 
 	this->preserveWhitespace=false;
 	this->bashCommand=EXTERNALCOMMAND;
-
-	//line.replace("\\\"","'");
 
 //check for assign
 	re.setPattern("^([[:alnum:]_]+)=(.*)");
@@ -185,12 +236,6 @@ bool parseFileClass::parseLine(QString qline)
 					return(true);
 				}
 				break;
-//			case BASHIF:
-//			case BASHELSE:
-//			case BASHFI:
-//			qDebug()<<"this->createCommand(line)";
-//				return(true);
-//				break;
 
 			case BASHDONE:
 				return(true);
@@ -262,8 +307,6 @@ QString parseFileClass::parseVar(QString line)
 	retcode=setSpecialDollars(line.at(1));
 	if(retcode.isEmpty()==false)
 		return(retcode);
-//${string%substring}
-//${string%%substring}
 
 	re.setPattern("^\\$\\{[[:alnum:]_\"]+([/#%:]{1,2}).*}");
 	match=re.match(line);
@@ -329,6 +372,7 @@ QString parseFileClass::parseVar(QString line)
 							return(retcode);
 						}
 				}
+
 //${string:position}/${string:position:length}
 			if(match.captured(1).trimmed()==":")
 				{//{
@@ -360,7 +404,6 @@ QString parseFileClass::parseVar(QString line)
 						}
 				}
 
-//${string/substring/replacement}
 //${string//substring/replacement}
 			if(match.captured(1).trimmed()=="//")
 				{//{
@@ -375,8 +418,8 @@ QString parseFileClass::parseVar(QString line)
 							return(retcode);
 						}
 				}
-
-			if(match.captured(1).trimmed()=="/")
+//${string/substring/replacement}
+			else if(match.captured(1).trimmed()=="/")
 				{//{
 					re.setPattern("([[:alnum:]_]*)/(.*)/(.*)\\}");
 					match=re.match(line);
@@ -550,7 +593,6 @@ void parseFileClass::createCommand(QString line)
 
 	this->bashCommand=EXTERNALCOMMAND;
 
-
 //if then else fi
 	if(mainCommandsClass->makeIf(line)==true)
 		{
@@ -574,25 +616,54 @@ void parseFileClass::createCommand(QString line)
 			return;
 		}
 
+//while read
+	if(mainCommandsClass->makeWhileRead(line)==true)
+		{
+			this->bashCommand=BASHWHILEREAD;
+			return;
+		}
+
 //while do done
 	if(mainCommandsClass->makeWhile(line)==true)
 		{
 			this->bashCommand=BASHWHILE;
 			return;
 		}
+
 	re.setPattern("^[[:space:]]*(do)[[:space:]]*$");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
-			cCode<<"{\n";
+			cCode<<"{\n";//}
 			this->bashCommand=BASHDO;
 			return;
 		}
+
+
 	re.setPattern("^[[:space:]]*(done)[[:space:]]*$");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
 			cCode<<"}\n";
+			this->bashCommand=BASHDONE;
+			return;
+		}
+
+	re.setPattern("^[[:space:]]*(done)[[:space:]]*<[[:space:]]*.*<\\((.*)\\)");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			if(this->whileReadLine.size()>0)
+				{
+					QString tstr=this->lineToBashCLIString(match.captured(2).trimmed());
+					cCode<<"}\npclose(fp);\n}\n";
+					cCode.insert(this->whileReadLine.last(),"QString proc=\""+tstr+"\";\n");
+					this->whileReadLine.pop_back();
+				}
+			else
+				{
+					cCode<<"}\n";
+				}
 			this->bashCommand=BASHDONE;
 			return;
 		}
