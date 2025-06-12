@@ -36,7 +36,7 @@ class parseFileClass
 	
 		QVector<lineData>	lineParts;
 		QVector<int>			whileReadLine;
-		//QMap<int>			xwhileReadLine;
+	
 		commandName			bashCommand=EXTERNALCOMMAND;
 		QString				currentPart="";
 		int					linePosition=0;
@@ -44,18 +44,25 @@ class parseFileClass
 		void					parseFile(void);
 		bool					parseLine(QString line);
 		QString				parseExprString(bool isnumexpr);
+		QString				parseExprStringNew(bool isnumexpr);
 		QString				lineToBashCLIString(QString qline);
 
-	private:
-		QFile				mainBashFile;
 		bool					preserveWhitespace=false;
-		int					currentLine=0;
-
-		QString				setSpecialDollars(QChar dollar);
 		QString				parseVar(QString line);
 		QString				cleanVar(QString line);
-		QString				globToRX(QString glob,bool greedy);
+		bool					isAVar(QString line);
+
+		QString				parseOutputString(QString qline);
+		QString				parseOutputStringNew(QString qline);
+
+bool quotevars=false;
+	private:
+		QFile				mainBashFile;
+		int					currentLine=0;
+
 		void 				parseString(QString qline);
+		QString				setSpecialDollars(QChar dollar);
+		QString				globToRX(QString glob,bool greedy);
 		void					createCommand(QString line);
 		void					parseSquareBraces(QString line);
 		void					parseDollar(QString line);

@@ -22,8 +22,13 @@
 
 parseFileClass	*mainParseClass=NULL;
 commandsClass	*mainCommandsClass=NULL;
+compilerClass	*mainCompilerClass=NULL;
+
 QString			bashOptsAtStart="";//TODO//for later
 QVector<QString>	cCode;
+QVector<QString>	fCode;
+QVector<QString>	functionNames;
+bool				isInFunction;
 
 int main(int argc,char **argv)
 {
@@ -57,57 +62,32 @@ int main(int argc,char **argv)
 		}
 	mainParseClass=new parseFileClass(prefs.cliArgs.at(0).c_str());
 	mainCommandsClass=new commandsClass();
+	mainCompilerClass=new compilerClass(argc,argv);
+
+
 
 	mainParseClass->verboseCompile=prefs.LFSTK_getBool("verbose-compile");
 	mainParseClass->verboseCCode=prefs.LFSTK_getBool("verbose-ccode");
-	mainParseClass->parseFile();
 
-	//QString specialvars="QString exitstatus;\nQString shelloptions("+bashOptsAtStart+");\n";
-	QString specialvars="QString exitstatus;\n";
-	//QHash<QString,QString> variables;\n";
-	//QString globalvars="QTextStream	outop(stdout);\nQTextStream	errop(stderr);\n";
-	QString globalvars="";
-	//QString headers="#include <QCoreApplication>\n#include <QTextStream>\n#include <QMap>\n#include <QRegularExpression>\n\n";
-	QString headers="#include <QTextStream>\n#include <QMap>\n#include <QRegularExpression>\n\n";
-	QString functions="\n\
-QString procsub(QString proc)\n\
-{\n\
-FILE *fp;\n\
-int exitnum=-1;\n\
-char *buffer=(char*)alloca(1024);\n\
-QString retstr=\"\";\n\
-\n\
-fp=popen(proc.toStdString().c_str(),\"r\");\n\
-if(fp!=NULL)\n\
-{\n\
-buffer[0]=0;\n\
-while(fgets(buffer,1024,fp))\n\
-retstr+=buffer;\n\
-retstr.resize(retstr.length()-1);\n\
-exitnum=pclose(fp)/256;\n\
-exitstatus=QString::number(exitnum);\n\
-}\n\
-return(retstr);\n\
-};\n\n";
+	if(mainCompilerClass->openBashFile(prefs.cliArgs.at(0).c_str())==true)
+		{
+			mainCompilerClass->verboseCompile=prefs.LFSTK_getBool("verbose-compile");
+			mainCompilerClass->verboseCCode=prefs.LFSTK_getBool("verbose-ccode");
+			mainCompilerClass->parseFile();
 
-//write code
-	//cCode.prepend("QCoreApplication myapp(argc,argv);\n");
-	cCode.prepend("QHash<QString,QString> variables;\n");
-	cCode.prepend("QTextStream	outop(stdout);\n");
-	cCode.prepend("int main(int argc, char **argv)\n{\n");
+	//mainParseClass->parseFile();
 
-	cCode.prepend(functions);
-	cCode.prepend(globalvars);
-	cCode.prepend(specialvars);
-	cCode.prepend(headers);
-	cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC  -Ofast /PATH/TO/THIS/FILE\nOptional:\nastyle -A7 --indent=tab /PATH/TO/THIS/FILE\nstrip ./a.out\nCreated on %2\n*/\n").arg(argv[1]).arg(QDate::currentDate().toString()));
-	cCode<<"\nreturn(0);\n}\n";
-
-	for(int j=0;j<cCode.size();j++)
-		QTextStream(stdout)<<cCode.at(j);
-
+			//mainCompilerClass->cCode=cCode;
+			//mainCompilerClass->fCode=fCode;
+			mainCompilerClass->functionNames=functionNames;
+			mainCompilerClass->writeCFile();
+		}
+	else
+		errop<<"Can't open input file, aborting ...!"<<Qt::endl;
+	
 	delete mainParseClass;
 	delete mainCommandsClass;
+	delete mainCompilerClass;
 
 	return(0);
 }

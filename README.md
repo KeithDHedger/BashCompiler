@@ -46,12 +46,15 @@ Process substitution, see example 5.
 if/then/else/fi, see 'To do', see example 6.  
 while/do/done, see 'To do', see example 7.  
 $? see example 7.  
-While read;do ... done see example whileifread ( ONLY default $REPLY variable used for now ).
+While read;do ... done see example whileifread.
+pushd/popd, No switches allowed ie no manipulating the stack ( yet! ).
+printf, optional '-v VARNAME' FORMATSTR STR1 ... STRN, format string is ignored.
 ######
 
 ### Ongoing in no particular order. 
 String slicing. see example stringslice.  
 Add options to bashcompiler.  
+Functions.
 ###
 
 ### To do ( loads! ) in no particular order.  

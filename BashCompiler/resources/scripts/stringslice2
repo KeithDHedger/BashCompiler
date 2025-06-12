@@ -1,0 +1,67 @@
+#!/bin/bash
+
+#\$\{([[:alnum:]_]+)(##?|%%?|:|//?)([[:alnum:]\.]*)(/|:)?(.*)}
+#${zzz//mm.m/23}
+
+avar="abcdef1.abcdfe2.abcdef3.abcdef4"
+echo $avar
+echo ${avar#*.abc}
+bvar=${avar#*.abc}
+echo $bvar
+
+avar="/media/LinuxData/Development64/Projects/BashCompiler"
+echo $avar
+echo ${avar#*/}
+bvar=${avar#*/media}
+echo $bvar
+
+echo ">>>>>>>>>>>>>>>>"
+echo "shortest"
+avar="abcdef1.abcdfe2.abcdef3.abcdef4"
+echo $avar
+echo ${avar%*.abc*}
+bvar=${avar%*.abc*}
+echo $bvar
+echo "longest"
+echo $avar
+echo ${avar%%.abc*}
+bvar=${avar%%.abc*}
+echo $bvar
+
+echo ">>>>>>>>>>>>>>>>"
+echo "substr"
+avar="/media/LinuxData/Development64/Projects/BashCompiler"
+echo $avar
+echo ${avar:10}
+bvar=${avar:10}
+echo $bvar
+
+echo "substr:len"
+avar="/media/LinuxData/Development64/Projects/BashCompiler"
+echo $avar
+echo ${avar:10:4}
+bvar=${avar:10:4}
+echo $bvar
+
+echo ">>>>>>>>>>>>>>>>"
+echo "replace all"
+avar="Zabcdef1.abcdfe2.abcdef3.abcdef4Z"
+echo $avar
+echo ${avar//Z/}
+bvar=${avar//Z/}
+echo $bvar
+
+echo "replace first"
+avar="abcdef1.abcdfe2.abcdef3.abcdef4"
+echo $avar
+echo ${avar/abc/XXX}
+bvar=${avar/abc/XXX}
+echo $bvar
+
+echo "length"
+avar="abcdef1.abcdfe2.abcdef3.abcdef4"
+echo $avar
+echo ${#avar}
+bvar=${#avar}
+echo $bvar
+

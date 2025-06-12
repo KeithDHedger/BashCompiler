@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#flags
+nocopy=
+forceregenthumbs=
+createindex=
+refresh=
+convertfold=
+
+pushd $(dirname $0) & > /dev/null
+	data="$(cat gui.data|yadqt --type=prefsdialog -t 'Photo PageMaker GUI' -a PhotoPageMakerGUI --fromstdin --ipseparator=newline --opseparator=newline --buttons='ok|cancel|apply')"
+
+#	if [ $? -eq 1 ];then
+#		exit 1
+#	fi
+
+	while read
+		do
+			echo $REPLY
+			XREPLY="${REPLY//\'/}"
+			printf -v ${XREPLY%%=?*} "${XREPLY##?*=}"
+
+		done< <(echo -e "$data")
+
+	if [ $no_file_copy -eq 1 ];then nocopy="-n";fi
+	if [ $regen_thumbs -eq 1 ];then forceregenthumbs="-f";fi
+	if [ $rebuild_index -eq 1 ];then createindex="-x";fi
+	if [ $refresh_pages -eq 1 ];then refresh="-r";fi
+	if [ $convert -eq 1 ];then convertfold="-c";fi
+
+	echo ./photopagemaker -i \"${input_folder%/}\" -o \"${output_folder%/}\" -m \"${main_page_link}\" $nocopy $forceregenthumbs $createindex $refresh $convertfold -s $thumbnail_size
+	#./photopagemaker -i "${input_folder%/}"
+	
+	./photopagemaker -i "${input_folder%/}" -o "${output_folder%/}" -m "${main_page_link}" $nocopy $forceregenthumbs $createindex $refresh $convertfold -s $thumbnail_size
+
+popd &>/dev/null

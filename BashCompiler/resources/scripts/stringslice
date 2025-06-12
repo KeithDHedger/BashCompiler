@@ -9,7 +9,7 @@ echo $HAYSTACK $PART $FIND $LEN
 ##TODO nested slicing
 ##NEEDLE=${HAYSTACK//abc/${PART//"AB"/"ab"}}
 #needs doing
-NEEDLE="${HAYSTACK//${FIND}/$PART} xxx {rtret} \"XXX\" << {qwerty}  \"done\""
+#NEEDLE="${HAYSTACK//${FIND}/$PART} xxx {rtret} \"XXX\" << {qwerty}  \"done\""
 echo $HAYSTACK
 echo $NEEDLE
 echo ${#NEEDLE}
@@ -37,6 +37,8 @@ echo
 echo ${avar%.abc*}
 echo ${avar%%.abc*}
 
+bvar=${avar%.abc*}
+
 echo
 
 
@@ -45,3 +47,5 @@ echo ${APATH#*/Music/}
 echo ${APATH##*/Music/}
 echo ${APATH##*/}
 echo ${APATH%.flac}
+
+bvar=${avar%.abc*}

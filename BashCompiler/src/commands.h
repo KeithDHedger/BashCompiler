@@ -32,7 +32,22 @@ class commandsClass
 //external command
 		QString	makeExternalCommand(QString line);
 
+//assign
+	QString	makeAssign(QString qline);
+
+//printf/echo
+	QString	makePrintfNew(QString qline);
+	QString	makeEcho(QString qline);
+
+	bool		makePrintf(QString qline);//TOGO//
+
+//functions
+		bool		makeFunction(QString qline);
+
 //if/then/else/fi
+		QString	makeIfNew(QString qline);
+
+
 		bool		makeIf(QString line);
 		bool		makeThen(QString line);
 		bool		makeElse(QString line);
@@ -43,7 +58,9 @@ class commandsClass
 		bool		makeDone(QString line);
 //while read
 		bool		makeWhileRead(QString qline);
-
+//builtins
+		bool		makePushd(QString qline);
+		bool		makePopd(QString qline);
 	private:
 
 };

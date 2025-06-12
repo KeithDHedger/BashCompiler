@@ -1,0 +1,27 @@
+#!/bin/bash
+
+cnt=10
+makePage ()
+{
+#while [[ $cnt -gt 0 ]]
+#do
+#	echo $cnt
+#	cnt=$((cnt-2))
+#done
+#cnt=8
+#echo "$cnt"
+echo "$0"
+echo "$1"
+echo "$2"
+echo "$3"
+echo "$4"
+#echo "$5"
+#echo "$6"
+#echo "XXX"
+}
+
+echo ">>>"$0
+echo "----"$1
+makePage abc def xyz $cnt
+xxx=$(makePage abc def xyz $cnt)
+echo "$xxx"

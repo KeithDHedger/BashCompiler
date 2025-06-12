@@ -1,0 +1,80 @@
+#page
+#type=page
+#tab label
+#if using paged prefs first entry MUST be a page
+#page
+#Tab 1
+
+#input folder
+#folder select
+#type=folder
+#prefs name, prefs sections seperated by /
+#default, will be overwitten when prefs are saved
+folder
+Input Folder
+/
+
+#output folder
+#folder select
+#type=folder
+#prefs name, prefs sections seperated by /
+#default, will be overwitten when prefs are saved
+folder
+Output Folder
+/
+
+#edit box
+#type=edit
+#prefs name, prefs sections seperated by /
+#default, will be overwitten when prefs are saved
+edit
+Main Page Link
+
+#check box
+#type=check
+#prefs name, prefs sections seperated by /
+#default (0/1), will be overwitten when prefs are saved
+check
+No File Copy
+0
+
+#check box
+#type=check
+#prefs name, prefs sections seperated by /
+#default (0/1), will be overwitten when prefs are saved
+check
+Regen Thumbs
+0
+
+#check box
+#type=check
+#prefs name, prefs sections seperated by /
+#default (0/1), will be overwitten when prefs are saved
+check
+Rebuild Index
+0
+
+#check box
+#type=check
+#prefs name, prefs sections seperated by /
+#default (0/1), will be overwitten when prefs are saved
+check
+Refresh Pages
+0
+
+#check box
+#type=check
+#prefs name, prefs sections seperated by /
+#default (0/1), will be overwitten when prefs are saved
+check
+Convert
+0
+
+#edit box
+#type=edit
+#prefs name, prefs sections seperated by /
+#default, will be overwitten when prefs are saved
+edit
+Thumbnail Size
+176
+

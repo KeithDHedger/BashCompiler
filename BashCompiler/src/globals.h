@@ -42,8 +42,9 @@
 
 class parseFileClass;
 class commandsClass;
+class compilerClass;
 
-enum commandName {EXTERNALCOMMAND=0,BASHASSIGN,BASHECHO,BASHIF,BASHTHEN,BASHELSE,BASHFI,BASHWHILE,BASHWHILEREAD,BASHDO,BASHDONE,SKIPLINE};
+enum commandName {EXTERNALCOMMAND=0,BASHASSIGN,BASHECHO,BASHIF,BASHTHEN,BASHELSE,BASHFI,BASHWHILE,BASHWHILEREAD,BASHDO,BASHDONE,BASHFUNCTION,BASHFUNCTIONCALL,BASHBUILTIN,SKIPLINE};
 enum parseDataType {UNKNOWN=0,WHITESPACE,DOUBLEQUOTESTRING,SINGLEQUOTSTRING,COMMAND,VARIABLE,VARIABLEINCURLYS,BRACKETS,SQUAREBRACKETS,STRINGDATA,VARNAME};
 
 struct lineData
@@ -63,10 +64,16 @@ static QTextStream	outop(stdout);
 
 #include "commands.h"
 #include "parseFile.h"
+#include "compiler.h"
 
 extern parseFileClass	*mainParseClass;
 extern commandsClass		*mainCommandsClass;
+extern compilerClass		*mainCompilerClass;
+
 extern QString			bashOptsAtStart;
 extern QVector<QString>	cCode;
+extern QVector<QString>	fCode;
+extern QVector<QString>	functionNames;
+extern bool				isInFunction;
 
 #endif
