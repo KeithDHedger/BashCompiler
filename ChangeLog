@@ -1,0 +1,58 @@
+0.3.0
+Added --syntax-check/-s switch to check syntax, will use shellcheck if installed.
+Done case/esac.
+Fixed 'exit' with no exit code.
+Added "done < /path/to/file" to while read;do...;done.
+Done simple 'here' doc.
+Done ${foo,,} and ${foo^^}.
+Done for ((x=0;x<n;x=x+n)).
+Fixed more escapes.
+Code clean.
+Fixed proccess substitution that doesn't return a trailing newline.
+Done redirect to file/pipe for echo.
+Done importing BASH environment variables at startup.
+Done 'Exit'.
+Removed ">=" and "<=" from string tests, ( not available in BASH ).
+Fixed "!=" in test;
+Fixed # not 1st character in line.
+Fixed breaking line on ';'.
+Added '-n' option to echo.
+Started rewrite and clean.
+
+0.2.0
+Quoted variables when feeding external commands to while read loop.
+Done printf ( optional -v to set variable ).
+Added access to $0-$9 as global args to app.
+Done pushd/popd.
+Done returning values from functions (eg : xx=$(makePage1) ).
+Done functions.
+Cleaned/compacted generated code for while read.
+Done while read.
+Fixed do/done/fi/else
+Done while.
+Done ${string#substring}/${string##substring}/${string%substring}/${string%%substring}.
+Fixed $?.
+Moved to qhash to hold variables
+Fixed quotes in process substitution.
+Done ${string:position:len} Extract substring from $string at $position with.
+Done ${string:position} Extract $length characters substring from $string at $position [zero-indexed, first character is at position 0].
+Corrected exit value from external command ( $? ).
+Done ${#HAYSTACK} variable length.
+Done '${HASTACK/$FIND/${REPLACE}} / ${HASTACK//$FIND/${REPLACE}}' find replace.
+Started string slicing.
+Removed redundant code.
+Changed to outputing of qt code instead of std c++.
+ 
+0.1.1
+Added '$?'.
+Fixed using '[' or '[[' in if.
+Added verbose C code.
+Added verbose compile.
+Done 'else'
+Done 'if/then'.
+
+0.0.0-0.1.0
+Internel updates.
+
+0.0.0
+1st outing.
