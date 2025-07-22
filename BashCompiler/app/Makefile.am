@@ -4,9 +4,6 @@ include ../sources
 
 bashcompiler_SOURCES = $(COMMONSRC)
 
-bashcompiler_CFLAGS = -O3
-bashcompiler_CXXFLAGS = -O3
-
 pixfilesdir = $(pkgdatadir)/pixmaps
 pixfiles_DATA = ../resources/pixmaps/*
 

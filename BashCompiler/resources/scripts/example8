@@ -2,20 +2,20 @@
 
 if [[ 1 -ge 1 ]]; then
 	cnt=0
-	while [[ $cnt -lt 100 ]]; do
+	while [[ $cnt -lt 1 ]]; do
 		file="/home/keithhedger/Backgrounds"
 		echo $file
 		while read; do
 			echo "$REPLY"
-			echo ${REPLY%.*}
-			basename $REPLY .png
+			echo "${REPLY%*.*}"
+			basename "$REPLY" .png
 		done < <(ls -1 $file | sort -r)
 
 		file="/home/keithhedger/Wallpapers"
 		echo $file
 		while read filename; do
 			echo "$filename"
-			#echo ${filename%.*}
+			echo "${filename%*.*}"
 			#basename $filename .png
 		done < <(find $file)
 		cnt=$((cnt + 1))

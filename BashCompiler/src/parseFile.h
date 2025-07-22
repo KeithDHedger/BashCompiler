@@ -26,44 +26,29 @@
 class parseFileClass
 {
 	public:
-		parseFileClass(QString filepath="");
+		parseFileClass();
 		~parseFileClass();
 
 //control
-		bool					verboseCompile=false;
-		bool					verboseCCode=false;
-		bool					noCodeOP=false;
-	
 		QVector<lineData>	lineParts;
-		QVector<int>			whileReadLine;
-	
-		commandName			bashCommand=EXTERNALCOMMAND;
 		QString				currentPart="";
+		commandName			bashCommand=EXTERNALCOMMAND;
 		int					linePosition=0;
-
-		void					parseFile(void);
-		bool					parseLine(QString line);
-		QString				parseExprString(bool isnumexpr);
-		QString				parseExprStringNew(bool isnumexpr);
-		QString				lineToBashCLIString(QString qline);
-
 		bool					preserveWhitespace=false;
+
+		QString				parseExprString(bool isnumexpr);
+		QString				lineToBashCLIString(QString qline);
 		QString				parseVar(QString line);
 		QString				cleanVar(QString line);
-		bool					isAVar(QString line);
-
 		QString				parseOutputString(QString qline);
-		QString				parseOutputStringNew(QString qline);
+		bool					parseLine(QString line);
+		QString				globToRX(QString glob,bool greedy);
 
-bool quotevars=false;
 	private:
-		QFile				mainBashFile;
 		int					currentLine=0;
 
+		QString				setSpecialDollars(QString dollar);
 		void 				parseString(QString qline);
-		QString				setSpecialDollars(QChar dollar);
-		QString				globToRX(QString glob,bool greedy);
-		void					createCommand(QString line);
 		void					parseSquareBraces(QString line);
 		void					parseDollar(QString line);
 		void					parseWhitespace(QString line);

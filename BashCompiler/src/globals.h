@@ -56,8 +56,8 @@ struct lineData
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 static const char* typeText[]={"UNKNOWN","WHITESPACE","DOUBLEQUOTESTRING","SINGLEQUOTSTRING","COMMAND","VARIABLE","VARIABLEINCURLYS","BRACKETS","SQUAREBRACKETS","STRINGDATA","VARNAME","SKIPLINE"};
-static const char*	bashmath[]={"-gt","-lt","-eq","-ne","-le","-ge","=","!=","<",">",">=","<=",NULL};
-static const char*	cmath[]={">","<","==","!=","<-",">=","==","!=","<",">",">=","<=",NULL};
+static const char*	bashmath[]={"-gt ","-lt ","-eq ","-ne ","-le ","-ge "," != "," < "," > "," = ",NULL};
+static const char*	cmath[]={">","<","==","!=","<=",">=","!=","<",">","==",NULL};
 static QTextStream	errop(stderr);
 static QTextStream	outop(stdout);
 #pragma GCC diagnostic pop
@@ -66,14 +66,19 @@ static QTextStream	outop(stdout);
 #include "parseFile.h"
 #include "compiler.h"
 
-extern parseFileClass	*mainParseClass;
 extern commandsClass		*mainCommandsClass;
 extern compilerClass		*mainCompilerClass;
 
 extern QString			bashOptsAtStart;
-extern QVector<QString>	cCode;
-extern QVector<QString>	fCode;
 extern QVector<QString>	functionNames;
 extern bool				isInFunction;
+
+extern QVector<int>		whileReadLine;
+extern QVector<QString>	cCode;
+extern QVector<QString>	fCode;
+extern QVector<QString>	forVariable;
+extern QVector<bool>		isInFor;
+extern QVector<QString>	caseVariable;
+extern bool				firstCasecompare;
 
 #endif

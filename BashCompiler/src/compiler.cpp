@@ -48,7 +48,7 @@ void compilerClass::writeCFile(void)
 {
 	QString specialvars="QString exitstatus;\n";
 	QString globalvars="QTextStream outop(stdout);\nQHash<QString,QString> variables;\nQVector<QString> dirstack;\nchar **gargv;\n";
-	QString headers="#include <QTextStream>\n#include <QHash>\n#include <QRegularExpression>\n#include <QDir>\n\n";
+	QString headers="#include <QTextStream>\n#include <QHash>\n#include <QRegularExpression>\n#include <QDir>\n#include <QProcessEnvironment>\n\n";
 	QString functions="\n\
 QString procsub(QString proc)\n\
 {\n\
@@ -57,33 +57,239 @@ int exitnum=-1;\n\
 char *buffer=(char*)alloca(1024);\n\
 QString retstr=\"\";\n\
 \n\
+//outop<<proc<<Qt::endl;\n\
+\n\
 fp=popen(proc.toStdString().c_str(),\"r\");\n\
 if(fp!=NULL)\n\
 {\n\
 buffer[0]=0;\n\
 while(fgets(buffer,1024,fp))\n\
 retstr+=buffer;\n\
+if(retstr.isEmpty()==false)\n\
+{\n\
+if(retstr.at(retstr.length()-1)=='\\n')\n\
 retstr.resize(retstr.length()-1);\n\
+}\n\
 exitnum=pclose(fp)/256;\n\
 exitstatus=QString::number(exitnum);\n\
 }\n\
 return(retstr);\n\
-};\n\n";
+};\n\n\
+QString loadEnvironment(bool capture,QHash<QString, QString> fv)\n\
+{\n\
+QProcessEnvironment env=QProcessEnvironment::systemEnvironment();\n\
+QStringList paths_list=env.toStringList();\n\
+for(int j=0;j<paths_list.size();j++)\n\
+{\n\
+if(paths_list.at(j).startsWith(\"BASH_FUNC_\")==false)\n\
+{\n\
+QStringList parts=paths_list.at(j).split(\"=\");\n\
+variables[parts.at(0)]=parts.at(1);\
+}\n\
+}\n\
+return(\"\");\n\
+}\n\
+\n";
 
-	for(int j=0;j<this->fCode.size();j++)
-		functions+=this->fCode.at(j);
+	for(int j=0;j<fCode.size();j++)
+		functions+=fCode.at(j);
 
 //write code
-	this->cCode.prepend("int main(int argc, char **argv)\n{\ngargv=argv;\n");
-	this->cCode.prepend(functions);
-	this->cCode.prepend(globalvars);
-	this->cCode.prepend(specialvars);
-	this->cCode.prepend(headers);
-	this->cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC  -Ofast /PATH/TO/THIS/FILE\nOptional:\nastyle -A7 --indent=tab /PATH/TO/THIS/FILE\nstrip ./a.out\nCreated on %2\n*/\n").arg(this->argv[1]).arg(QDate::currentDate().toString()));
+	cCode.prepend("int main(int argc, char **argv)\n{\ngargv=argv;\nloadEnvironment(false,{});\n");
+	cCode.prepend(functions);
+	cCode.prepend(globalvars);
+	cCode.prepend(specialvars);
+	cCode.prepend(headers);
+	cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC  -Ofast /PATH/TO/THIS/FILE -o APPNAME\nOptional:\nastyle -A7 --indent=tab /PATH/TO/THIS/FILE\nstrip ./a.out\nCreated on %2\n*/\n").arg(this->argv[1]).arg(QDate::currentDate().toString()));
 	cCode<<"\nreturn(0);\n}\n";
 
-	for(int j=0;j<this->cCode.size();j++)
-		QTextStream(stdout)<<this->cCode.at(j);
+	for(int j=0;j<cCode.size();j++)
+		QTextStream(stdout)<<cCode.at(j);
+}
+
+void compilerClass::parseSingleLine(QString qline)
+{
+	QString					line;
+	QStringList				lines;
+	QString					retstr;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	QString					lineend;
+	commandsClass			commands;
+
+	line=this->rawLine;
+
+	if(line.length()==0)
+		return;
+
+	if(this->verboseCompile==true)
+		errop<<"Processing line "<<this->currentLine<<" "<<line<<Qt::endl;
+
+	if((this->verboseCCode==true) && (line.length()>0))
+		{
+			if(isInFunction==true)
+				fCode<<"//"+QString("Line %0: ").arg(currentLine)+line+"\n";
+			else
+				cCode<<"//"+QString("Line %0: ").arg(currentLine)+line+"\n";
+		}
+
+	if(line.startsWith('#'))
+		return;
+
+	re.setPattern("^.*<<([[:space:]]*[[:alpha:][:alnum:]]*[[:space:]]*)$");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			retstr=commands.makeHereDoc(line);
+			if(retstr.isEmpty()==false)
+				{
+					if(isInFunction==true)
+						fCode<<retstr<<";";
+					else
+						cCode<<retstr<<";";
+				}
+			return;
+		}
+	else
+		lines=this->splitLines(this->rawLine);
+
+	for(int j=0;j<lines.count();j++)
+		{//{
+			if(lines.at(j).trimmed().startsWith('#'))
+				return;
+
+			if(lines.at(j).trimmed()=="{")//}
+				return;
+
+			if(lines.at(j).trimmed()=="}")
+				{//{
+					fCode<<"return(retstr);\n}\n\n";
+					isInFunction=false;
+					return;
+				}
+
+			lineend=";\n";
+			retstr="";
+					
+			re.setPattern("^[[:space:]]*([[:alpha:][:alnum:]_]*)[[:space:]]*(=)?");
+			match=re.match(lines.at(j));
+			if(match.hasMatch())
+				{
+					if(match.captured(2).trimmed()=="=")
+						{
+							retstr=commands.makeAssign(lines.at(j));
+							if(retstr.isEmpty()==false)
+								{
+									retstr="variables[\""+match.captured(1).trimmed()+"\"]="+retstr;
+								}
+						}
+					else
+						{
+						//builtins
+							if(match.captured(1).trimmed()=="printf")
+								retstr=commands.makePrintf(lines.at(j));
+							if(match.captured(1).trimmed()=="echo")
+								retstr=commands.makeEcho(lines.at(j));
+							if(match.captured(1).trimmed()=="pushd")
+								retstr=commands.makePushd(lines.at(j));
+							if(match.captured(1).trimmed()=="popd")
+								retstr=commands.makePopd(lines.at(j));
+							if(match.captured(1).trimmed()=="exit")
+								retstr=commands.makeExit(lines.at(j));
+							if(match.captured(1).trimmed()=="export")
+								retstr=commands.makeExport(lines.at(j));
+							if(match.captured(1).trimmed()=="cd")
+								retstr=commands.makeCD(lines.at(j));
+
+							if(match.captured(1).trimmed()=="case")
+								{
+									retstr=commands.makeCase(lines.at(j));
+									continue;
+								}
+							if(match.captured(1).trimmed()=="esac")
+								{
+									caseVariable.pop_back();
+									continue;
+								}
+
+							//conditionals
+							if(match.captured(1).trimmed()=="for")
+								{
+									lineend="";
+									retstr=commands.makeFor(lines.at(j));
+								}
+
+							if(match.captured(1).trimmed()=="if")
+								{
+									lineend="";
+									retstr=commands.makeIf(lines.at(j));
+								}
+							if(match.captured(1).trimmed()=="then")
+								{
+									lineend="";
+									retstr="{\n";
+								}
+							if(match.captured(1).trimmed()=="else") //TODO//elif
+								{
+									lineend="";
+									retstr="}\nelse\n{\n";
+								}
+							if(match.captured(1).trimmed()=="fi")
+								{
+									lineend="";
+									retstr="}\n";
+								}
+							if(match.captured(1).trimmed()=="while")
+								{
+									lineend="";
+									retstr=commands.makeWhileRead(lines.at(j));
+									if(retstr.isEmpty()==true)
+										retstr=commands.makeWhile(lines.at(j));
+								}
+							if(match.captured(1).trimmed()=="do")
+								{
+									lineend="";
+									if((isInFor.isEmpty()==false) && (isInFor.back()==true))
+										retstr="{\nvariables[\""+forVariable.back()+"\"].setNum("+forVariable.back()+");\n";//}
+									else
+										retstr="{\n";//}
+								}
+							if(match.captured(1).trimmed()=="done")
+								{//{
+									lineend="";
+									retstr=commands.makeDone(lines.at(j));
+									if(retstr.isEmpty()==true)
+										retstr="}\n";
+								}
+
+							//functions/external commands	 etc
+							if(retstr.isEmpty()==true)
+								{
+									if(retstr.isEmpty()==true)
+										retstr=commands.makeFunction(lines.at(j));
+								
+									if(retstr.isEmpty()==true)
+										{
+											retstr=commands.makeCaseCompareStatement(lines.at(j));
+											if(retstr.isEmpty()==false)
+												{
+													lineend="";
+												}
+										}
+									if(retstr.isEmpty()==true)
+										retstr=commands.makeExternalCommand(lines.at(j));
+								}
+						}
+
+					if(retstr.isEmpty()==false)
+						{
+							if(isInFunction==true)
+								fCode<<retstr<<lineend;
+							else
+								cCode<<retstr<<lineend;
+						}
+				}
+		}
 }
 
 void compilerClass::parseFile(void)
@@ -96,82 +302,13 @@ void compilerClass::parseFile(void)
 	QString					lineend;
 
 	commandsClass			commands;
-	while (!this->mainBashFile.atEnd())
+	functionNames<<"loadEnvironment";
+
+	while(!this->mainBashFile.atEnd())
 		{
+			this->currentLine++;
 			this->rawLine=this->mainBashFile.readLine().trimmed();
-			currentLine++;
-			line=this->rawLine;
-
-			if(line.length()==0)
-				continue;
-			if(this->verboseCompile==true)
-				errop<<"processing line "<<this->currentLine<<" "<<line<<Qt::endl;
-
-			if((this->verboseCCode==true) && (line.length()>0))
-				{
-					if(this->isInFunction==true)
-						fCode<<"//"+line+"\n";
-					else
-						cCode<<"//"+line+"\n";
-				}
-
-			if(line.startsWith('#'))
-				continue;
-
-			lines=this->splitLines(this->rawLine);
-			for(int j=0;j<lines.count();j++)
-				{
-					lineend=";\n";
-					retstr="";
-					re.setPattern("^[[:space:]]*([[:alpha:][:alnum:]_]*)[[:space:]]*(=)?");
-					match=re.match(lines.at(j));
-					if(match.hasMatch())
-						{
-							if(match.captured(2).trimmed()=="=")
-								{
-									retstr=commands.makeAssign(lines.at(j));
-									if(retstr.isEmpty()==false)
-										{
-											retstr="variables[\""+match.captured(1).trimmed()+"\"]="+retstr;
-										}
-								}
-							else
-								{
-									if(match.captured(1).trimmed()=="printf")
-										retstr=commands.makePrintfNew(lines.at(j));
-									if(match.captured(1).trimmed()=="echo")
-										retstr=commands.makeEcho(lines.at(j));
-									if(match.captured(1).trimmed()=="if")
-										{
-											lineend="";
-											retstr=commands.makeIfNew(lines.at(j));
-										}
-									if(match.captured(1).trimmed()=="then")
-										{
-											lineend="";
-											retstr="{\n";
-										}
-									if(match.captured(1).trimmed()=="else")
-										{
-											lineend="";
-											retstr="}\nelse\n{\n";
-										}
-									if(match.captured(1).trimmed()=="fi")
-										{
-											lineend="";
-											retstr="}\n";
-										}
-								}
-
-							if(retstr.isEmpty()==false)
-								{
-									if(isInFunction==true)
-										this->fCode<<retstr<<lineend;
-									else
-										this->cCode<<retstr<<lineend;
-								}
-						}
-				}
+			this->parseSingleLine(this->rawLine);
 		}
 }
 
@@ -182,7 +319,6 @@ QStringList compilerClass::splitLines(QString qline)
 	QStringList	keywords;
 	QStringList	ss;
 	bool			inquotes;
-	bool			quotes;
 	int			inquotespos;
 	int			pos=0;
 
@@ -190,8 +326,7 @@ QStringList compilerClass::splitLines(QString qline)
 	tstr=qline;
 	inquotes=false;
 	inquotespos=0;
-	keywords<<"then "<<"else "<<"do "<<"#";
-	//keywords<<"then ";
+	keywords<<"then "<<"else "<<"do ";
 
 	while(pos<tstr.length())
 		{
@@ -231,8 +366,30 @@ QStringList compilerClass::splitLines(QString qline)
 						}
 					pos=inquotespos;
 				}
+
+			if((pos<tstr.length()-1) && (tstr.at(pos).toLatin1()=='(') && (tstr.at(pos+1).toLatin1()=='('))
+				{
+					pos+=2;
+					inquotes=true;
+					inquotespos=pos;
+					while((inquotespos<tstr.length()) && (inquotes==true))
+						{
+							if((tstr.at(inquotespos).toLatin1()==')') && (tstr.at(inquotespos+1).toLatin1()==')'))
+								inquotes=false;
+							inquotespos++;
+						}
+					pos=inquotespos+1;
+				}
+
+
 			if(pos>=tstr.length())
 				continue;
+
+			if(pos+1<tstr.length() && tstr.at(pos).toLatin1()==';' && tstr.at(pos+1).toLatin1()==';')
+				{
+					pos+=2;
+					continue;
+				}
 
 			if(tstr.at(pos).toLatin1()==';')
 				{
@@ -241,6 +398,14 @@ QStringList compilerClass::splitLines(QString qline)
 					pos=0;
 					continue;
 				}
+
+//TODO//
+//			if(tstr.at(pos).toLatin1()=='#')
+//				{
+//					lines<<tstr.left(pos);
+//					tstr="#"+tstr.mid(pos+1);
+//					break;
+//				}
 
 			for(int k=0;k<keywords.count();k++)
 				{
@@ -263,8 +428,5 @@ QStringList compilerClass::splitLines(QString qline)
 			pos++;
 		}
 	lines<<tstr;
-//for(int j=0;j<lines.count();j++)
-//	qDebug()<<lines.at(j);
-//exit(100);
 	return(lines);
 }

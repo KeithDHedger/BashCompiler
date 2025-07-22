@@ -1,9 +1,6 @@
 #!/bin/bash -e
 
-#TODO env vars
-home=/home/keithhedger
-PROCSUBVAR="--------->>>>>>>>"
+home=/home/
 ls ${HOME}
 ls ${home}
-
-echo "$PROCSUBVAR"
+echo ${PATH}

@@ -22,8 +22,6 @@
 #define _COMPILER_
 
 #include "globals.h"
-//class parseFileClass;
-#include "parseFile.h"
 
 class compilerClass
 {
@@ -31,16 +29,13 @@ class compilerClass
 		compilerClass(int argc,char **argv);
 		~compilerClass();
 
-
 		QFile			mainBashFile;
-		QVector<QString>	cCode;
-		QVector<QString>	fCode;
-		QVector<QString>	functionNames;
+		QString			rawLine;
+		int				currentLine=0;
 
 		bool				verboseCompile=false;
 		bool				verboseCCode=false;
 		bool				noCodeOP=false;
-		bool				isInFunction=false;
 		int				argc=0;
 		char				**argv=NULL;
 
@@ -48,14 +43,10 @@ class compilerClass
 		void				parseFile(void);
 		void				writeCFile(void);
 
+		void				parseSingleLine(QString qline);
+
 	private:
 		QStringList		splitLines(QString qline);
-
-		//parseFileClass	nparser();
-		//parseFileClass	*pfl=new parseFileClass("apath");
-		//commandsClass	commands;
-		int				currentLine=0;
-		QString			rawLine;
 };
 
 #endif

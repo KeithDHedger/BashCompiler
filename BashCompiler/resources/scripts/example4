@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+#echo always preserves whitespace ( for now! )
+
 aaaa="ababa"
 bbb="cacacac"
 qqq="wawawa"

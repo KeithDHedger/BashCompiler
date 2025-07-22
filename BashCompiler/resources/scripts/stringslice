@@ -9,10 +9,12 @@ echo $HAYSTACK $PART $FIND $LEN
 ##TODO nested slicing
 ##NEEDLE=${HAYSTACK//abc/${PART//"AB"/"ab"}}
 #needs doing
-#NEEDLE="${HAYSTACK//${FIND}/$PART} xxx {rtret} \"XXX\" << {qwerty}  \"done\""
-echo $HAYSTACK
-echo $NEEDLE
-echo ${#NEEDLE}
+echo ">>>>>>>>>>>>"
+NEEDLE="${HAYSTACK//${FIND}/$PART} xxx {rtret} \"XXX\" << {qwerty}  \"done\""
+echo "$HAYSTACK"
+echo "$NEEDLE"
+echo "${#NEEDLE}"
+echo "<<<<<<<<<<<<<"
 
 RESULT=${HAYSTACK:2}
 echo $HAYSTACK

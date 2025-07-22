@@ -30,39 +30,46 @@ class commandsClass
 		~commandsClass();
 
 //external command
-		QString	makeExternalCommand(QString line);
+		QString	makeExternalCommand(QString qline);
 
 //assign
-	QString	makeAssign(QString qline);
+		QString	makeAssign(QString qline);
 
 //printf/echo
-	QString	makePrintfNew(QString qline);
-	QString	makeEcho(QString qline);
+		QString	makePrintf(QString qline);
+		QString	makeEcho(QString qline);
 
-	bool		makePrintf(QString qline);//TOGO//
-
-//functions
-		bool		makeFunction(QString qline);
+//for ((x=0;x<n;x=x+n))
+//		QVector<QString>	forVariable;
+//		QVector<bool>	isInFor;
+		QString	makeFor(QString qline);
 
 //if/then/else/fi
-		QString	makeIfNew(QString qline);
+		QString	makeIf(QString qline);
 
-
-		bool		makeIf(QString line);
-		bool		makeThen(QString line);
-		bool		makeElse(QString line);
-		bool		makeFi(QString line);
 //while/do/done
-		bool		makeWhile(QString line);
-		bool		makeDo(QString line);
-		bool		makeDone(QString line);
-//while read
-		bool		makeWhileRead(QString qline);
-//builtins
-		bool		makePushd(QString qline);
-		bool		makePopd(QString qline);
-	private:
+		QString	makeWhile(QString line);
+		QString	makeDone(QString qline);
 
+//while read	
+		QString	makeWhileRead(QString qline);
+
+//builtins
+		QString	makePushd(QString qline);
+		QString	makePopd(QString qline);
+		QString	makeExit(QString qline);
+		QString	makeExport(QString qline);
+		QString	makeCD(QString qline);
+		QString	makeCase(QString qline);
+		QString	makeCaseCompareStatement(QString qline);
+
+//functions
+		QString	makeFunction(QString qline);
+		QString	makeFunctionDefine(QString qline);
+
+//here docs
+		QString	makeHereDoc(QString qline);
+	private:
 };
 
 #endif

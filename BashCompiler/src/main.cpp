@@ -20,15 +20,19 @@
 
 #include "globals.h"
 
-parseFileClass	*mainParseClass=NULL;
 commandsClass	*mainCommandsClass=NULL;
 compilerClass	*mainCompilerClass=NULL;
 
 QString			bashOptsAtStart="";//TODO//for later
-QVector<QString>	cCode;
-QVector<QString>	fCode;
 QVector<QString>	functionNames;
 bool				isInFunction;
+QVector<int>		whileReadLine;
+QVector<QString>	cCode;
+QVector<QString>	fCode;
+QVector<QString>	forVariable;
+QVector<bool>	isInFor;
+QVector<QString>	caseVariable;
+bool				firstCasecompare=false;
 
 int main(int argc,char **argv)
 {
@@ -39,6 +43,7 @@ int main(int argc,char **argv)
 		{
 			{"verbose-compile",optional_argument,NULL,'v'},
 			{"verbose-ccode",optional_argument,NULL,'V'},
+			{"syntax-check",optional_argument,NULL,'s'},
 			{0,0,0,0}
 		};
 
@@ -47,8 +52,9 @@ int main(int argc,char **argv)
 
 	prefs.prefsMap=
 		{
-			{prefs.LFSTK_hashFromKey("verbose-compile"),{TYPEBOOL,"verbose-compile","Verbose compile ( optional 1/true or 0/false )","",false,0}},
+			{prefs.LFSTK_hashFromKey("verbose-compile"),{TYPEBOOL,"verbose-compile","Verbose compile ( optional 1/true or 0/false )","",true,0}},
 			{prefs.LFSTK_hashFromKey("verbose-ccode"),{TYPEBOOL,"verbose-ccode","Add BASH source lines to C Code ( optional 1/true or 0/false )","",false,0}},
+			{prefs.LFSTK_hashFromKey("syntax-check"),{TYPEBOOL,"syntax-check","Just Check syntax ( use shellcheck if installed  else use bash -n )","",false,0}},
 		};
 	prefs.LFSTK_loadVarsFromFile(configfile);
 
@@ -60,32 +66,28 @@ int main(int argc,char **argv)
 			qDebug()<<"No input file supplied ...";
 			exit(1);
 		}
-	mainParseClass=new parseFileClass(prefs.cliArgs.at(0).c_str());
+
+	if(prefs.LFSTK_getBool("syntax-check")==true)
+		{
+			QString checkstr=QString("shellcheck \"%1\" 2>/dev/null||bash -n \"%1\"").arg(prefs.cliArgs.at(0).c_str());
+			int exitstatus=WEXITSTATUS(system(checkstr.toStdString().c_str()));
+			qDebug()<<"Error "<<exitstatus;
+			exit(exitstatus);
+		}
+
 	mainCommandsClass=new commandsClass();
 	mainCompilerClass=new compilerClass(argc,argv);
-
-
-
-	mainParseClass->verboseCompile=prefs.LFSTK_getBool("verbose-compile");
-	mainParseClass->verboseCCode=prefs.LFSTK_getBool("verbose-ccode");
 
 	if(mainCompilerClass->openBashFile(prefs.cliArgs.at(0).c_str())==true)
 		{
 			mainCompilerClass->verboseCompile=prefs.LFSTK_getBool("verbose-compile");
 			mainCompilerClass->verboseCCode=prefs.LFSTK_getBool("verbose-ccode");
 			mainCompilerClass->parseFile();
-
-	//mainParseClass->parseFile();
-
-			//mainCompilerClass->cCode=cCode;
-			//mainCompilerClass->fCode=fCode;
-			mainCompilerClass->functionNames=functionNames;
 			mainCompilerClass->writeCFile();
 		}
 	else
 		errop<<"Can't open input file, aborting ...!"<<Qt::endl;
 	
-	delete mainParseClass;
 	delete mainCommandsClass;
 	delete mainCompilerClass;
 

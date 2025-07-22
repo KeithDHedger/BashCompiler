@@ -28,177 +28,95 @@ commandsClass::commandsClass()
 {
 }
 
-#if 0
-QString commandsClass::makeExternalCommand(QString line)
+QString commandsClass::makeFunction(QString qline)
 {
-	QString tstr;
-	if(line.isEmpty()==true)
-		return("");
-	tstr=line;
-	parseFileClass			pfl;
-QString xx;
-	pfl.noCodeOP=true;
-	pfl.preserveWhitespace=true;
-	pfl.quotevars=true;
-tstr=pfl.parseOutputString(line);
-	errop<<">>"<<tstr<<"\n"<<line<<"<<"<<Qt::endl;
+	QString					tstr;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	QString					leftstr;
+	QString					midstr;
+	QString					ritestr;
+	QString					retstr="";
 
-	xx="exitstatus=QString::number(WEXITSTATUS(system("+tstr+".toStdString().c_str())) & 0xff);";
-	errop<<xx<<Qt::endl;
-	return(xx);
-
-	tstr=line;
-
-//QString xx="dirname $(dirname $(dirname '"+variables["APATH"]+"'))";
-//	//exitstatus=QString::number(WEXITSTATUS(system("dirname $(dirname $(dirname '"variables[$ {APATH}].toStdString().c_str()"'))")) & 0xff);
-//	exitstatus=QString::number(WEXITSTATUS(system(xx.toStdString().c_str())) & 0xff);
-
-//	exitstatus=QString::number(WEXITSTATUS(system(QString("basename \"/tmp/a \\\"test\\\" file\" .txt").toStdString().c_str())) & 0xff);
-
-
-	tstr.replace(QRegularExpression("\\$\\{(.*)\\}"),"'\"+variables[\"\\1\"]+\"'");
-	//tstr=
-	errop<<tstr<<Qt::endl;
-	errop<<tstr.toStdString().c_str()<<Qt::endl;
-//QString xx;
-	xx="exitstatus=QString::number(WEXITSTATUS(system(QString(\""+tstr+"\").toStdString().c_str())) & 0xff);";
-	//exit(100);
-//tstr=QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system("+xx+".toStdString().c_str()\")) & 0xff);\n");
-//	errop<<tstr<<Qt::endl;
-	errop<<xx<<Qt::endl;
-	return(xx);
+//call no return val
+	re.setPattern("^[[:space:]]*([[:alnum:]_]+)[[:space:]]*(.*)$");
+	match=re.match(qline);
+	if(match.hasMatch())
+		{
+			for(int j=0;j<functionNames.count();j++)
+				{
+					if(match.captured(1).trimmed().compare(functionNames.at(j).trimmed())==0)
+						{
+							parseFileClass	pfl;
+							parseFileClass	pfl1;
+							QString varstr="{";
+							tstr=match.captured(2).trimmed();
+							pfl.parseLine(tstr);
+							int argcnt=1;
+							for(int kk=0;kk<pfl.lineParts.count();kk++)
+								{
+									pfl1.parseLine(pfl.lineParts.at(kk).data);
+									tstr=pfl1.parseExprString(false);
+									tstr.replace("\"\"\"+","");
+									tstr.replace("+\"\"\"","");
+									varstr+=QString("{\"%1\",").arg(argcnt++)+tstr+"},";
+								}
+							varstr+="}";
+							retstr=match.captured(1).trimmed()+"(false,"+varstr+")";
+							return(retstr);
+						}
+				}
+		}
+//define
+	retstr=this->makeFunctionDefine(qline);
+	return(retstr);
 }
-#else
-QString commandsClass::makeExternalCommand(QString line)
+
+QString commandsClass::makeExternalCommand(QString qline)
 {
-	QString tstr;
-	if(line.isEmpty()==true)
+	QString	formatstr="";
+	QString	datastr="";
+	QString	final;
+	QString	tstr;
+	QString retstr=qline;
+
+	if(qline.isEmpty()==true)
 		return("");
-	//tstr=mainParseClass->lineToBashCLIString(line);
-	//errop<<">>"<<tstr<<"<<"<<Qt::endl;
 
-	parseFileClass			pfl;
+	tstr=qline;
+	tstr=tstr.replace("\"","\\\"");
+	tstr=tstr.replace(QRegularExpression("\\${*([[:alpha:]][[:alnum:]_]*)}*"),"\"+variables[\"\\1\"]+\"");
 
-	pfl.noCodeOP=true;
-	pfl.preserveWhitespace=true;
-	pfl.quotevars=true;
-tstr=pfl.parseOutputString(line);
-	errop<<">>"<<tstr<<"<<"<<line<<"<<"<<Qt::endl;
+	if(isInFunction==true)
+		tstr=tstr.replace(QRegularExpression("\\${*([[0-9]]*)}*"),"\"+QString(fv[\"\\1\"])+\"");
+	else
+		tstr=tstr.replace(QRegularExpression("\\${*([[0-9]]*)}*"),"\"+QString(gargv[\\1])+\"");
 
-//exit(100);
-//tstr.replace(QRegularExpression(".arg\\((QString\\(variables\\[\".*\"\\]\\).*)"),"\"'\"+.arg(\\1+\"'\"");
-
-errop<<">>>>>>>>>>"<<tstr<<"<<<<<<<<<<<<"<<Qt::endl;
-
-//exitstatus=QString::number(WEXITSTATUS(system(QString(QString("./photopagemaker -i %1").arg(QString("%1").arg(QString(variables["input_folder"]).replace(QRegularExpression(QString("%1").arg("^(.*)/.*")),"\\1")))).toStdString().c_str())));
-
-//exitstatus=QString::number(WEXITSTATUS(system(QString(QString("./photopagemaker -i %1").arg(QString("%1").arg(QString(variables["input_folder"]).replace(QRegularExpression(QString("%1").arg("^(.*)/.*")),"\\1")))).toStdString().c_str())));
-
-QString xx=tstr;
-tstr=QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system("+xx+".toStdString().c_str())) & 0xff);\n");
-
-//exitstatus=QString::number(WEXITSTATUS(system(QString(\"%1\").toStdString().c_str())) & 0xff);\n").arg(xx))
-	if(tstr.isEmpty()==false)
-//		return(QString("fflush(NULL);\nexitstatus=QString::number(WEXITSTATUS(system(QString(\"%1\").toStdString().c_str())) & 0xff);\n").arg(tstr));
-		return(tstr);
-	return("");
+	retstr="exitstatus=QString::number(WEXITSTATUS(system(QString(\""+tstr+"\").toStdString().c_str())));\nfflush(NULL)";
+	return(retstr);
 }
-#endif
-bool commandsClass::makeFunction(QString qline)
+
+QString commandsClass::makeFunctionDefine(QString qline)
 {
 	QString					line=qline;
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
+	QString					retstr="";
 
 	re.setPattern("^[[:space:]]*([[:alnum:]_]+)[[:space:]]*\\([[:space:]]*\\)[[:space:]]*$");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
 			isInFunction=true;
-			fCode<<"QString "<<match.captured(1).trimmed()<<"(bool capture,QHash<QString, QString> fv)\n{\nQString retstr;\n";
+			retstr="QString "+match.captured(1).trimmed()+"(bool capture,QHash<QString, QString> fv)\n{\nQString retstr;";
 			functionNames<<match.captured(1).trimmed();
 		}
-	else
-		return(false);
-	return(true);
-
+	return(retstr);
 }
 
-bool commandsClass::makeIf(QString qline)
+QString commandsClass::makeIf(QString qline)
 {
 	QString					tstr;
-	QString					line;
-	QRegularExpression		re;
-	QRegularExpressionMatch	match;
-	QString					leftstr;
-	QString					midstr;
-	QString					ritestr;
-	int						cnt=0;
-	bool						donumexpr=true;
-	bool						singlelinethen=false;
-	parseFileClass			pfl;
-	parseFileClass			pfr;
-
-	pfl.noCodeOP=true;
-	pfr.noCodeOP=true;
-	line=qline;
-	while(bashmath[cnt]+=NULL)
-		tstr+=bashmath[cnt++]+QString("|");
-	tstr=tstr.left(tstr.length()-1);
-
-	re.setPattern("^[[:space:]]*(if)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^]]+)[^;]\\]*;*(.*)");
-
-	match=re.match(line);
-	if((match.hasMatch()) && (match.captured(1).trimmed().compare("if")==0))
-		{
-			mainParseClass->bashCommand=BASHIF;
-			if(match.captured(5).trimmed().compare("then")==0)
-				singlelinethen=true;
-
-			midstr=match.captured(3).trimmed();
-			if(midstr.at(0)=='-')
-				donumexpr=true;
-			else
-				donumexpr=false;
-	
-			tstr=match.captured(2).trimmed();
-			pfl.parseLine(tstr);
-			//leftstr=pfl.parseExprString(donumexpr);
-			leftstr=pfl.parseExprStringNew(donumexpr);
-			tstr=match.captured(4).trimmed();
-			pfr.parseLine(tstr);
-			//ritestr=pfr.parseExprString(donumexpr);
-			ritestr=pfr.parseExprStringNew(donumexpr);
-
-			cnt=0;
-			while(bashmath[cnt]+=NULL)
-				{
-					if(midstr.compare(bashmath[cnt])==0)
-						midstr=cmath[cnt];
-					cnt++;		
-				}
-			if(isInFunction==true)
-				fCode<<"if("+leftstr+midstr+ritestr+")\n";
-			else
-				cCode<<"if("+leftstr+midstr+ritestr+")\n";
-			if(singlelinethen==true)
-				{
-					if(isInFunction==true)
-						fCode<<"{\n";
-					else
-						cCode<<"{\n";
-				}
-			return(true);
-		}
-	else
-		return(false);
-	return(true);
-}
-
-QString commandsClass::makeIfNew(QString qline)
-{
-	QString					tstr;
-	//QString					line;
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
 	QString					leftstr;
@@ -206,13 +124,10 @@ QString commandsClass::makeIfNew(QString qline)
 	QString					ritestr;
 	QString					retstr="";
 	int						cnt=0;
-	bool						donumexpr=true;
+	QString					doint="";
 	parseFileClass			pfl;
 	parseFileClass			pfr;
 
-	pfl.noCodeOP=true;
-	pfr.noCodeOP=true;
-	//line=qline;
 	while(bashmath[cnt]+=NULL)
 		tstr+=bashmath[cnt++]+QString("|");
 	tstr=tstr.left(tstr.length()-1);
@@ -221,23 +136,24 @@ QString commandsClass::makeIfNew(QString qline)
 	match=re.match(qline);
 	if(match.hasMatch())
 		{
-			midstr=match.captured(2).trimmed();
+			midstr=match.captured(2);
 			if(midstr.at(0)=='-')
-				donumexpr=true;
-			else
-				donumexpr=false;
-	
+				doint=".toInt()";
+
 			tstr=match.captured(1).trimmed();
 			pfl.parseLine(tstr);
-			leftstr=pfl.parseExprStringNew(donumexpr);
+			leftstr=pfl.parseOutputString(tstr)+doint;
 			tstr=match.captured(3).trimmed();
 			pfr.parseLine(tstr);
-			ritestr=pfr.parseExprStringNew(donumexpr);
+			ritestr=pfr.parseOutputString(tstr)+doint;
 			cnt=0;
 			while(bashmath[cnt]+=NULL)
 				{
 					if(midstr.compare(bashmath[cnt])==0)
-						midstr=cmath[cnt];
+						{
+							midstr=cmath[cnt];
+							break;
+						}
 					cnt++;		
 				}
 			retstr="if("+leftstr+midstr+ritestr+")\n";
@@ -246,60 +162,7 @@ QString commandsClass::makeIfNew(QString qline)
 	return(retstr);
 }
 
-bool commandsClass::makeThen(QString line)
-{
-	QRegularExpression		re;
-	QRegularExpressionMatch	match;
-
-	re.setPattern("^[[:space:]]*(then)[[:space:]]*$");
-	match=re.match(line);
-	if(match.hasMatch())
-		{
-			if(isInFunction==true)
-				fCode<<"{\n";
-			else
-				cCode<<"{\n";
-			return(true);
-		}
-	return(false);
-}
-
-bool commandsClass::makeElse(QString line)
-{
-	QRegularExpression		re;
-	QRegularExpressionMatch	match;
-
-	re.setPattern("^[[:space:]]*(else)[[:space:]]*$");
-	match=re.match(line);
-	if(match.hasMatch())
-		{
-			if(isInFunction==true)
-				fCode<<"}\nelse\n{\n";
-			else
-				cCode<<"}\nelse\n{\n";
-			return(true);
-		}
-	return(false);
-}
-bool commandsClass::makeFi(QString line)
-{
-	QRegularExpression		re;
-	QRegularExpressionMatch	match;
-
-	re.setPattern("^[[:space:]]*(fi)[[:space:]]*$");
-	match=re.match(line);
-	if(match.hasMatch())
-		{
-			if(isInFunction==true)
-				fCode<<"}\n";
-			else
-				cCode<<"}\n";
-			return(true);
-		}
-	return(false);
-}
-
-bool commandsClass::makeWhileRead(QString qline)
+QString commandsClass::makeWhileRead(QString qline)
 {
 	QString					line=qline;
 	QRegularExpression		re;
@@ -307,6 +170,10 @@ bool commandsClass::makeWhileRead(QString qline)
 	QString					commstr;
 	QString					midstr;
 	QString					ritestr;
+	QString					retstr="";
+
+	isInFor.push_back(false);
+	forVariable.push_back("");
 
 	re.setPattern("^[[:space:]]*(while[[:space:]]*read)[[:space:]]*(.*)$");
 	match=re.match(line);
@@ -314,35 +181,36 @@ bool commandsClass::makeWhileRead(QString qline)
 		{
 			if(isInFunction==true)
 				{
-					fCode<<"{\nFILE *fp;\n";
-					mainParseClass->whileReadLine.append(fCode.size());
-					fCode<<"fp=popen(proc.toStdString().c_str(),\"r\");\n";
-					fCode<<"QTextStream	inpop(fp);\n";
+					retstr+="FILE *fp;\n";//}
+					fCode+="{\n";//}
+					whileReadLine.append(fCode.size());
+					retstr+="fp=popen(proc.toStdString().c_str(),\"r\");\n";
+					retstr+="QTextStream	inpop(fp);\n";
 					if(match.captured(2).trimmed().isEmpty()==true)
-						fCode<<"while(inpop.readLineInto(&variables[\"REPLY\"]))\n";
+						retstr+="while(inpop.readLineInto(&variables[\"REPLY\"]))\n";
 					else
-						fCode<<"while(inpop.readLineInto(&variables[\""+match.captured(2).trimmed()+"\"]))\n";
+						retstr+="while(inpop.readLineInto(&variables[\""+match.captured(2).trimmed()+"\"]))\n";
 				}
 			else
 				{
-					cCode<<"{\nFILE *fp;\n";
-					mainParseClass->whileReadLine.append(cCode.size());
-					cCode<<"fp=popen(proc.toStdString().c_str(),\"r\");\n";
-					cCode<<"QTextStream	inpop(fp);\n";
+					retstr+="FILE *fp;\n";//}
+					cCode+="{\n";//}
+					whileReadLine.append(cCode.size());
+					retstr+="fp=popen(proc.toStdString().c_str(),\"r\");\n";
+					retstr+="QTextStream	inpop(fp);\n";
 					if(match.captured(2).trimmed().isEmpty()==true)
-						cCode<<"while(inpop.readLineInto(&variables[\"REPLY\"]))\n";
+						retstr+="while(inpop.readLineInto(&variables[\"REPLY\"]))\n";
 					else
-						cCode<<"while(inpop.readLineInto(&variables[\""+match.captured(2).trimmed()+"\"]))\n";
+						retstr+="while(inpop.readLineInto(&variables[\""+match.captured(2).trimmed()+"\"]))\n";
 				}
-			return(true);
+			return(retstr);
 		}
-	else
-		return(false);
-	return(true);
+	return(retstr);
 }
 
-bool commandsClass::makeWhile(QString qline)
+QString commandsClass::makeWhile(QString qline)
 {
+	QString					retstr="";
 	QString					tstr;
 	QString					line;
 	QRegularExpression		re;
@@ -352,13 +220,13 @@ bool commandsClass::makeWhile(QString qline)
 	QString					ritestr;
 	int						cnt=0;
 	bool						donumexpr=true;
-	bool						singlelinethen=false;
 	parseFileClass			pfl;
 	parseFileClass			pfr;
 
-	pfl.noCodeOP=true;
-	pfr.noCodeOP=true;
+	isInFor.push_back(false);
+	forVariable.push_back("");
 	line=qline;
+
 	while(bashmath[cnt]+=NULL)
 		tstr+=bashmath[cnt++]+QString("|");
 	tstr=tstr.left(tstr.length()-1);
@@ -367,11 +235,7 @@ bool commandsClass::makeWhile(QString qline)
 	match=re.match(line);
 	if((match.hasMatch()) && (match.captured(1).trimmed().compare("while")==0))
 		{
-			mainParseClass->bashCommand=BASHWHILE;
-			if(match.captured(5).trimmed().compare("do")==0)
-				singlelinethen=true;
-
-			midstr=match.captured(3).trimmed();
+			midstr=match.captured(3);
 			if(midstr.at(0)=='-')
 				donumexpr=true;
 			else
@@ -379,12 +243,10 @@ bool commandsClass::makeWhile(QString qline)
 	
 			tstr=match.captured(2).trimmed();
 			pfl.parseLine(tstr);
-			//leftstr=pfl.parseExprString(donumexpr);
-			leftstr=pfl.parseExprStringNew(donumexpr);
+			leftstr=pfl.parseExprString(donumexpr);
 			tstr=match.captured(4).trimmed();
 			pfr.parseLine(tstr);
-			//ritestr=pfr.parseExprString(donumexpr);
-			ritestr=pfr.parseExprStringNew(donumexpr);
+			ritestr=pfr.parseExprString(donumexpr);
 
 			cnt=0;
 			while(bashmath[cnt]+=NULL)
@@ -393,58 +255,124 @@ bool commandsClass::makeWhile(QString qline)
 						midstr=cmath[cnt];
 					cnt++;		
 				}
-			if(isInFunction==true)
-				fCode<<"while("+leftstr+midstr+ritestr+")\n";
-			else
-				cCode<<"while("+leftstr+midstr+ritestr+")\n";
-			if(singlelinethen==true)
-				{
-					if(isInFunction==true)
-						fCode<<"{\n";//}
-					else
-						cCode<<"{\n";//}
-				}
-			return(true);
+			retstr="while("+leftstr+midstr+ritestr+")\n";
 		}
-	else
-		return(false);
-	return(true);
+
+	return(retstr);
 }
 
-bool commandsClass::makePopd(QString qline)
+QString commandsClass::makeDone(QString qline)
+{
+	QString					retstr="";
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	parseFileClass			pfl;
+
+	if((isInFor.isEmpty()==false) && (isInFor.back()==true))
+		{
+			retstr="}\n";
+		}
+	else
+		{
+			//re.setPattern("^[[:space:]]*(done)[[:space:]]*<[[:space:]]*.*<\\((.*)\\)");
+			re.setPattern("^[[:space:]]*(done)[[:space:]]*<[[:space:]]*(<\\((.*)\\)|(.*))");
+			match=re.match(qline);
+			if(match.hasMatch())
+				{
+					int matchnum=3;
+					QString doacat="";
+					if(match.captured(matchnum).trimmed().isEmpty()==true)
+						{
+							matchnum=4;
+							doacat="cat ";
+						}
+					if(whileReadLine.size()>0)
+						{
+							QString tstr=pfl.lineToBashCLIString(match.captured(matchnum).trimmed());//{{
+							retstr="}\npclose(fp);\n}\n";
+							if(isInFunction==true)
+								fCode.insert(whileReadLine.last(),"QString proc=\""+doacat+tstr+"\";\n");
+							else
+								cCode.insert(whileReadLine.last(),"QString proc=\""+doacat+tstr+"\";\n");
+							whileReadLine.pop_back();
+						}
+					else
+						{//{
+							retstr="}\n";
+						}
+				}
+		}
+	if(isInFor.isEmpty()==false)
+		{
+			isInFor.pop_back();
+			forVariable.pop_back();
+		}
+	return(retstr);
+}
+
+QString commandsClass::makePopd(QString qline)
 {
 	QString					tstr;
 	QString					line=qline;
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
-	parseFileClass			pfl;
+
 	re.setPattern("^[[:space:]]*?(popd)[[:space:]]*.*");
 	match=re.match(line);
 	if(match.hasMatch())
-		{
-			if(isInFunction==true)
-				{
-					fCode<<"if(dirstack.isEmpty()==false) QDir::setCurrent(dirstack.takeLast());\n";
-				}
-			else
-				{
-					cCode<<"if(dirstack.isEmpty()==false) QDir::setCurrent(dirstack.takeLast());\n";
-				}			
-		}
-	else
-		return(false);
-	return(true);}
+		tstr="if(dirstack.isEmpty()==false) QDir::setCurrent(dirstack.takeLast())";
+	return(tstr);
+}
 
-bool commandsClass::makePushd(QString qline)
+QString commandsClass::makeExport(QString qline)
 {
-	QString					tstr;
+	QString					tstr="";
 	QString					line=qline;
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
 	parseFileClass			pfl;
 
-	pfl.noCodeOP=true;
-pfl.quotevars=true;
+	re.setPattern("^[[:space:]]*?(export)[[:space:]]+(.*)");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			tstr=QString("setenv(\"%1\",%2.toStdString().c_str(),1)").arg(match.captured(2).trimmed()).arg("variables[\""+match.captured(2).trimmed()+"\"]");
+		}
+	return(tstr);
+}
+
+QString commandsClass::makeExit(QString qline)
+{
+	QString					tstr="";
+	QString					line=qline;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	parseFileClass			pfl;
+
+	re.setPattern("^[[:space:]]*?(exit)[[:space:]]*(.*)?[[:space:]]*");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			if(match.captured(2).trimmed().isEmpty()==false)
+				{
+					tstr=match.captured(2).trimmed();
+					pfl.parseLine(tstr);
+					tstr=pfl.parseExprString(true);
+					tstr="exit("+tstr+")";
+				}
+			else
+				tstr="exit(0)";
+		}
+	return(tstr);
+}
+
+QString commandsClass::makePushd(QString qline)
+{
+	QString					tstr="";
+	QString					line=qline;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	parseFileClass			pfl;
 
 	re.setPattern("^[[:space:]]*?(pushd)[[:space:]]+(.*)");
 	match=re.match(line);
@@ -453,26 +381,13 @@ pfl.quotevars=true;
 			tstr=match.captured(2).trimmed();
 			tstr.remove(QRegularExpression("[[:space:]&123][[:space:]]*>[[:space:]]*.*$"));
 			pfl.parseLine(tstr);
-			//tstr=pfl.parseExprString(false);
-			tstr=pfl.parseExprStringNew(false);
-			if(isInFunction==true)
-				{
-					fCode<<"dirstack<<QDir::currentPath();\n";
-					fCode<<"QDir::setCurrent("+tstr+");\n";
-				}
-			else
-				{
-					cCode<<"dirstack<<QDir::currentPath();\n";
-					cCode<<"QDir::setCurrent("+tstr+");\n";
-				}
+			tstr=pfl.parseExprString(false);
+			tstr="dirstack<<QDir::currentPath();\nQDir::setCurrent("+tstr+")";
 		}
-	else
-		return(false);
-
-	return(true);
+	return(tstr);
 }
 
-bool commandsClass::makePrintf(QString qline)
+QString commandsClass::makePrintf(QString qline)
 {
 	QString					tstr;
 	QString					tstr2;
@@ -482,93 +397,45 @@ bool commandsClass::makePrintf(QString qline)
 	QRegularExpressionMatch	match;
 	parseFileClass			pfl;
 
-	pfl.noCodeOP=true;
 	pfl.preserveWhitespace=true;
-	pfl.quotevars=true;
-	re.setPattern("[[:space:]]*printf[[:space:]]*(-v)?[[:space:]]*(\\$*\\{*.*?)[[:space:]]+(\\$*\\{*.*\\}*)?");
+	re.setPattern("[[:space:]]*printf[[:space:]]*(-v)?[[:space:]]*(\"?[^\\s]*\"?)?[[:space:]]*(.*)");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
 			if(match.captured(1).trimmed().compare("-v")==0)
 				{
-					tstr2=pfl.parseOutputString(match.captured(2).trimmed());
-					tstr3=pfl.parseOutputString(match.captured(3).trimmed());
-					tstr="variables["+tstr2+"]="+tstr3+";\n";
-					
-					if(isInFunction==true)
-						fCode<<tstr;
-					else
-						cCode<<tstr;
-					return(true);
-				}
-			else
-				{
-					errop<<"----"<<tstr<<Qt::endl;
-					tstr=pfl.parseOutputString(match.captured(3).trimmed());
-					errop<<"0000"<<tstr<<Qt::endl;
-					tstr="outop<<"+tstr+";\n";
-					if(isInFunction==true)
-						fCode<<tstr;
-					else
-						cCode<<tstr;
-					return(true);
-				}
-		}
-	else
-		return(false);
-
-	return(true);
-}
-
-
-QString commandsClass::makePrintfNew(QString qline)
-{
-	QString					tstr;
-	QString					tstr2;
-	QString					tstr3;
-	QString					line=qline;
-	QRegularExpression		re;
-	QRegularExpressionMatch	match;
-	parseFileClass			pfl;
-
-	pfl.noCodeOP=true;
-	pfl.preserveWhitespace=true;
-	pfl.quotevars=true;
-	re.setPattern("[[:space:]]*printf[[:space:]]*(-v)?[[:space:]]*(\"[^\\\"]*\")?[[:space:]]*(.*)");
-	match=re.match(line);
-	if(match.hasMatch())
-		{
-			if(match.captured(1).trimmed().compare("-v")==0)
-				{
-					re.setPattern("[[:space:]]*([[:alnum:]_]+)[[:space:]]+(.*)");
-					match=re.match(match.captured(3).trimmed());
+					QString newvar=match.captured(2).trimmed();
+					newvar=pfl.parseOutputString(match.captured(2).trimmed());
+					tstr=match.captured(3).trimmed();
+					re.setPattern("[[:space:]]*\"?(%[[:alnum:]_]+)\"?[[:space:]]+(.*)");
+					match=re.match(tstr);
 					if(match.hasMatch())
 						{
-							tstr2=pfl.parseOutputStringNew(match.captured(1).trimmed());
-							tstr3=pfl.parseOutputStringNew(match.captured(2).trimmed());
-							tstr="variables["+tstr2+"]="+tstr3;
+							tstr2=pfl.parseOutputString(match.captured(2).trimmed());
+							tstr="variables["+newvar+"]="+tstr2;
 						}
 					return(tstr);
 				}
 			else
 				{
-					tstr=pfl.parseOutputStringNew(match.captured(3).trimmed());
+					tstr=pfl.parseOutputString(match.captured(3).trimmed());
 					if(match.captured(2).trimmed().endsWith("\\n\"")==true)//TODO//horrible hack!
 						tstr+="<<Qt::endl";
 					tstr="outop<<"+tstr;
 					return(tstr);
 				}
 		}
-
 	return("");
 }
 
 QString commandsClass::makeAssign(QString qline)
 {
-	QString pal;
+	QString			pal;
 	parseFileClass	pfl;
+
 	pfl.parseLine(qline);
-	pal=pfl.parseExprStringNew(false);
+	pal=pfl.parseExprString(false);
+	pal=pal.replace(QRegularExpression("\\\\([[:alpha:]])"),"\\1");
 	return(pal);
 }
 
@@ -580,20 +447,206 @@ QString commandsClass::makeEcho(QString qline)
 	QRegularExpressionMatch	match;
 	parseFileClass			pfl;
 
-	pfl.noCodeOP=true;
 	pfl.preserveWhitespace=true;
-	pfl.quotevars=true;
-	re.setPattern("[[:space:]]*echo[[:space:]]*(-n)?[[:space:]]*(.*)");
+
+	re.setPattern("[[:space:]]*echo[[:space:]]*(-.\\s*)?(-.?\\s*)?[[:space:]]*(.*)[[:space:]](>>?|\\|)(.*)");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
-			tstr=pfl.parseOutputStringNew(match.captured(2).trimmed());
-			if(match.captured(1).trimmed()=="-n")
-				tstr="outop<<"+tstr;
+			tstr=pfl.parseOutputString(match.captured(3).trimmed());
+			QString rep=tstr;
+			QString outit=pfl.parseOutputString(match.captured(5).trimmed());
+			QString whatit=match.captured(4).trimmed();
+			QString endit="";
+			if(whatit=="|")
+				return("");
+			if((match.captured(1).trimmed()!="-n") && (match.captured(2).trimmed()!="-n"))
+				endit="\\n";
+			if(whatit==">")
+				whatit="w";
 			else
-				tstr="outop<<"+tstr+"<<Qt::endl";
+				whatit="a";
+
+			re.setPattern("QString\\(\"(.*)\"\\)(.*)");
+			match=re.match(rep);
+			if(match.hasMatch())
+				{
+					rep=match.captured(1);
+					//rep.replace("\"","\\\"");//TODO//
+					QString final="{\nFILE *fp = fopen("+outit+".toStdString().c_str(),\""+whatit+"\");\nfprintf(fp, \"%s"+endit.toStdString().c_str()+"\",QString(\""+rep+"\")"+match.captured(2)+".toStdString().c_str());";
+					final+="\nfclose(fp);\n}";
+					return(final);
+				}
+		}
+	else
+		{
+			re.setPattern("[[:space:]]*echo[[:space:]]*(-.\\s*)?(-.?\\s*)?[[:space:]]*(.*)");
+			match=re.match(line);
+			if(match.hasMatch())
+				{
+					tstr=pfl.parseOutputString(match.captured(3).trimmed());
+					if(isInFunction==true)
+						{
+							QString pal=pfl.parseExprString(false);
+
+							tstr="if(capture==false)\n";
+							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))
+								tstr+=QString("outop<<%1<<Qt::flush;\n").arg(pal);
+							else
+								tstr+=QString("outop<<%1<<Qt::endl;\n").arg(pal);
+							tstr+="else\n";
+							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))
+								tstr+="retstr+="+pal;
+							else
+								tstr+="retstr+="+pal+"+\"\\n\"";
+						}
+					else
+						{
+							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))
+								tstr="outop<<"+tstr+"<<Qt::flush";
+							else
+								tstr="outop<<"+tstr+"<<Qt::endl";
+						}
+					return(tstr);
+				}
+		}
+	return("");
+}
+
+QString commandsClass::makeFor(QString qline)
+{
+	QString					tstr="";
+	QString					line=qline;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+
+	re.setPattern("^[[:space:]]*for[[:space:]]*\\(\\((.*)[[:space:]]*;[[:space:]]*(.*)[[:space:]]*;[[:space:]]*(.*)\\)\\)");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			isInFor.push_back(true);
+			tstr="for(int "+match.captured(1).trimmed()+";"+match.captured(2).trimmed()+";"+match.captured(3).trimmed()+")\n";
+			re.setPattern("([[:alpha:]][[:alnum:]_]*)[[:space:]]*=[[:space:]]*");
+			match=re.match(match.captured(1).trimmed());
+			forVariable.push_back(match.captured(1));
+		}
+	return(tstr);	
+}
+
+QString commandsClass::makeHereDoc(QString qline)
+{
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	QString					procstr;
+	QString					op;
+	QString					data="";
+	QString					outto;
+	QString					hl;
+	bool						loop=true;
+	parseFileClass			pfl;
+
+	re.setPattern("^[[:space:]]*(.*)[[:space:]]+<<([[:space:]]*[[:alpha:][:alnum:]]*[[:space:]]*)$");
+	match=re.match(qline);
+	if(match.hasMatch())
+		{
+			outto=pfl.lineToBashCLIString(match.captured(1).trimmed());
+			while(loop==true)
+				{
+					hl=mainCompilerClass->mainBashFile.readLine();
+					mainCompilerClass->currentLine++;
+					if(hl.trimmed()==match.captured(2).trimmed())
+						{
+							loop=false;
+							continue;
+						}
+					data+=hl;
+				}
+
+			data.replace("\"","\\\"");
+			data.replace("\\\\","\\");
+			data.replace(";","\\\\;");
+			data.replace("\n","\\n");
+			data.replace("\t","\\t");
+			data.replace(QRegularExpression("([^\\\\])\\$\\{?([[:alpha:][:alnum:]_]*)}?"),"\\1\"+variables[\"\\2\"]+\"");
+			data.replace("\\$","\\\\$");
+
+			procstr="echo -e \\\""+data+"\\\"";
+			op="system(QString(\"%1|%2\").arg(\""+procstr+"\").arg(\""+outto+"\").toStdString().c_str())";
+			return(op);
+		}
+	return("");
+}
+
+QString commandsClass::makeCD(QString qline)
+{
+	QString					tstr="";
+	QString					line=qline;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	parseFileClass			pfl;
+
+	re.setPattern("^[[:space:]]*?(cd)[[:space:]]+(.*)");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			tstr=match.captured(2).trimmed();
+			tstr.remove(QRegularExpression("[[:space:]&123][[:space:]]*>[[:space:]]*.*$"));
+			pfl.parseLine(tstr);
+			tstr=pfl.parseExprString(false);
+			tstr.replace("\"\"\"+","");
+			tstr.replace("+\"\"\"","");
+			tstr="QDir::setCurrent("+tstr+")";
+		}
+	return(tstr);
+}
+QString commandsClass::makeCase(QString qline)
+{
+	QString					tstr;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	parseFileClass			pfl;
+
+	re.setPattern("^[[:space:]]*?(case)[[:space:]]+(.*)[[:space:]]+in[[:space:]]*$");
+	match=re.match(qline);
+	if(match.hasMatch())
+		{
+			tstr=pfl.parseOutputString(match.captured(2).trimmed());
+			caseVariable.push_back(tstr);
+			firstCasecompare=true;
+		}
+	return("");
+}
+
+QString commandsClass::makeCaseCompareStatement(QString qline)
+{
+	QString					tstr;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	parseFileClass			pfl;
+
+	re.setPattern("[[:space:]]*(.*)[[:space:]]*\\)[[:space:]]*");
+	match=re.match(qline);
+	if(match.hasMatch())
+		{
+			tstr=match.captured(1).trimmed();
+			tstr.remove(QRegularExpression("^\"|\"$"));
+			tstr=pfl.globToRX(tstr,true);
+			tstr=pfl.parseOutputString("^"+tstr+"\\$");
+			if(firstCasecompare==true)
+				tstr="if("+caseVariable.back()+".contains(QRegularExpression("+tstr+")))\n{\n";
+			else
+				tstr="else if("+caseVariable.back()+".contains(QRegularExpression("+tstr+")))\n{\n";
+			firstCasecompare=false;
 			return(tstr);
 		}
-
+	else
+		{
+			re.setPattern("[[:space:]]*;;[[:space:]]*");
+			match=re.match(qline);
+			if(match.hasMatch())
+				{
+					return("}\n");
+				}
+		}
 	return("");
 }

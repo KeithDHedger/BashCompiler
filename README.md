@@ -16,11 +16,24 @@ sudo make install ( optional ).
 The bashcompiler executable can be installed or run directly from the BashCompiler/app folder, or just copy it somewhere convienient.  
 ######
 ### Caveates:  
-BASH is weakly typed so you MUST use "=, ==, <, or >" for string comparisons.  
+BASH is weakly typed so you **MUST** use "=, ==, <, or >" for string comparisons.  
 You MUST use "-gt, -ge ... etc for numeric comparisons.  
-All numerical expression MUST be enclosed by $(())  
+All numerical expression **MUST** be enclosed by $(())  
 ######
 'eval' is NOT supported and almost certainly will never be, not because of any supposed "eval=evil" but simply it would need the compiler available at runtime and probably a JIT compiler.  
+When using redirect to a file or pipe with echo  you **MUST** precede the '>' or '|' with a space.  
+When using -e/-n with echo you **MUST** use individual switches eg -n -e AND NOT -ne.  
+When using loops ( eg for ((x=0;x<n;x=x++)) ) the control loop is **READ ONLY**, you shouldn't really programatically alter the control loop anyway, if you do need to you should use a 'while' loop.  
+  
+When using ${foo^^} be aware that BASH mistakenly uppercases any embedded '\n' to '\N'.  
+
+Positional paramaters should be assigned to a variable BEFORE string slicing eg: 
+```` 
+file=${1}
+echo ${file^^}
+AND NOT
+echo ${1^^}
+````
 ######
 All examples in BashCompiler/resources/scripts will compile and run.
 ######
@@ -37,9 +50,10 @@ popd
 ######
 ### Done ( mostly! )
 
+simple 'here' doc.
 Variable assignment.  
 When using ${string#substring} ( #/##/%/%% ) globs must be literal strings ( for now ), ie	echo ${avar#*.abc} NOT echo ${avar#${PATTERN}}  
-
+for ((x=0;x<n;x=x+n))  
 echo, assumes quotes see example 3.  
 external commands, see example 2.  
 Process substitution, see example 5.  
@@ -47,8 +61,8 @@ if/then/else/fi, see 'To do', see example 6.
 while/do/done, see 'To do', see example 7.  
 $? see example 7.  
 While read;do ... done see example whileifread.
-pushd/popd, No switches allowed ie no manipulating the stack ( yet! ).
-printf, optional '-v VARNAME' FORMATSTR STR1 ... STRN, format string is ignored.
+pushd/popd, No switches allowed ie no manipulating the stack ( yet! ) also does not op dir changes ( same as eg pushd /usr >/dev/null ).
+printf, optional '-v VARNAME' FORMATSTR STR1 ... STRN, format string is ignored ( except if it ends with '\n' ) but MUST be present ( for now! ).
 ######
 
 ### Ongoing in no particular order. 

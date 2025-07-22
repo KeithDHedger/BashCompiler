@@ -11,11 +11,16 @@ ls -1 /tmpx
 
 echo "bad retcode=$?"
 
-HASTACK="100abc:::"
+HASTACK="100abc:::100abc:::"
 PART="ABBA"
 FIND="abc"
 echo $HASTACK
-#NEEDLE=${HASTACK//"abc"/"--"}
-NEEDLE="${HASTACK//$FIND/"--"}"
+NEEDLE=${HASTACK/"abc"/"XYZ"}
+echo $NEEDLE
+NEEDLE=${HASTACK//"abc"/XYZ}
+echo $NEEDLE
+NEEDLE=${HASTACK//"abc"/$PART}
+echo $NEEDLE
 
+NEEDLE="${HASTACK//$FIND/"--"}"
 echo $NEEDLE

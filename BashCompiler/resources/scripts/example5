@@ -2,8 +2,8 @@
 
 #echo always preserves whitespace ( for now! )
 
-PROCSUBVAR="$(ls /)-$(ls /home)"
-echo $PROCSUBVAR
+PROCSUBVAR="$(ls -1 /)-$(ls -1 /home)"
+echo "$PROCSUBVAR"
 PROCSUBVAR=$(ls ${HOME})
 echo "$PROCSUBVAR"
 
