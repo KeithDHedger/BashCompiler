@@ -8,7 +8,7 @@ No syntax checking ( that's BASH's job ).
 Main use is for simpler but time consuming scripts, eg recursing through a music collection.  
 ######
 ### Compile with:
-````console
+````
 ./autogen.sh --prefix=/usr
 make
 sudo make install ( optional ).
@@ -28,7 +28,7 @@ When using loops ( eg for ((x=0;x<n;x=x++)) ) the control loop is **READ ONLY**,
 When using ${foo^^} be aware that BASH mistakenly uppercases any embedded '\n' to '\N'.  
 
 Positional paramaters should be assigned to a variable BEFORE string slicing eg: 
-```` console
+```` 
 file=${1}
 echo ${file^^}
 AND NOT
@@ -38,7 +38,7 @@ echo ${1^^}
 All examples in BashCompiler/resources/scripts will compile and run.
 ######
 ### USAGE:
-````console
+````
 bashcompiler /PATH/TO/SCRIPT > /tmp/x.cpp
 Or nice output:
 bashcompiler /PATH/TO/SCRIPT| astyle -A7 --indent=tab > /tmp/x.cpp
