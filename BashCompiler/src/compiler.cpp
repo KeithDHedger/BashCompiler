@@ -100,7 +100,7 @@ return(\"\");\n\
 	cCode.prepend(globalvars);
 	cCode.prepend(specialvars);
 	cCode.prepend(headers);
-	cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs Qt6Core ) -fPIC  -Ofast /PATH/TO/THIS/FILE -o APPNAME\nOptional:\nastyle -A7 --indent=tab /PATH/TO/THIS/FILE\nstrip ./a.out\nCreated on %2\n*/\n").arg(this->argv[1]).arg(QDate::currentDate().toString()));
+	cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast /PATH/TO/THIS/FILE -o APPNAME\nOptional:\nastyle -A7 --indent=tab /PATH/TO/THIS/FILE\nstrip ./a.out\nCreated on %2\n*/\n").arg(this->argv[1]).arg(QDate::currentDate().toString()));
 	cCode<<"\nreturn(0);\n}\n";
 
 	if(fullCompileHere.isEmpty()==true)
@@ -119,7 +119,7 @@ return(\"\");\n\
 			QDir().mkpath(foldername);
 			if (!file.open(QIODevice::WriteOnly))
 				{
-					errop<<"Failed to open file"<<Qt::endl;
+					qDebug()<<"Failed to open file";
 					exit(100);
 				}
 
@@ -127,7 +127,7 @@ return(\"\");\n\
 			for(int j=0;j<cCode.size();j++)
 				out<<cCode.at(j);
 			file.close();
-			command=QString("g++ -Wall $(pkg-config --cflags --libs Qt6Core ) -fPIC  -Ofast '%1' -o '%2'").arg(foldername+"/"+filename+".cpp").arg(foldername+"/"+filename);
+			command=QString("g++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast '%1' -o '%2'").arg(foldername+"/"+filename+".cpp").arg(foldername+"/"+filename);
 			errop<<"Compiling using command:\n"<<command<<"\n..."<<Qt::endl;
 			system(command.toStdString().c_str());
 		}

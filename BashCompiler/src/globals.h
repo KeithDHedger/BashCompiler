@@ -83,5 +83,6 @@ extern QVector<bool>		isInFor;
 extern QVector<QString>	caseVariable;
 extern bool				firstCasecompare;
 extern QString			fullCompileHere;
+extern QString			useQT;
 
 #endif

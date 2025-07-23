@@ -1,4 +1,5 @@
 0.3.0
+Added -5/--use-qt5 to compile with qt5 instead of qt6 ( the default ).
 Added -c/--full-compile switch to compile script and compile final application.
 Added --syntax-check/-s switch to check syntax, will use shellcheck if installed.
 Done case/esac.
