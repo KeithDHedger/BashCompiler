@@ -46,7 +46,7 @@ int main(int argc,char **argv)
 			{"verbose-compile",optional_argument,NULL,'v'},
 			{"verbose-ccode",optional_argument,NULL,'V'},
 			{"full-compile",required_argument,NULL,'c'},
-			{"use-qt5",no_argument,NULL,'5'},
+			{"use-qt5",optional_argument,NULL,'5'},
 			{"syntax-check",optional_argument,NULL,'s'},
 			{0,0,0,0}
 		};
