@@ -100,11 +100,37 @@ return(\"\");\n\
 	cCode.prepend(globalvars);
 	cCode.prepend(specialvars);
 	cCode.prepend(headers);
-	cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC  -Ofast /PATH/TO/THIS/FILE -o APPNAME\nOptional:\nastyle -A7 --indent=tab /PATH/TO/THIS/FILE\nstrip ./a.out\nCreated on %2\n*/\n").arg(this->argv[1]).arg(QDate::currentDate().toString()));
+	cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs Qt6Core ) -fPIC  -Ofast /PATH/TO/THIS/FILE -o APPNAME\nOptional:\nastyle -A7 --indent=tab /PATH/TO/THIS/FILE\nstrip ./a.out\nCreated on %2\n*/\n").arg(this->argv[1]).arg(QDate::currentDate().toString()));
 	cCode<<"\nreturn(0);\n}\n";
 
-	for(int j=0;j<cCode.size();j++)
-		QTextStream(stdout)<<cCode.at(j);
+	if(fullCompileHere.isEmpty()==true)
+		{
+			for(int j=0;j<cCode.size();j++)
+				QTextStream(stdout)<<cCode.at(j);
+		}
+	else
+		{
+			QFileInfo	fi(fullCompileHere);
+			QString		filename=fi.fileName();
+			QString		foldername=fi.dir().absolutePath();
+			QFile		file(foldername+"/"+filename+".cpp");
+			QString		command;
+
+			QDir().mkpath(foldername);
+			if (!file.open(QIODevice::WriteOnly))
+				{
+					errop<<"Failed to open file"<<Qt::endl;
+					exit(100);
+				}
+
+			QTextStream	out(&file);
+			for(int j=0;j<cCode.size();j++)
+				out<<cCode.at(j);
+			file.close();
+			command=QString("g++ -Wall $(pkg-config --cflags --libs Qt6Core ) -fPIC  -Ofast '%1' -o '%2'").arg(foldername+"/"+filename+".cpp").arg(foldername+"/"+filename);
+			errop<<"Compiling using command:\n"<<command<<"\n..."<<Qt::endl;
+			system(command.toStdString().c_str());
+		}
 }
 
 void compilerClass::parseSingleLine(QString qline)

@@ -32,6 +32,7 @@ QVector<QString>	fCode;
 QVector<QString>	forVariable;
 QVector<bool>	isInFor;
 QVector<QString>	caseVariable;
+QString			fullCompileHere="";
 bool				firstCasecompare=false;
 
 int main(int argc,char **argv)
@@ -43,6 +44,7 @@ int main(int argc,char **argv)
 		{
 			{"verbose-compile",optional_argument,NULL,'v'},
 			{"verbose-ccode",optional_argument,NULL,'V'},
+			{"full-compile",required_argument,NULL,'c'},
 			{"syntax-check",optional_argument,NULL,'s'},
 			{0,0,0,0}
 		};
@@ -54,6 +56,7 @@ int main(int argc,char **argv)
 		{
 			{prefs.LFSTK_hashFromKey("verbose-compile"),{TYPEBOOL,"verbose-compile","Verbose compile ( optional 1/true or 0/false )","",true,0}},
 			{prefs.LFSTK_hashFromKey("verbose-ccode"),{TYPEBOOL,"verbose-ccode","Add BASH source lines to C Code ( optional 1/true or 0/false )","",false,0}},
+			{prefs.LFSTK_hashFromKey("full-compile"),{TYPESTRING,"full-compile","Compile script then compile code to ARG ( where ARG is fullpath to final application )","",false,0}},
 			{prefs.LFSTK_hashFromKey("syntax-check"),{TYPEBOOL,"syntax-check","Just Check syntax ( use shellcheck if installed  else use bash -n )","",false,0}},
 		};
 	prefs.LFSTK_loadVarsFromFile(configfile);
@@ -73,6 +76,12 @@ int main(int argc,char **argv)
 			int exitstatus=WEXITSTATUS(system(checkstr.toStdString().c_str()));
 			qDebug()<<"Error "<<exitstatus;
 			exit(exitstatus);
+		}
+	if(prefs.LFSTK_getString("full-compile").length()>0)
+		{
+			fullCompileHere=prefs.LFSTK_getString("full-compile").c_str();
+			//errop<<prefs.LFSTK_getString("full-compile").c_str()<<Qt::endl;
+			//exit(100);
 		}
 
 	mainCommandsClass=new commandsClass();

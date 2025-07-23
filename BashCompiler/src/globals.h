@@ -23,6 +23,8 @@
 
 #include <QApplication>
 #include <QFile>
+#include <QDir>
+#include <QFileInfo>
 #include <QRegularExpression>
 #include <QVector>
 #include <QTextStream>
@@ -80,5 +82,6 @@ extern QVector<QString>	forVariable;
 extern QVector<bool>		isInFor;
 extern QVector<QString>	caseVariable;
 extern bool				firstCasecompare;
+extern QString			fullCompileHere;
 
 #endif
