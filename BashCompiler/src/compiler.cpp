@@ -226,6 +226,8 @@ void compilerClass::parseSingleLine(QString qline)
 								retstr=commands.makeExport(lines.at(j));
 							if(match.captured(1).trimmed()=="cd")
 								retstr=commands.makeCD(lines.at(j));
+							if(match.captured(1).trimmed()=="read")
+								retstr=commands.makeRead(lines.at(j));
 
 							if(match.captured(1).trimmed()=="case")
 								{
@@ -435,7 +437,8 @@ QStringList compilerClass::splitLines(QString qline)
 
 			for(int k=0;k<keywords.count();k++)
 				{
-					if(keywords.at(k)==tstr.trimmed().mid(pos,keywords.at(k).length()))
+					//if(keywords.at(k)==tstr.trimmed().mid(pos,keywords.at(k).length()))
+					if(tstr.left(keywords.at(k).length())==keywords.at(k))
 						{
 							lines<<tstr.left(pos);
 							lines<<keywords.at(k);

@@ -1,3 +1,9 @@
+0.3.1
+Started read.
+Fixed assigning curses escape codes to variables.
+Added $#.
+Fixed splitting lines on 'd'.
+
 0.3.0
 Added -5/--use-qt5 to compile with qt5 instead of qt6 ( the default ).
 Added -c/--full-compile switch to compile script and compile final application.

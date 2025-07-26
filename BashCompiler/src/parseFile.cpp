@@ -107,11 +107,11 @@ bool parseFileClass::parseLine(QString qline)
 					continue;
 				}
 
-			if(line.at(this->linePosition).toLatin1()=='[')
-				{
-					this->parseSquareBraces(line);
-					continue;
-				}
+//			if(line.at(this->linePosition).toLatin1()=='[')
+//				{
+//					this->parseSquareBraces(line);
+//					continue;
+//				}
 
 			this->currentPart+=line.at(this->linePosition);
 			this->linePosition++;
@@ -469,7 +469,7 @@ QString parseFileClass::setSpecialDollars(QString dollar)
 {
 	QString tstr=dollar;
 
-	tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?([[:digit:]\\?])\\}?[[:space:]]*"),"\\1");
+	tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?([[:digit:]#\\?])\\}?[[:space:]]*"),"\\1");
 	if(tstr.isEmpty()==false)
 		{
 			QChar num=tstr.at(0);
@@ -495,6 +495,13 @@ QString parseFileClass::setSpecialDollars(QString dollar)
 						else
 							return("fv[\""+QString(num)+"\"]");
 						break;
+					case '#':
+						if(isInFunction==false)
+							return("argc-1");
+						else
+							return("fv.size()");
+						break;
+					
 					default:
 						break;
 				}

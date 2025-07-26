@@ -434,6 +434,7 @@ QString commandsClass::makeAssign(QString qline)
 	parseFileClass	pfl;
 
 	pfl.parseLine(qline);
+	errop<<">>>>"<<qline<<Qt::endl;
 	pal=pfl.parseExprString(false);
 	pal=pal.replace(QRegularExpression("\\\\([[:alpha:]])"),"\\1");
 	return(pal);
@@ -649,4 +650,11 @@ QString commandsClass::makeCaseCompareStatement(QString qline)
 				}
 		}
 	return("");
+}
+
+QString commandsClass::makeRead(QString qline)
+{
+	parseFileClass			pfl;
+	QString retstr=QString("variables[\"REPLY\"]=procsub(\"%1;echo $REPLY\")").arg(pfl.lineToBashCLIString(qline));
+	return(retstr);
 }

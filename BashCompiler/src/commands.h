@@ -60,6 +60,7 @@ class commandsClass
 		QString	makeExit(QString qline);
 		QString	makeExport(QString qline);
 		QString	makeCD(QString qline);
+		QString	makeRead(QString qline);
 		QString	makeCase(QString qline);
 		QString	makeCaseCompareStatement(QString qline);
 

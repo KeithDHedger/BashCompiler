@@ -43,7 +43,15 @@ file=${1}
 echo ${file^^}
 AND NOT
 echo ${1^^}
+
 ````
+read ( not read while ) will only use the default REPLY for now.  
+Eg:
+````
+read -p "run this command ? [N/y] "
+echo $REPLY
+````  
+
 ######
 All examples in BashCompiler/resources/scripts will compile and run.
 ######
