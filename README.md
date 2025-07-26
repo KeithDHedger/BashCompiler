@@ -60,8 +60,13 @@ popd
 ######
 ### Done ( mostly! )
 
+cd
+case.  
 simple 'here' doc.
+env variables.
+Command redirection.  
 Variable assignment.  
+export.  
 When using ${string#substring} ( #/##/%/%% ) globs must be literal strings ( for now ), ie	echo ${avar#*.abc} NOT echo ${avar#${PATTERN}}  
 for ((x=0;x<n;x=x+n))  
 echo, assumes quotes see example 3.  
@@ -76,6 +81,7 @@ printf, optional '-v VARNAME' FORMATSTR STR1 ... STRN, format string is ignored 
 ######
 
 ### Ongoing in no particular order. 
+for loops.  
 String slicing. see example stringslice.  
 Add options to bashcompiler.  
 Functions.
@@ -83,13 +89,8 @@ Functions.
 
 ### To do ( loads! ) in no particular order.  
 
-env variables.
 C style assign/for etc.  
 read.  
-case.  
-for loops.  
-Command redirection.  
-export.  
 arrays.  
 regex.  
 Backgrounding ( '&' ).  

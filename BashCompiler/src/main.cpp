@@ -58,8 +58,8 @@ int main(int argc,char **argv)
 		{
 			{prefs.LFSTK_hashFromKey("verbose-compile"),{TYPEBOOL,"verbose-compile","Verbose compile ( optional 1/true or 0/false )","",true,0}},
 			{prefs.LFSTK_hashFromKey("verbose-ccode"),{TYPEBOOL,"verbose-ccode","Add BASH source lines to C Code ( optional 1/true or 0/false )","",false,0}},
-			{prefs.LFSTK_hashFromKey("full-compile"),{TYPESTRING,"full-compile","Compile script then compile code to ARG ( where ARG is fullpath to final application )","",false,0}},
-			{prefs.LFSTK_hashFromKey("use-qt5"),{TYPEBOOL,"use-qt5","Use qt5 for final compile instead of qt6","",false,0}},
+			{prefs.LFSTK_hashFromKey("full-compile"),{TYPESTRING,"full-compile","Compile script then compile code to STRING_ARG ( where STRING_ARG is fullpath to final application )\n\tAll intermediate directories are created if needed","",false,0}},
+			{prefs.LFSTK_hashFromKey("use-qt5"),{TYPEBOOL,"use-qt5","Use qt5 for final compile instead of qt6 ( optional 1/true or 0/false )","",false,0}},
 			{prefs.LFSTK_hashFromKey("syntax-check"),{TYPEBOOL,"syntax-check","Just Check syntax ( use shellcheck if installed  else use bash -n )","",false,0}},
 		};
 	prefs.LFSTK_loadVarsFromFile(configfile);

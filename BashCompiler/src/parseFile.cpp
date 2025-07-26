@@ -308,7 +308,7 @@ QString parseFileClass::parseVar(QString line)
 						}
 				}
 		}
-	re.setPattern("\\$\\{#([[:alnum:]_]*)\\}");//}
+	re.setPattern("\\$\\{#([[:alnum:]_]*)\\}");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
@@ -548,14 +548,14 @@ void parseFileClass::parseDollar(QString line)
 		{
 			braceopen='{';
 			braceclose='}';
-			dollardata="${";//}
+			dollardata="${";
 			dtype=VARIABLEINCURLYS;
 		}
 	if(line.at(this->linePosition+1).toLatin1()=='(')
 		{
 			braceopen='(';
 			braceclose=')';
-			dollardata="$(";//)
+			dollardata="$(";
 			dtype=BRACKETS;
 		}
 

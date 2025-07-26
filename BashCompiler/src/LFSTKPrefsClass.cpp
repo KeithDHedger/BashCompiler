@@ -315,13 +315,13 @@ void LFSTK_prefsClass::printHelp(option longoptions[])
 						fprintf(stderr," \t");
 						break;
 					case TYPESTRING:
-						fprintf(stderr," %sSTRING ARG%s\t",ob,cb);
+						fprintf(stderr," %sSTRING_ARG%s\t",ob,cb);
 						break;
 					case TYPEINT:
-						fprintf(stderr," %sINTEGER ARG%s\t",ob,cb);
+						fprintf(stderr," %sINTEGER_ARG%s\t",ob,cb);
 						break;
 					case TYPEBOOL:
-						fprintf(stderr," %sBOOLEAN ARG%s\t",ob,cb);
+						fprintf(stderr," %sBOOLEAN_ARG%s\t",ob,cb);
 						break;
 				}
 			fprintf(stderr," %s",desc.c_str());

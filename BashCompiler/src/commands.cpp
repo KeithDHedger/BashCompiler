@@ -181,8 +181,8 @@ QString commandsClass::makeWhileRead(QString qline)
 		{
 			if(isInFunction==true)
 				{
-					retstr+="FILE *fp;\n";//}
-					fCode+="{\n";//}
+					retstr+="FILE *fp;\n";
+					fCode+="{\n";
 					whileReadLine.append(fCode.size());
 					retstr+="fp=popen(proc.toStdString().c_str(),\"r\");\n";
 					retstr+="QTextStream	inpop(fp);\n";
@@ -193,8 +193,8 @@ QString commandsClass::makeWhileRead(QString qline)
 				}
 			else
 				{
-					retstr+="FILE *fp;\n";//}
-					cCode+="{\n";//}
+					retstr+="FILE *fp;\n";
+					cCode+="{\n";
 					whileReadLine.append(cCode.size());
 					retstr+="fp=popen(proc.toStdString().c_str(),\"r\");\n";
 					retstr+="QTextStream	inpop(fp);\n";
@@ -288,7 +288,7 @@ QString commandsClass::makeDone(QString qline)
 						}
 					if(whileReadLine.size()>0)
 						{
-							QString tstr=pfl.lineToBashCLIString(match.captured(matchnum).trimmed());//{{
+							QString tstr=pfl.lineToBashCLIString(match.captured(matchnum).trimmed());
 							retstr="}\npclose(fp);\n}\n";
 							if(isInFunction==true)
 								fCode.insert(whileReadLine.last(),"QString proc=\""+doacat+tstr+"\";\n");
@@ -297,7 +297,7 @@ QString commandsClass::makeDone(QString qline)
 							whileReadLine.pop_back();
 						}
 					else
-						{//{
+						{
 							retstr="}\n";
 						}
 				}

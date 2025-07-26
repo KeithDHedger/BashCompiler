@@ -117,7 +117,7 @@ return(\"\");\n\
 			QString		command;
 
 			QDir().mkpath(foldername);
-			if (!file.open(QIODevice::WriteOnly))
+			if(!file.open(QIODevice::WriteOnly))
 				{
 					qDebug()<<"Failed to open file";
 					exit(100);
@@ -180,15 +180,15 @@ void compilerClass::parseSingleLine(QString qline)
 		lines=this->splitLines(this->rawLine);
 
 	for(int j=0;j<lines.count();j++)
-		{//{
+		{
 			if(lines.at(j).trimmed().startsWith('#'))
 				return;
 
-			if(lines.at(j).trimmed()=="{")//}
+			if(lines.at(j).trimmed()=="{")
 				return;
 
 			if(lines.at(j).trimmed()=="}")
-				{//{
+				{
 					fCode<<"return(retstr);\n}\n\n";
 					isInFunction=false;
 					return;
@@ -276,12 +276,12 @@ void compilerClass::parseSingleLine(QString qline)
 								{
 									lineend="";
 									if((isInFor.isEmpty()==false) && (isInFor.back()==true))
-										retstr="{\nvariables[\""+forVariable.back()+"\"].setNum("+forVariable.back()+");\n";//}
+										retstr="{\nvariables[\""+forVariable.back()+"\"].setNum("+forVariable.back()+");\n";
 									else
-										retstr="{\n";//}
+										retstr="{\n";
 								}
 							if(match.captured(1).trimmed()=="done")
-								{//{
+								{
 									lineend="";
 									retstr=commands.makeDone(lines.at(j));
 									if(retstr.isEmpty()==true)
