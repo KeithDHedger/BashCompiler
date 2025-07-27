@@ -1,5 +1,5 @@
 0.3.1
-Started read.
+Done read.
 Fixed assigning curses escape codes to variables.
 Added $#.
 Fixed splitting lines on 'd'.

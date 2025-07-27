@@ -17,8 +17,14 @@ sudo make install ( optional ).
 
 #### Simple Usage:
 ````console
-bashcompiler -V /PATH/TO//BASHSCRIPT >/tmp/x.cpp
+bashcompiler -V /PATH/TO/BASHSCRIPT >/tmp/x.cpp
 g++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC  -Ofast /tmp/x.cpp -o APPNAME
+
+Or:
+bashcompiler -V /PATH/TO/BASHSCRIPT -c /PATH/TO/FINAL/APP
+
+All intermediate folders are created if need when using the -c switch.
+
 ````
 
 The bashcompiler executable can be installed or run directly from the BashCompiler/app folder, or just copy it somewhere convienient.  
@@ -45,11 +51,16 @@ AND NOT
 echo ${1^^}
 
 ````
-read ( not read while ) will only use the default REPLY for now.  
+read ( not read while ) will only use the LAST variable given the default REPLY is used if no variable given.  
 Eg:
 ````
 read -p "run this command ? [N/y] "
 echo $REPLY
+
+read -p "run this command ? [N/y] " ans1 ans2
+echo $ans2
+N.B. extra variables supplied ( ie ans1 ) will 'swallow' input.
+
 ````  
 
 ######
@@ -68,6 +79,7 @@ popd
 ######
 ### Done ( mostly! )
 
+read
 cd
 case.  
 simple 'here' doc.

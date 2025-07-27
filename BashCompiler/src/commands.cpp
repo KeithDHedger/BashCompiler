@@ -434,7 +434,6 @@ QString commandsClass::makeAssign(QString qline)
 	parseFileClass	pfl;
 
 	pfl.parseLine(qline);
-	errop<<">>>>"<<qline<<Qt::endl;
 	pal=pfl.parseExprString(false);
 	pal=pal.replace(QRegularExpression("\\\\([[:alpha:]])"),"\\1");
 	return(pal);
@@ -654,7 +653,16 @@ QString commandsClass::makeCaseCompareStatement(QString qline)
 
 QString commandsClass::makeRead(QString qline)
 {
-	parseFileClass			pfl;
-	QString retstr=QString("variables[\"REPLY\"]=procsub(\"%1;echo $REPLY\")").arg(pfl.lineToBashCLIString(qline));
+	parseFileClass	pfl;
+	QString			tstr;
+	QString			retstr;
+
+	tstr=qline;
+	if(tstr.contains(QRegularExpression("^.*[[:space:]]+([[:alpha:]][[:alnum:]_]*)[[:space:]]*$")))
+		tstr.replace(QRegularExpression("^.*[[:space:]]+([[:alpha:]][[:alnum:]_]*)[[:space:]]*$"),"\\1");
+	else
+		tstr="REPLY";
+
+	retstr=QString("variables[\""+tstr+"\"]=procsub(\"%1;echo ${"+tstr+"}\")").arg(pfl.lineToBashCLIString(qline));
 	return(retstr);
 }
