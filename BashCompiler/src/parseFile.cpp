@@ -181,10 +181,19 @@ QString parseFileClass::parseVar(QString line)
 	if(retcode.isEmpty()==false)
 		return(retcode);
 
-	re.setPattern("\\$\\{\\#?([[:alnum:]_]+)(##?|%%?|:|//?|,,?|\\^\\^?)(.*)}");
+	re.setPattern("\\$\\{\\#?([[:alnum:]_]+)(:-|##?|%%?|:|//?|,,?|\\^\\^?)(.*)}");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
+//${string:-default}
+			if(match.captured(2).trimmed()==":-")
+				{
+					varname=match.captured(1).trimmed();
+					haystack=this->parseOutputString(match.captured(3).trimmed());
+					retcode="(variables[\""+varname+"\"].isEmpty()==true) ? (variables[\""+varname+"\"]="+haystack+") : (variables[\""+varname+"\"])";
+					return(retcode);
+				}
+
 //${string,}
 			if(match.captured(2).trimmed()==",")
 				{

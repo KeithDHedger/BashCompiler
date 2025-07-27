@@ -158,7 +158,45 @@ QString commandsClass::makeIf(QString qline)
 				}
 			retstr="if("+leftstr+midstr+ritestr+")\n";
 		}
-
+	else
+		{
+			re.setPattern("^[[:space:]]*if[[:space:]]*\\[+[[:space:]]*(!)?[[:space:]]*-([efdhxrw])[[:space:]](.*)[[:space:]]*[^]]+");
+			match=re.match(qline);
+			if(match.hasMatch())
+				{
+					QString testwhat="true";
+					if(match.captured(1).trimmed()=="!")
+						testwhat="false";
+					ritestr=pfl.parseOutputString(match.captured(3).trimmed());
+					switch(match.captured(2).trimmed().at(0).toLatin1())
+						{
+							case 'e':
+								retstr="if(QFileInfo::exists("+ritestr+")=="+testwhat+")\n";
+								break;
+							case 'd':
+								retstr="if(QFileInfo("+ritestr+").isDir()=="+testwhat+")\n";
+								break;
+							case 'f':
+								retstr="if(QFileInfo("+ritestr+").isFile()=="+testwhat+")\n";
+								break;
+							case 'h':
+								retstr="if(QFileInfo("+ritestr+").isSymLink()=="+testwhat+")\n";
+								break;
+							case 'x':
+								retstr="if(QFileInfo("+ritestr+").isExecutable()=="+testwhat+")\n";
+								break;
+							case 'r':
+								retstr="if(QFileInfo("+ritestr+").isReadable()=="+testwhat+")\n";
+								break;
+							case 'w':
+								retstr="if(QFileInfo("+ritestr+").isWritable()=="+testwhat+")\n";
+								break;
+							default:
+								retstr="if(false)\n";
+								break;
+						}
+				}
+		}
 	return(retstr);
 }
 
