@@ -21,7 +21,7 @@ sudo -Kk
 printHelp ()
 {
 	echo "Usage:"
-	echo "SafeDD INPUTFILE OUTPUTFILE"
+	echo "SaferDD INPUTFILE OUTPUTFILE"
 	echo "ENV Vars:"
 	echo "STATUS=[none|noxfer|progress] Default=progress"
 	echo "WRITEBYTES=BYTES Default=128M"
