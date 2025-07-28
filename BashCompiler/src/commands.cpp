@@ -160,7 +160,7 @@ QString commandsClass::makeIf(QString qline)
 		}
 	else
 		{
-			re.setPattern("^[[:space:]]*if[[:space:]]*\\[+[[:space:]]*(!)?[[:space:]]*-([efdhxrw])[[:space:]](.*)[[:space:]]*[^]]+");
+			re.setPattern("^[[:space:]]*if[[:space:]]*\\[+[[:space:]]*(!)?[[:space:]]*-([efdhxrwL])[[:space:]](.*)[[:space:]]*[^]]+");
 			match=re.match(qline);
 			if(match.hasMatch())
 				{
@@ -180,6 +180,7 @@ QString commandsClass::makeIf(QString qline)
 								retstr="if(QFileInfo("+ritestr+").isFile()=="+testwhat+")\n";
 								break;
 							case 'h':
+							case 'L':
 								retstr="if(QFileInfo("+ritestr+").isSymLink()=="+testwhat+")\n";
 								break;
 							case 'x':

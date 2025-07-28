@@ -1,0 +1,64 @@
+#!/bin/bash -e
+
+#example 1
+#file tests
+
+FILETOTEST=${FILETOTEST:-"/etc/fstab"}
+FOLDER=$(dirname ${FILETOTEST})
+
+if [[ -e $FILETOTEST ]]; then
+	echo "File $FILETOTEST exists"
+else
+	echo "File $FILETOTEST doesn't exist"
+fi
+
+echo "Negate previous test"
+if [[ ! -e $FILETOTEST ]]; then
+	echo "File $FILETOTEST exists"
+else
+	echo "File $FILETOTEST doesn't exist"
+fi
+echo
+
+if [[ -f $FILETOTEST ]]; then
+	echo "File $FILETOTEST is a regular file"
+else
+	echo "File $FILETOTEST is not a regular file"
+fi
+
+if [[ -d $FOLDER ]]; then
+	echo "File $FOLDER is a folder"
+else
+	echo "File $FOLDER is not a folder"
+fi
+
+echo
+echo "Using -h"
+if [[ -h $FILETOTEST ]]; then
+	echo "File $FILETOTEST is a symlink"
+else
+	echo "File $FILETOTEST is not a symlink"
+fi
+echo "Or use  -L"
+if [[ -L $FILETOTEST ]]; then
+	echo "File $FILETOTEST is a symlink"
+else
+	echo "File $FILETOTEST is not a symlink"
+fi
+echo
+
+if [[ -x $FILETOTEST ]]; then
+	if [[ -d $FILETOTEST ]]; then
+		echo "File $FILETOTEST is a folder with read permisions"
+	else
+		echo "File $FILETOTEST is executable"
+	fi
+else
+	echo "File $FILETOTEST is not executable"
+fi
+
+if [[ -w $FILETOTEST ]]; then
+	echo "File $FILETOTEST can be written"
+else
+	echo "File $FILETOTEST can't be written"
+fi
