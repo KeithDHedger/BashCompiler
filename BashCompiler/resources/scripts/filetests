@@ -4,7 +4,7 @@
 #file tests
 
 FILETOTEST=${FILETOTEST:-"/etc/fstab"}
-FOLDER=$(dirname ${FILETOTEST})
+FOLDER=$(dirname "${FILETOTEST}")
 
 if [[ -e $FILETOTEST ]]; then
 	echo "File $FILETOTEST exists"

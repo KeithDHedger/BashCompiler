@@ -478,9 +478,12 @@ QString parseFileClass::setSpecialDollars(QString dollar)
 {
 	QString tstr=dollar;
 
-	tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?([[:digit:]#\\?])\\}?[[:space:]]*"),"\\1");
+	//tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?([[:digit:]#\\?])\\}?[[:space:]]*"),"\\1");
+	tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?(#|\\?|[[:digit:]]|#[[:alnum:]]*)[\\}?][[:space:]]*"),"\\1");
 	if(tstr.isEmpty()==false)
 		{
+			if(tstr.length()>1)
+				return("");
 			QChar num=tstr.at(0);
 			switch(num.toLatin1())
 				{
