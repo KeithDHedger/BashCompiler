@@ -477,21 +477,35 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 QString parseFileClass::setSpecialDollars(QString dollar)
 {
 	QString tstr=dollar;
+	QChar	num;
+	bool		needlength=false;
 
 	//tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?([[:digit:]#\\?])\\}?[[:space:]]*"),"\\1");
-	tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?(#|\\?|[[:digit:]]|#[[:alnum:]]*)[\\}?][[:space:]]*"),"\\1");
+	//tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?(#|\\?|[[:digit:]]|#[[:alnum:]]*)[\\}?][[:space:]]*"),"\\1");
+	tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?(#[[:digit:]]|#|\\?|[[:digit:]]|#[[:alnum:]]*)}?"),"\\1");
+
 	if(tstr.isEmpty()==false)
 		{
-			if(tstr.length()>1)
+			if(tstr.length()>2)
 				return("");
-			QChar num=tstr.at(0);
+			if((tstr.length()>1) && (tstr.at(0)=="#"))
+				{
+					num=tstr.at(1);
+					needlength=true;
+				}
+			else
+				num=tstr.at(0);
+
 			switch(num.toLatin1())
 				{
 					case '?':
 						return("exitstatus");
 						break;
 					case '0':
-						return("gargv[0]");
+						if(needlength==true)
+							return("strlen(gargv[0])");
+						else
+							return("gargv[0]");
 						break;
 					case '1':
 					case '2':
@@ -503,9 +517,19 @@ QString parseFileClass::setSpecialDollars(QString dollar)
 					case '8':
 					case '9':
 						if(isInFunction==false)
-							return("gargv["+QString(num)+"]");
+							{
+								if(needlength==true)
+									return("strlen(gargv["+QString(num)+"])");
+								else
+									return("gargv["+QString(num)+"]");
+							}
 						else
-							return("fv[\""+QString(num)+"\"]");
+							{
+								if(needlength==true)
+									return("strlen(fv[\""+QString(num)+"\"].toStdString().c_str())");
+								else
+									return("fv[\""+QString(num)+"\"]");
+							}
 						break;
 					case '#':
 						if(isInFunction==false)

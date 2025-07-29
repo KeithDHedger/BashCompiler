@@ -8,10 +8,8 @@ GREEN="\e[1;32m"
 
 ARGC=${#}
 
-#STATUS=${STATUS:-"progress"}
-#WRITEBYTES=${WRITEBYTES:-128M}
-STATUS=progress
-WRITEBYTES=128M
+STATUS=${STATUS:-"progress"}
+WRITEBYTES=${WRITEBYTES:-128M}
 
 INFILE="${1}"
 OUTFILE="${2}"
@@ -72,12 +70,13 @@ checkArgs
 
 echo -e "Input file=${GREEN}${INFILE}${NORMAL}"
 echo -e "Output file=${RED}${OUTFILE}${NORMAL}"
-echo "Using command:"
-echo "sudo dd status=${STATUS} bs=${WRITEBYTES} if=$INFILE of=$OUTFILE"
 
 if [[ -e "$OUTFILE" ]];then
 	echo -e "${RED}!!!WARNINIG!!!\n${NORMAL}Output file ${GREEN}'${OUTFILE}'${NORMAL} ${RED}WILL${NORMAL} be overwritten!"
 fi
+
+echo "Using command:"
+echo "sudo dd status=${STATUS} bs=${WRITEBYTES} if=$INFILE of=$OUTFILE"
 
 DD=$(which dd)
 read -p "run this command ? [N/y] "
