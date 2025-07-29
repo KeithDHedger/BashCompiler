@@ -230,7 +230,7 @@ QString parseFileClass::parseVar(QString line)
 					needle=match.captured(3).trimmed();
 					needle=this->globToRX(needle,true);
 					needle="^"+needle+"(.*)$";
-					retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\"%1\").arg(\""+needle+"\")),\"\\\\1\"))";
+					retcode="QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\""+needle+"\")) ,\"\\\\1\")";
 					return(retcode);
 				}
 //${string#substring}
@@ -240,7 +240,7 @@ QString parseFileClass::parseVar(QString line)
 					needle=match.captured(3).trimmed();
 					needle=this->globToRX(needle,false);
 					needle="^"+needle+"(.*)$";
-					retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\"%1\").arg(\""+needle+"\")),\"\\\\1\"))";
+					retcode="QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\""+needle+"\")),\"\\\\1\")";
 					return(retcode);
 				}
 //${string%substring}
@@ -250,7 +250,7 @@ QString parseFileClass::parseVar(QString line)
 					needle=match.captured(3).trimmed();
 					needle=this->globToRX(needle,true);
 					needle="^(.*)"+needle+".*";
-					retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\"%1\").arg(\""+needle+"\")),\"\\\\1\"))";
+					retcode="QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\""+needle+"\")),\"\\\\1\")";
 					return(retcode);
 				}
 //${string%%substring}
@@ -260,7 +260,7 @@ QString parseFileClass::parseVar(QString line)
 					needle=match.captured(3).trimmed();
 					needle=this->globToRX(needle,true);
 					needle="^(.*?)"+needle;
-					retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\"%1\").arg(\""+needle+"\")),\"\\\\1\"))";
+					retcode="QString(variables[\""+varname+"\"]).replace(QRegularExpression(QString(\""+needle+"\")),\"\\\\1\")";
 					return(retcode);
 				}
 			else if(match.captured(2).trimmed()==":")
@@ -276,7 +276,7 @@ QString parseFileClass::parseVar(QString line)
 								{
 									haystack=this->cleanVar(match.captured(1).trimmed());
 									needle=this->cleanVar(match.captured(2).trimmed());
-									retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).mid(QString(\"%1\").arg("+haystack+").toInt(nullptr,0),QString(\"%1\").arg("+needle+").toInt(nullptr,0)))";
+									retcode="variables[\""+varname+"\"].mid(QString("+haystack+").toInt(nullptr,0),QString("+needle+").toInt(nullptr,0))";
 									return(retcode);
 								}
 						}
@@ -284,7 +284,7 @@ QString parseFileClass::parseVar(QString line)
 						{
 //${string:position}
 							needle=this->cleanVar(match.captured(3).trimmed());
-							retcode="QString(\"%1\").arg(QString(variables[\""+varname+"\"]).mid(QString(\"%1\").arg("+needle+").toInt(nullptr,0)))";
+							retcode="variables[\""+varname+"\"].mid(QString("+needle+").toInt(nullptr,0))";
 							return(retcode);
 						}
 				}
@@ -312,7 +312,7 @@ QString parseFileClass::parseVar(QString line)
 							varname=match.captured(1).trimmed();
 							haystack=this->cleanVar(match.captured(2).trimmed());
 							needle=this->cleanVar(match.captured(3).trimmed());
-							retcode=QString("QString(%1).remove(%1.indexOf(%2,0),QString(%2).length()).insert(%1.indexOf(%2,0),%3)").arg("variables[\""+varname+"\"]").arg(haystack).arg(needle); 
+							retcode="QString(variables[\""+varname+"\"]).replace(variables[\""+varname+"\"].indexOf(QString("+haystack+")),QString("+haystack+").size(), QString("+needle+"))";
 							return(retcode);
 						}
 				}

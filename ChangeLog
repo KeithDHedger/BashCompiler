@@ -1,4 +1,5 @@
 0.3.1
+Cleaned up string slicing code op.
 Fixed paramaters.
 Fixed ${#foo}.
 Redone some examples.
