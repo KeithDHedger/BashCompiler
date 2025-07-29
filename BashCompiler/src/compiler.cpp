@@ -151,14 +151,6 @@ void compilerClass::parseSingleLine(QString qline)
 	if(this->verboseCompile==true)
 		errop<<"Processing line "<<this->currentLine<<" "<<line<<Qt::endl;
 
-	if((this->verboseCCode==true) && (line.length()>0))
-		{
-			if(isInFunction==true)
-				fCode<<"//"+QString("Line %0: ").arg(currentLine)+line+"\n";
-			else
-				cCode<<"//"+QString("Line %0: ").arg(currentLine)+line+"\n";
-		}
-
 	if(line.startsWith('#'))
 		return;
 
@@ -185,10 +177,26 @@ void compilerClass::parseSingleLine(QString qline)
 				return;
 
 			if(lines.at(j).trimmed()=="{")
-				return;
+				{
+					if(this->verboseCCode==true)
+						{
+							if(isInFunction==true)
+								fCode<<"//"+QString("Line %0: {\n").arg(currentLine);
+							else
+								cCode<<"//"+QString("Line %0: {\n").arg(currentLine);
+						}
+					return;
+				}
 
 			if(lines.at(j).trimmed()=="}")
 				{
+					if((this->verboseCCode==true) && (line.length()>0))
+						{
+							if(isInFunction==true)
+								fCode<<"//"+QString("Line %0: }\n").arg(currentLine);
+							else
+								cCode<<"//"+QString("Line %0: }\n").arg(currentLine);
+						}
 					fCode<<"return(retstr);\n}\n\n";
 					isInFunction=false;
 					return;
@@ -295,7 +303,7 @@ void compilerClass::parseSingleLine(QString qline)
 								{
 									if(retstr.isEmpty()==true)
 										retstr=commands.makeFunction(lines.at(j));
-								
+
 									if(retstr.isEmpty()==true)
 										{
 											retstr=commands.makeCaseCompareStatement(lines.at(j));
@@ -311,6 +319,14 @@ void compilerClass::parseSingleLine(QString qline)
 
 					if(retstr.isEmpty()==false)
 						{
+							if((this->verboseCCode==true) && (line.length()>0))
+								{
+									if(isInFunction==true)
+										fCode<<"//"+QString("Line %0: ").arg(currentLine)+line+"\n";
+									else
+										cCode<<"//"+QString("Line %0: ").arg(currentLine)+line+"\n";
+								}
+										
 							if(isInFunction==true)
 								fCode<<retstr<<lineend;
 							else

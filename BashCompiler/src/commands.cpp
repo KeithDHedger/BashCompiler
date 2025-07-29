@@ -108,7 +108,7 @@ QString commandsClass::makeFunctionDefine(QString qline)
 	if(match.hasMatch())
 		{
 			isInFunction=true;
-			retstr="QString "+match.captured(1).trimmed()+"(bool capture,QHash<QString, QString> fv)\n{\nQString retstr;";
+			retstr="QString "+match.captured(1).trimmed()+"(bool capture,QHash<QString, QString> fv)\n{\nQString retstr";
 			functionNames<<match.captured(1).trimmed();
 		}
 	return(retstr);
