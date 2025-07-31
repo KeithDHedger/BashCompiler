@@ -1,4 +1,7 @@
 0.3.1
+Cleaned up verbose C Code.
+Started code output optimization.
+Cleaned up verbose C Code.
 Cleaned up verbose C Code for functions.
 Cleaned up string slicing code op.
 Fixed paramaters.

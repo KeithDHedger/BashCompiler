@@ -55,8 +55,15 @@ struct lineData
 	parseDataType		typeHint;
 };
 
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+
+static const char	*NORMAL="\e[0m";
+static const char	*RED="\e[1;31m";
+static const char	*GREEN="\e[1;32m";
+static const char	*CYAN="\e[1;36m";
+static const char	*BLUE="\e[1;34m";
 static const char* typeText[]={"UNKNOWN","WHITESPACE","DOUBLEQUOTESTRING","SINGLEQUOTSTRING","COMMAND","VARIABLE","VARIABLEINCURLYS","BRACKETS","SQUAREBRACKETS","STRINGDATA","VARNAME","SKIPLINE"};
 static const char*	bashmath[]={"-gt ","-lt ","-eq ","-ne ","-le ","-ge "," != "," < "," > "," = ",NULL};
 static const char*	cmath[]={">","<","==","!=","<=",">=","!=","<",">","==",NULL};

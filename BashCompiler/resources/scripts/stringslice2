@@ -62,3 +62,6 @@ echo ${#avar}
 bvar=${#avar}
 echo $bvar
 
+bvar=${#}
+echo $bvar
+echo ${#}

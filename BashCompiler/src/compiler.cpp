@@ -142,6 +142,7 @@ void compilerClass::parseSingleLine(QString qline)
 	QRegularExpressionMatch	match;
 	QString					lineend;
 	commandsClass			commands;
+bool doignore=false;
 
 	line=this->rawLine;
 
@@ -173,6 +174,7 @@ void compilerClass::parseSingleLine(QString qline)
 
 	for(int j=0;j<lines.count();j++)
 		{
+			doignore=false;
 			if(lines.at(j).trimmed().startsWith('#'))
 				return;
 
@@ -262,16 +264,19 @@ void compilerClass::parseSingleLine(QString qline)
 								}
 							if(match.captured(1).trimmed()=="then")
 								{
+									doignore=true;
 									lineend="";
 									retstr="{\n";
 								}
 							if(match.captured(1).trimmed()=="else") //TODO//elif
 								{
+									doignore=true;
 									lineend="";
 									retstr="}\nelse\n{\n";
 								}
 							if(match.captured(1).trimmed()=="fi")
 								{
+									doignore=true;
 									lineend="";
 									retstr="}\n";
 								}
@@ -284,6 +289,7 @@ void compilerClass::parseSingleLine(QString qline)
 								}
 							if(match.captured(1).trimmed()=="do")
 								{
+									doignore=true;
 									lineend="";
 									if((isInFor.isEmpty()==false) && (isInFor.back()==true))
 										retstr="{\nvariables[\""+forVariable.back()+"\"].setNum("+forVariable.back()+");\n";
@@ -292,6 +298,7 @@ void compilerClass::parseSingleLine(QString qline)
 								}
 							if(match.captured(1).trimmed()=="done")
 								{
+									doignore=true;
 									lineend="";
 									retstr=commands.makeDone(lines.at(j));
 									if(retstr.isEmpty()==true)
@@ -319,12 +326,14 @@ void compilerClass::parseSingleLine(QString qline)
 
 					if(retstr.isEmpty()==false)
 						{
-							if((this->verboseCCode==true) && (line.length()>0))
+							if((this->verboseCCode==true) && (line.length()>0) && (doignore==false))
 								{
 									if(isInFunction==true)
-										fCode<<"//"+QString("Line %0: ").arg(currentLine)+line+"\n";
+										//fCode<<"//"+QString("Line %0: ").arg(currentLine)+line+"\n";
+										fCode<<"//"+QString("Line %0: ").arg(currentLine)+lines.at(j)+"\n";
 									else
-										cCode<<"//"+QString("Line %0: ").arg(currentLine)+line+"\n";
+										//cCode<<"//"+QString("Line %0: ").arg(currentLine)+line+"\n";
+										cCode<<"//"+QString("Line %0: ").arg(currentLine)+lines.at(j)+"\n";
 								}
 										
 							if(isInFunction==true)

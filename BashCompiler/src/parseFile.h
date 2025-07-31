@@ -41,8 +41,10 @@ class parseFileClass
 		QString				parseVar(QString line);
 		QString				cleanVar(QString line);
 		QString				parseOutputString(QString qline);
-		bool					parseLine(QString line);
 		QString				globToRX(QString glob,bool greedy);
+		bool					parseLine(QString line);
+
+		QString				optimizeOP(QString qline,bool *succeed);
 
 	private:
 		int					currentLine=0;

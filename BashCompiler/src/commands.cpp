@@ -127,6 +127,7 @@ QString commandsClass::makeIf(QString qline)
 	QString					doint="";
 	parseFileClass			pfl;
 	parseFileClass			pfr;
+	bool						nowrapper;
 
 	while(bashmath[cnt]+=NULL)
 		tstr+=bashmath[cnt++]+QString("|");
@@ -156,6 +157,10 @@ QString commandsClass::makeIf(QString qline)
 						}
 					cnt++;		
 				}
+
+			leftstr=pfl.optimizeOP(leftstr,&nowrapper);
+			ritestr=pfl.optimizeOP(ritestr,&nowrapper);
+
 			retstr="if("+leftstr+midstr+ritestr+")\n";
 		}
 	else
@@ -168,6 +173,7 @@ QString commandsClass::makeIf(QString qline)
 					if(match.captured(1).trimmed()=="!")
 						testwhat="false";
 					ritestr=pfl.parseOutputString(match.captured(3).trimmed());
+					ritestr=pfl.optimizeOP(ritestr,&nowrapper);
 					switch(match.captured(2).trimmed().at(0).toLatin1())
 						{
 							case 'e':
@@ -470,12 +476,17 @@ QString commandsClass::makePrintf(QString qline)
 QString commandsClass::makeAssign(QString qline)
 {
 	QString			pal;
+	QString			retstr;
 	parseFileClass	pfl;
+	bool				ok;
 
 	pfl.parseLine(qline);
 	pal=pfl.parseExprString(false);
-	pal=pal.replace(QRegularExpression("\\\\([[:alpha:]])"),"\\1");
-	return(pal);
+	pal.replace(QRegularExpression("\\\\([[:alpha:]])"),"\\1");
+
+	retstr=pfl.optimizeOP(pal,&ok);
+
+	return(retstr);
 }
 
 QString commandsClass::makeEcho(QString qline)
@@ -485,6 +496,7 @@ QString commandsClass::makeEcho(QString qline)
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
 	parseFileClass			pfl;
+	bool						nowrapper;
 
 	pfl.preserveWhitespace=true;
 
@@ -511,7 +523,6 @@ QString commandsClass::makeEcho(QString qline)
 			if(match.hasMatch())
 				{
 					rep=match.captured(1);
-					//rep.replace("\"","\\\"");//TODO//
 					QString final="{\nFILE *fp = fopen("+outit+".toStdString().c_str(),\""+whatit+"\");\nfprintf(fp, \"%s"+endit.toStdString().c_str()+"\",QString(\""+rep+"\")"+match.captured(2)+".toStdString().c_str());";
 					final+="\nfclose(fp);\n}";
 					return(final);
@@ -523,10 +534,15 @@ QString commandsClass::makeEcho(QString qline)
 			match=re.match(line);
 			if(match.hasMatch())
 				{
+					nowrapper=true;
 					tstr=pfl.parseOutputString(match.captured(3).trimmed());
+
 					if(isInFunction==true)
 						{
 							QString pal=pfl.parseExprString(false);
+
+							pal=pfl.optimizeOP(pal,&nowrapper);
+							nowrapper=!nowrapper;
 
 							tstr="if(capture==false)\n";
 							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))
@@ -535,16 +551,30 @@ QString commandsClass::makeEcho(QString qline)
 								tstr+=QString("outop<<%1<<Qt::endl;\n").arg(pal);
 							tstr+="else\n";
 							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))
-								tstr+="retstr+="+pal;
+								if(nowrapper==false)
+									tstr+="retstr+="+pal;
+								else
+									tstr+="retstr+=QString("+pal+")";
 							else
-								tstr+="retstr+="+pal+"+\"\\n\"";
+								if(nowrapper==true)
+									tstr+="retstr+="+pal+"+\"\\n\"";
+								else
+									tstr+="retstr+=QString("+pal+")+\"\\n\"";
+
 						}
 					else
 						{
+							tstr=pfl.optimizeOP(tstr,&nowrapper);
 							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))
-								tstr="outop<<"+tstr+"<<Qt::flush";
+								if(nowrapper==true)
+									tstr="outop<<"+tstr+"<<Qt::flush";
+								else
+									tstr="outop<<QString("+tstr+")<<Qt::flush";
 							else
-								tstr="outop<<"+tstr+"<<Qt::endl";
+								if(nowrapper==true)
+									tstr="outop<<"+tstr+"<<Qt::endl";
+								else
+									tstr="outop<<QString("+tstr+")<<Qt::endl";
 						}
 					return(tstr);
 				}
