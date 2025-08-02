@@ -108,7 +108,10 @@ QString commandsClass::makeFunctionDefine(QString qline)
 	if(match.hasMatch())
 		{
 			isInFunction=true;
-			retstr="QString "+match.captured(1).trimmed()+"(bool capture,QHash<QString, QString> fv)\n{\nQString retstr";
+			retstr="QString "+match.captured(1).trimmed()+"(bool capture,QHash<QString, QString> fv)\n{\nQString retstr;\nQTextStream ss;\nQFile file;\n";
+			retstr+="if(capture==true)\nss.setString(&retstr, QIODevice::WriteOnly);\nelse\n";
+			retstr+="{\nfile.open(stderr, QIODevice::WriteOnly);\nss.setDevice(&file);\n}";
+
 			functionNames<<match.captured(1).trimmed();
 		}
 	return(retstr);
@@ -319,7 +322,6 @@ QString commandsClass::makeDone(QString qline)
 		}
 	else
 		{
-			//re.setPattern("^[[:space:]]*(done)[[:space:]]*<[[:space:]]*.*<\\((.*)\\)");
 			re.setPattern("^[[:space:]]*(done)[[:space:]]*<[[:space:]]*(<\\((.*)\\)|(.*))");
 			match=re.match(qline);
 			if(match.hasMatch())
@@ -483,9 +485,7 @@ QString commandsClass::makeAssign(QString qline)
 	pfl.parseLine(qline);
 	pal=pfl.parseExprString(false);
 	pal.replace(QRegularExpression("\\\\([[:alpha:]])"),"\\1");
-
 	retstr=pfl.optimizeOP(pal,&ok);
-
 	return(retstr);
 }
 
@@ -497,6 +497,8 @@ QString commandsClass::makeEcho(QString qline)
 	QRegularExpressionMatch	match;
 	parseFileClass			pfl;
 	bool						nowrapper;
+	//bool						preserve=false;//TODO//
+	//bool						escapes=false;//TODO//
 
 	pfl.preserveWhitespace=true;
 
@@ -537,44 +539,44 @@ QString commandsClass::makeEcho(QString qline)
 					nowrapper=true;
 					tstr=pfl.parseOutputString(match.captured(3).trimmed());
 
+					//TODO//if(match.captured(3).trimmed().contains(QRegularExpression("^\\\".*\\\"$"))==true)
+					//TODO//	preserve=true;
+					//TODO//if(match.captured(2).trimmed()=="-e" || match.captured(1).trimmed()=="-e")
+					//TODO//	escapes=true;
+
 					if(isInFunction==true)
 						{
 							QString pal=pfl.parseExprString(false);
-
+							QString	endline="<<\"\\n\";";
+							
 							pal=pfl.optimizeOP(pal,&nowrapper);
 							nowrapper=!nowrapper;
-
-							tstr="if(capture==false)\n";
 							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))
-								tstr+=QString("outop<<%1<<Qt::flush;\n").arg(pal);
+								endline=";";
 							else
-								tstr+=QString("outop<<%1<<Qt::endl;\n").arg(pal);
-							tstr+="else\n";
-							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))
-								if(nowrapper==false)
-									tstr+="retstr+="+pal;
-								else
-									tstr+="retstr+=QString("+pal+")";
+								endline="<<Qt::endl;";
+							if(nowrapper==false)
+								tstr="ss<<"+pal+endline;
 							else
-								if(nowrapper==true)
-									tstr+="retstr+="+pal+"+\"\\n\"";
-								else
-									tstr+="retstr+=QString("+pal+")+\"\\n\"";
-
+								tstr="ss<<QString("+pal+")"+endline;
 						}
 					else
 						{
 							tstr=pfl.optimizeOP(tstr,&nowrapper);
-							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))
+							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))	
+								{
 								if(nowrapper==true)
 									tstr="outop<<"+tstr+"<<Qt::flush";
 								else
 									tstr="outop<<QString("+tstr+")<<Qt::flush";
+									}
 							else
+							{
 								if(nowrapper==true)
 									tstr="outop<<"+tstr+"<<Qt::endl";
 								else
 									tstr="outop<<QString("+tstr+")<<Qt::endl";
+									}
 						}
 					return(tstr);
 				}

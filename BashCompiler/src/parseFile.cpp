@@ -107,12 +107,6 @@ bool parseFileClass::parseLine(QString qline)
 					continue;
 				}
 
-//			if(line.at(this->linePosition).toLatin1()=='[')
-//				{
-//					this->parseSquareBraces(line);
-//					continue;
-//				}
-
 			this->currentPart+=line.at(this->linePosition);
 			this->linePosition++;
 		}
@@ -349,7 +343,6 @@ QString parseFileClass::lineToBashCLIString(QString qline)
 	return(tstr);
 }
 
-#if 0
 QString parseFileClass::parseExprString(bool isnumexpr)
 {
 	QStringList				parts;
@@ -465,170 +458,6 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 		}
 
 	QString outstr="";
-//static const char* typeText[]={"UNKNOWN","WHITESPACE","DOUBLEQUOTESTRING","SINGLEQUOTSTRING","COMMAND","VARIABLE","VARIABLEINCURLYS","BRACKETS","SQUAREBRACKETS","STRINGDATA","VARNAME","SKIPLINE"};
-
-
-if(parts.count()==1)
-{
-	errop<<"var="<<parts.at(0)<<" "<<QString(typeText[this->lineParts.at(0).typeHint])<<Qt::endl;
-	complete=parts.at(0);
-	if(isnumber==true)
-		complete="("+complete+").toInt(nullptr,0)";
-	return(complete);
-}
-else if(parts.count()==0)
-{
-	errop<<"part>?"<<parts.count()<<" >>>"<<outstr<<"<<----"<<outfmt<<"---"<<Qt::endl;
-	errop<<"--->>>"<<this->lineParts.at(0).data<<"<<<----"<<Qt::endl;
-	//outfmt="\"";
-	//return("\""+this->lineParts.at(0).data+"\"");
-}
-//else
-//	outfmt=outfmt+"\"";
-
-//errop<<">>>>>"<<outfmt<<Qt::endl;
-
-	for(int j=0;j<parts.count();j++)
-		outstr+=".arg("+parts.at(j)+")";
-
-//if(parts.count()==0)
-//	outfmt+="";
-//else
-	outfmt+="\")";
-
-//errop<<"<<<<"<<outstr<<" "<<parts.count()<<Qt::endl;
-
-	complete=outfmt+outstr;
-errop<<"--------"<<complete<<Qt::endl;
-
-	if(isnumber==true)
-		complete="("+complete+").toInt(nullptr,0)";
-	return(complete);
-}
-#else
-QString parseFileClass::parseExprString(bool isnumexpr)
-{
-	QStringList				parts;
-	QString					complete="";
-	QString					tstr;
-	bool						isnumber=isnumexpr;
-	bool						doabreak;
-	QRegularExpression		re;
-	QRegularExpressionMatch	match;
-	int						argcnt=1;
-	QString					outfmt="QString(\"";
-
-	for(int j=0;j<this->lineParts.count();j++)
-		{
-			doabreak=false;
-			switch(this->lineParts.at(j).typeHint)
-				{
-					case STRINGDATA:
-						outfmt+=this->lineParts.at(j).data;
-						break;
-					case DOUBLEQUOTESTRING:
-						tstr=this->lineParts.at(j).data;
-						tstr.replace(QRegularExpression("\\$\\{*([[:alnum:]_]+)\\}*"),"\"+variables[\"\\1\"]+\"");
-						outfmt+=tstr;
-						break;
-					case VARIABLEINCURLYS:
-						parts<<this->parseVar(this->lineParts.at(j).data);
-						if(argcnt<10)
-							outfmt+="%0"+ QString::number(argcnt++);
-						else
-							outfmt+="%"+ QString::number(argcnt++);
-						break;
-					case BRACKETS:						
-						if((this->lineParts.at(j).data.at(2)=='('))
-							{
-								tstr=this->lineParts.at(j).data;
-								tstr.replace(QRegularExpression("^\\$\\(*|\\)*$"),"");
-								tstr.replace(QRegularExpression("\\$\\{*|\\}*"),"");
-								tstr.replace(QRegularExpression("\\b([[:alpha:]][[:alnum:]_]*)\\b"),"variables[\"\\1\"].toInt(nullptr,0)");
-								tstr=tstr.trimmed();
-								parts<<tstr;
-								if(argcnt<10)
-									outfmt+="%0"+ QString::number(argcnt++);
-								else
-									outfmt+="%"+ QString::number(argcnt++);
-								break;
-							}
-						tstr=this->lineParts.at(j).data;
-						tstr.replace(QRegularExpression("^\\$\\(*|\\)*$"),"");
-						tstr=this->lineToBashCLIString(tstr);
-//call a bash function and assign
-						re.setPattern("^[[:space:]]*([[:alnum:]_]+)[[:space:]]*(.*)$");
-						match=re.match(tstr);
-						if(match.hasMatch())
-							{
-								for(int jj=0;jj<functionNames.count();jj++)
-									{
-										if(match.captured(1).trimmed().compare(functionNames.at(jj).trimmed())==0)
-											{
-												parseFileClass	pfl;
-												parseFileClass	pfl1;
-												QString varstr="{";
-												tstr=match.captured(2).trimmed();
-												pfl.parseLine(tstr);
-												int argcnt=1;
-												for(int kk=0;kk<pfl.lineParts.count();kk++)
-													{
-														pfl1.parseLine(pfl.lineParts.at(kk).data);
-														tstr=pfl1.parseExprString(false);
-														if(pfl.lineParts.at(kk).data.compare("\"+variables[\"")==0)
-															{
-																varstr+=QString("{\"%1\",variables[\"%2\"]},").arg(argcnt++).arg(pfl.lineParts.at(kk+1).data);
-																kk+=3;
-															}
-														else
-															varstr+=QString("{\"%1\",").arg(argcnt++)+tstr+"},";
-													}
-												varstr+="}";
-												parts<<functionNames.at(jj)+"(true,"+varstr+")";
-												if(argcnt<10)
-													outfmt+="%0"+ QString::number(argcnt++);
-												else
-													outfmt+="%"+ QString::number(argcnt++);
-												doabreak=true;
-											}
-									}
-							}
-
-						if(doabreak==true)
-							break;
-
-						if(isnumber==true)
-							parts<<"procsub(\""+tstr+"\").toInt(nullptr,0)";
-						else
-							parts<<"procsub(\""+tstr+"\")";
-						if(argcnt<10)
-							outfmt+="%0"+ QString::number(argcnt++);
-						else
-							outfmt+="%"+ QString::number(argcnt++);
-						break;
-
-					case VARIABLE:
-						parts<<this->parseVar(this->lineParts.at(j).data);
-						if(argcnt<10)
-							outfmt+="%0"+ QString::number(argcnt++);
-						else
-							outfmt+="%"+ QString::number(argcnt++);
-						break;
-					default:
-						outfmt+=this->lineParts.at(j).data;
-						continue;
-				}
-		}
-
-	QString outstr="";
-//if(parts.count()==0)
-//{
-//outfmt+="\")";
-//complete=outfmt+outstr;
-//	errop<<">>>"<<outstr<<"<<<"<<outfmt<<"<<<<"<<complete<<"<<<<"<<"<<<"<<this->lineParts.at(0).typeHint<<Qt::endl;
-////complete.remove(QRegularExpression("^QString\\(|\\)$"));
-//	return(complete);
-//}
 
 	for(int j=0;j<parts.count();j++)
 		outstr+=".arg("+parts.at(j)+")";
@@ -637,29 +466,16 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 	if(isnumber==true)
 		complete="("+complete+").toInt(nullptr,0)";
 
-//if(variables["ARGC"].toInt()<QString("2").toInt())
-
-//if(argcnt==2 && isnumber==false)
-//{
-//	
-//	errop<<">>>"<<outstr<<"<<<"<<outfmt<<"<<<<"<<complete<<"<<<<"<<parts.at(0)<<"<<<"<<this->lineParts.at(0).typeHint<<Qt::endl;
-//	//complete.replace(QRegularExpression("^QString\\(\"%01\"\\)\\.arg\\((.*)\\)$"),"\\1");
-//}
-
-//complete.remove(QRegularExpression("^QString\\(\"|\"\\)$"));
 	return(complete);
 }
-#endif
+
 QString parseFileClass::setSpecialDollars(QString dollar)
 {
 	QString tstr=dollar;
 	QChar	num;
 	bool		needlength=false;
 
-	//tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?([[:digit:]#\\?])\\}?[[:space:]]*"),"\\1");
-	//tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?(#|\\?|[[:digit:]]|#[[:alnum:]]*)[\\}?][[:space:]]*"),"\\1");
 	tstr.replace(QRegularExpression("[[:space:]]*\\$\\{?(#[[:digit:]]|#|\\?|[[:digit:]]|#[[:alnum:]]*)}?"),"\\1");
-
 	if(tstr.isEmpty()==false)
 		{
 			if(tstr.length()>2)
@@ -709,11 +525,9 @@ QString parseFileClass::setSpecialDollars(QString dollar)
 						break;
 					case '#':
 						if(isInFunction==false)
-							//return("argc-1");
 							return("QString(\"%1\").arg(argc-1)");
 
 						else
-							//return("fv.size()");
 							return("QString(\"%1\").arg(fv.size())");
 						break;
 					
@@ -919,13 +733,6 @@ QString parseFileClass::parseOutputString(QString qline)
 					this->linePosition+=3;
 					continue;
 				}
-//		//unescape other escaped chars
-//			if(line.at(this->linePosition).toLatin1()=='\\')
-//				{
-//					this->currentPart+="\\\\"+QString(line.at(this->linePosition+1).toLatin1());
-//					this->linePosition+=2;
-//					continue;
-//				}
 			if(line.at(this->linePosition).toLatin1()=='"')
 				{
 					this->parseString(line);
@@ -965,7 +772,6 @@ QString parseFileClass::optimizeOP(QString qline,bool *succeed)
 	QString	pal=qline;
 	*succeed=false;
 
-	//if(pal.contains(QRegularExpression("^QString\\(\"%01\"\\).arg\\(.*\\....+\\(.*\\)\\)$"))==false)
 	if(pal.contains(QRegularExpression("^QString\\(\"%01\"\\).arg\\(.*\\.(mid|length|toInt|toStdString).*$"))==false)
 		{
 			if(pal.contains(QRegularExpression("^QString\\(\"%01\"\\)"))==true)
@@ -980,11 +786,15 @@ QString parseFileClass::optimizeOP(QString qline,bool *succeed)
 					*succeed=true;
 				}
 		}
+	if(pal.contains(QRegularExpression("QString\\(\"%01\"\\)\\.arg\\(variables\\[\"sbar\"\\]\\).toInt\\(\\)$"))==true)
+		{
+			pal.replace(QRegularExpression("QString\\(\"%01\"\\)\\.arg\\((variables\\[\"sbar\"\\])\\).toInt\\(\\)$"),"\\1.toInt()");
+			*succeed=true;
+		}
 
 	if(mainCompilerClass->verboseCompile==true && *succeed==true)
-		{
-			errop<<RED<<"Optimized "<<BLUE<<qline<<RED<<" to "<<CYAN<<pal<<NORMAL<<Qt::endl;
-		}
+		errop<<RED<<"Optimized "<<BLUE<<qline<<RED<<" to "<<CYAN<<pal<<NORMAL<<Qt::endl;
+
 	return(pal);
 }
 

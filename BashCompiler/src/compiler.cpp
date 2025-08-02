@@ -199,7 +199,9 @@ bool doignore=false;
 							else
 								cCode<<"//"+QString("Line %0: }\n").arg(currentLine);
 						}
-					fCode<<"return(retstr);\n}\n\n";
+
+					fCode<<"	if(capture==true)\nreturn(retstr.trimmed());\n";
+					fCode<<"else\n{\nif(file.isOpen()==true)\nfile.close();}\n\nreturn(0);\n}\n";
 					isInFunction=false;
 					return;
 				}
@@ -451,14 +453,6 @@ QStringList compilerClass::splitLines(QString qline)
 					pos=0;
 					continue;
 				}
-
-//TODO//
-//			if(tstr.at(pos).toLatin1()=='#')
-//				{
-//					lines<<tstr.left(pos);
-//					tstr="#"+tstr.mid(pos+1);
-//					break;
-//				}
 
 			for(int k=0;k<keywords.count();k++)
 				{

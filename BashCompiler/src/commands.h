@@ -35,13 +35,9 @@ class commandsClass
 //assign
 		QString	makeAssign(QString qline);
 
-//printf/echo
+//printf/echo/for
 		QString	makePrintf(QString qline);
 		QString	makeEcho(QString qline);
-
-//for ((x=0;x<n;x=x+n))
-//		QVector<QString>	forVariable;
-//		QVector<bool>	isInFor;
 		QString	makeFor(QString qline);
 
 //if/then/else/fi

@@ -1,6 +1,10 @@
 #!/bin/bash -e
 
 home=/home/
-ls ${HOME}
+ls "${HOME}"
 ls ${home}
 echo ${PATH}
+
+avar="abc				1234 \nqwert		uiop"
+echo $avar
+echo "$avar"
