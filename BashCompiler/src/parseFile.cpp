@@ -701,7 +701,7 @@ QString parseFileClass::parseOutputString(QString qline)
 		//skip escaped quote
 			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='"'))
 				{
-					this->currentPart+="\\\"";
+					this->currentPart+="\"";
 					this->linePosition+=2;
 					continue;
 				}
@@ -712,27 +712,32 @@ QString parseFileClass::parseOutputString(QString qline)
 					this->linePosition+=2;
 					continue;
 				}
-		//skip escaped nl
-			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='n'))
+		//skip escaped e
+			//if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='\\') && (line.at(this->linePosition+2).toLatin1()=='e'))
+			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='e'))
 				{
-					this->currentPart+="\\n";
-					this->linePosition+=2;
-					continue;
-				}
-		//skip escaped return
-			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='r'))
-				{
-					this->currentPart+="\\r";
-					this->linePosition+=2;
-					continue;
-				}
-		//skip escaped char
-			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='e') && (line.at(this->linePosition+2).toLatin1()=='['))
-				{
-					this->currentPart+="\\e[";
+		//errop<<"skip escaped e"<<Qt::endl;
+		//errop<<"0"<<line.at(this->linePosition).toLatin1()<<"1"<<line.at(this->linePosition+1).toLatin1()<<"2"<<line.at(this->linePosition+2).toLatin1()<<Qt::endl;
+					this->currentPart+="\\e"+QString(line.at(this->linePosition+2));
 					this->linePosition+=3;
 					continue;
 				}
+//		//skip escaped return
+//			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='r'))
+//				{
+//		errop<<"skip escaped return"<<Qt::endl;
+//					this->currentPart+="\\r";
+//					this->linePosition+=2;
+//					continue;
+//				}
+		//skip escaped char
+//			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='e') && (line.at(this->linePosition+2).toLatin1()=='['))
+//				{
+//		errop<<"skip escaped char"<<Qt::endl;
+//					this->currentPart+="\\e[";
+//					this->linePosition+=3;
+//					continue;
+//				}
 			if(line.at(this->linePosition).toLatin1()=='"')
 				{
 					this->parseString(line);
@@ -764,6 +769,7 @@ QString parseFileClass::parseOutputString(QString qline)
 		this->lineParts.append({this->currentPart,STRINGDATA});
 
 	QString pal=this->parseExprString(false);
+	pal.replace("\\$","$");
 	return(pal);
 }
 
@@ -786,12 +792,15 @@ QString parseFileClass::optimizeOP(QString qline,bool *succeed)
 					*succeed=true;
 				}
 		}
-	if(pal.contains(QRegularExpression("QString\\(\"%01\"\\)\\.arg\\(variables\\[\"sbar\"\\]\\).toInt\\(\\)$"))==true)
-		{
-			pal.replace(QRegularExpression("QString\\(\"%01\"\\)\\.arg\\((variables\\[\"sbar\"\\])\\).toInt\\(\\)$"),"\\1.toInt()");
-			*succeed=true;
-		}
+//	if(pal.contains(QRegularExpression("QString\\(\"%01\"\\)\\.arg\\(variables\\[\"[[:alnum:]]+\"\\]\\).toInt\\(\\)$"))==true)
+//		{
+//		errop<<">>>>"<<pal<<Qt::endl;
+//			pal.replace(QRegularExpression("QString\\(\"%01\"\\)\\.arg\\((variables\\[\"[[:alnum:]]+\"\\])\\).toInt\\(\\)$"),"\\1.toInt()");
+//			*succeed=true;
+//		errop<<pal<<"<<<<<<"<<Qt::endl;
+//		}
 
+	//if(qline=QString("")
 	if(mainCompilerClass->verboseCompile==true && *succeed==true)
 		errop<<RED<<"Optimized "<<BLUE<<qline<<RED<<" to "<<CYAN<<pal<<NORMAL<<Qt::endl;
 

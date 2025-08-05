@@ -142,13 +142,15 @@ void compilerClass::parseSingleLine(QString qline)
 	QRegularExpressionMatch	match;
 	QString					lineend;
 	commandsClass			commands;
-bool doignore=false;
+	bool doignore=false;
 
 	line=this->rawLine;
 
 	if(line.length()==0)
 		return;
 
+	//line.replace(QRegularExpression("\\\\([^e])"),"\\\\\\1");
+	line.replace(QRegularExpression("\\\\(.)"),"\\\\\\1");
 	if(this->verboseCompile==true)
 		errop<<"Processing line "<<this->currentLine<<" "<<line<<Qt::endl;
 
@@ -170,8 +172,10 @@ bool doignore=false;
 			return;
 		}
 	else
-		lines=this->splitLines(this->rawLine);
-
+	{
+	//	lines=this->splitLines(this->rawLine);
+		lines=this->splitLines(line);
+}
 	for(int j=0;j<lines.count();j++)
 		{
 			doignore=false;

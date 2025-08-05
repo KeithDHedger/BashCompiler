@@ -50,6 +50,9 @@ echo ${file^^}
 AND NOT
 echo ${1^^}
 
+echo ${#1}
+Is OK
+
 ````
 read ( not read while ) will only use the LAST variable given the default REPLY is used if no variable given.  
 Eg:
@@ -75,6 +78,11 @@ pushd /tmp
 g++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC -Ofast x.cpp
 ./a.out
 popd
+
+Or:
+bashcompiler -V /PATH/TO/SCRIPT -c /PATH/TO/OUTPUT/saferdd
+Which will compile the final application 'saferdd' in /PATH/TO/OUTPUT, intermediate folders will be created if needed.
+
 ````
 ######
 ### Done ( mostly! )

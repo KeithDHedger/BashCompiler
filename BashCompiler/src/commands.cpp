@@ -110,7 +110,7 @@ QString commandsClass::makeFunctionDefine(QString qline)
 			isInFunction=true;
 			retstr="QString "+match.captured(1).trimmed()+"(bool capture,QHash<QString, QString> fv)\n{\nQString retstr;\nQTextStream ss;\nQFile file;\n";
 			retstr+="if(capture==true)\nss.setString(&retstr, QIODevice::WriteOnly);\nelse\n";
-			retstr+="{\nfile.open(stderr, QIODevice::WriteOnly);\nss.setDevice(&file);\n}";
+			retstr+="{\nfile.open(stdout, QIODevice::WriteOnly);\nss.setDevice(&file);\n}";
 
 			functionNames<<match.captured(1).trimmed();
 		}
@@ -489,46 +489,76 @@ QString commandsClass::makeAssign(QString qline)
 	return(retstr);
 }
 
+//TODO//More optimisations...
+QString commandsClass::optEchoLine(QString qline,bool preserve,bool escapes,bool force)
+{
+	QString	tstr=qline;
+	QString replaces=".replace(\"\\\\n\",\"\\n\").replace(\"\\\\t\",\"\\t\").replace(\"\\\\e\",\"\\e\").replace(\"\\\\r\",\"\\r\")";
+	QString start="QString(";
+	QString dne=")";
+
+	if(qline.contains("variables[\"")==false)
+		{
+			if(preserve==false && escapes==true)
+				tstr.replace(QRegularExpression("[[:space:]]+"), " ").replace("\\\\n","\\n").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
+			else if(preserve==true && escapes==true)
+				tstr.replace("\\\\n","\\n").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
+			else if(preserve==false && escapes==false)
+				tstr.replace(QRegularExpression("[[:space:]]+"), " ").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
+			return(tstr);
+		}
+
+	if((preserve==true || escapes==true) && (force==false))
+		{
+			if(tstr.startsWith("QString("))
+				{
+					start="";
+					dne="";
+				}
+		}
+
+	if(preserve==false && escapes==true)
+		tstr=start+tstr+dne+".replace(QRegularExpression(\"[[:space:]]+\"), \" \")"+replaces;
+	else if(preserve==true && escapes==true)
+		tstr=start+tstr+dne+replaces;
+	else if(preserve==false && escapes==false)
+		tstr=tstr=start+tstr+dne+".replace(QRegularExpression(\"[[:space:]]+\"), \" \")";
+	//else if(preserve==true && escapes==false)
+	//	tstr="QString("+tstr+").replace(\"\\\\n\",\"\\\\\\n\").replace(\"\\\\t\",\"\\\\\\t\")";
+
+	return(tstr);
+}
+
 QString commandsClass::makeEcho(QString qline)
 {
 	QString					tstr;
 	QString					line=qline;
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
+	QString					outwhat="";
+	QString					outendl="Qt::endl";
+	QString					whereto="";
 	parseFileClass			pfl;
 	bool						nowrapper;
-	//bool						preserve=false;//TODO//
-	//bool						escapes=false;//TODO//
+	bool						preserve=false;
+	bool						escapes=false;
+	bool						nonl=false;
+	bool						force=false;
+	bool						emptyEcho=false;
 
 	pfl.preserveWhitespace=true;
 
-	re.setPattern("[[:space:]]*echo[[:space:]]*(-.\\s*)?(-.?\\s*)?[[:space:]]*(.*)[[:space:]](>>?|\\|)(.*)");
+	re.setPattern("[[:space:]]*echo[[:space:]]*(-.\\s*)?(-.?\\s*)?[[:space:]]*(.*)([[:space:]]>+|\\|)(.*)");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
-			tstr=pfl.parseOutputString(match.captured(3).trimmed());
-			QString rep=tstr;
-			QString outit=pfl.parseOutputString(match.captured(5).trimmed());
-			QString whatit=match.captured(4).trimmed();
-			QString endit="";
-			if(whatit=="|")
-				return("");
-			if((match.captured(1).trimmed()!="-n") && (match.captured(2).trimmed()!="-n"))
-				endit="\\n";
-			if(whatit==">")
-				whatit="w";
-			else
-				whatit="a";
-
-			re.setPattern("QString\\(\"(.*)\"\\)(.*)");
-			match=re.match(rep);
-			if(match.hasMatch())
-				{
-					rep=match.captured(1);
-					QString final="{\nFILE *fp = fopen("+outit+".toStdString().c_str(),\""+whatit+"\");\nfprintf(fp, \"%s"+endit.toStdString().c_str()+"\",QString(\""+rep+"\")"+match.captured(2)+".toStdString().c_str());";
-					final+="\nfclose(fp);\n}";
-					return(final);
-				}
+			if(match.captured(1).trimmed()=="-e" || match.captured(2).trimmed()=="-e")
+				escapes=true;
+			if(match.captured(1).trimmed()=="-n" || match.captured(2).trimmed()=="-n")
+				nonl=true;
+			outwhat=match.captured(4).trimmed();
+			whereto=match.captured(5).trimmed();
+			force=true;
 		}
 	else
 		{
@@ -536,52 +566,67 @@ QString commandsClass::makeEcho(QString qline)
 			match=re.match(line);
 			if(match.hasMatch())
 				{
-					nowrapper=true;
-					tstr=pfl.parseOutputString(match.captured(3).trimmed());
-
-					//TODO//if(match.captured(3).trimmed().contains(QRegularExpression("^\\\".*\\\"$"))==true)
-					//TODO//	preserve=true;
-					//TODO//if(match.captured(2).trimmed()=="-e" || match.captured(1).trimmed()=="-e")
-					//TODO//	escapes=true;
-
-					if(isInFunction==true)
-						{
-							QString pal=pfl.parseExprString(false);
-							QString	endline="<<\"\\n\";";
-							
-							pal=pfl.optimizeOP(pal,&nowrapper);
-							nowrapper=!nowrapper;
-							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))
-								endline=";";
-							else
-								endline="<<Qt::endl;";
-							if(nowrapper==false)
-								tstr="ss<<"+pal+endline;
-							else
-								tstr="ss<<QString("+pal+")"+endline;
-						}
-					else
-						{
-							tstr=pfl.optimizeOP(tstr,&nowrapper);
-							if((match.captured(1).trimmed()=="-n") || (match.captured(2).trimmed()=="-n"))	
-								{
-								if(nowrapper==true)
-									tstr="outop<<"+tstr+"<<Qt::flush";
-								else
-									tstr="outop<<QString("+tstr+")<<Qt::flush";
-									}
-							else
-							{
-								if(nowrapper==true)
-									tstr="outop<<"+tstr+"<<Qt::endl";
-								else
-									tstr="outop<<QString("+tstr+")<<Qt::endl";
-									}
-						}
-					return(tstr);
+					if(match.captured(1).trimmed()=="-e" || match.captured(2).trimmed()=="-e")
+						escapes=true;
+					if(match.captured(1).trimmed()=="-n" || match.captured(2).trimmed()=="-n")
+						nonl=true;
 				}
 		}
-	return("");
+
+	if(nonl==true)
+		outendl="Qt::flush";
+
+	nowrapper=true;
+	emptyEcho=match.captured(3).isEmpty();
+	if(emptyEcho==false)
+		{
+			tstr=pfl.parseOutputString(match.captured(3));
+
+			if(match.captured(3).contains(QRegularExpression("^\\\".*\\\"$"))==true)
+				preserve=true;
+
+			tstr=pfl.optimizeOP(tstr,&nowrapper);
+			tstr=this->optEchoLine(tstr,preserve,escapes,force);
+		}
+
+	whereto=pfl.parseOutputString(whereto);
+	whereto=pfl.optimizeOP(whereto,&nowrapper);
+
+
+	if(outwhat.isEmpty()==true)
+		{
+			if(emptyEcho==false)
+				{
+					if(isInFunction==false)
+						tstr="outop<<"+tstr+"<<"+outendl;
+					else
+						tstr="ss<<"+tstr+"<<"+outendl;
+				}
+			else
+				{
+					if(isInFunction==false)
+						tstr="outop<<"+outendl;
+					else
+						tstr="ss<<"+outendl;
+				}
+		}
+	else
+		{
+			QString outofile;
+			if(outwhat=="|")
+				return("");
+			if(outwhat==">")
+				outwhat="QIODevice::WriteOnly";
+			else
+				outwhat="QIODevice::Append";
+			if(emptyEcho==false)
+				outofile="{\nQString f="+whereto+";\nQFile fh(f);\nfh.open("+outwhat+");\nQTextStream out(&fh);\nout<<"+tstr+"<<"+outendl+";\n}";
+			else
+				outofile="{\nQString f="+whereto+";\nQFile fh(f);\nfh.open("+outwhat+");\nQTextStream out(&fh);\nout<<"+outendl+";\n}";
+			return(outofile);
+		}
+
+	return(tstr);
 }
 
 QString commandsClass::makeFor(QString qline)

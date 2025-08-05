@@ -67,6 +67,7 @@ class commandsClass
 //here docs
 		QString	makeHereDoc(QString qline);
 	private:
+		QString	optEchoLine(QString qline,bool preserve,bool escapes,bool force);
 };
 
 #endif
