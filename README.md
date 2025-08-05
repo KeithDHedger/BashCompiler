@@ -79,7 +79,7 @@ g++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC -Ofast x.cpp
 ./a.out
 popd
 
-Or:
+Or to compile a final app:
 bashcompiler -V /PATH/TO/SCRIPT -c /PATH/TO/OUTPUT/saferdd
 Which will compile the final application 'saferdd' in /PATH/TO/OUTPUT, intermediate folders will be created if needed.
 
