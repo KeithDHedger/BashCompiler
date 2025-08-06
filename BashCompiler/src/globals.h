@@ -69,6 +69,8 @@ static const char*	bashmath[]={"-gt ","-lt ","-eq ","-ne ","-le ","-ge "," != ",
 static const char*	cmath[]={">","<","==","!=","<=",">=","!=","<",">","==",NULL};
 static QTextStream	errop(stderr);
 static QTextStream	outop(stdout);
+static QRegularExpression replaceWhiteSpace("[[:space:]]+");
+
 #pragma GCC diagnostic pop
 
 #include "commands.h"

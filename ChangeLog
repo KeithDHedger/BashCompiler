@@ -1,4 +1,6 @@
 0.3.1
+Parsing tweaks.
+OP code tweaks.
 Added more echo optimisations.
 Output now follows BASH's 'echo' better ie preserving white space excapes chars or not depending if using quotes and -e switch.
 Redone function code.

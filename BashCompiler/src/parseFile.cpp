@@ -70,10 +70,10 @@ bool parseFileClass::parseLine(QString qline)
 	while(this->linePosition<line.length())
 		{
 		//skip escaped quote
-			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='"'))
+			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='\\') && (line.at(this->linePosition+2).toLatin1()=='"'))
 				{
 					this->currentPart+="\\\"";
-					this->linePosition+=2;
+					this->linePosition+=3;
 					continue;
 				}
 		//skip escaped dollar
@@ -393,6 +393,7 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 						tstr=this->lineParts.at(j).data;
 						tstr.replace(QRegularExpression("^\\$\\(*|\\)*$"),"");
 						tstr=this->lineToBashCLIString(tstr);
+						tstr.replace("\\\\\"","\\\"");
 //call a bash function and assign
 						re.setPattern("^[[:space:]]*([[:alnum:]_]+)[[:space:]]*(.*)$");
 						match=re.match(tstr);
@@ -778,6 +779,8 @@ QString parseFileClass::optimizeOP(QString qline,bool *succeed)
 	QString	pal=qline;
 	*succeed=false;
 
+
+	//pal.replace("\\\\\"","\\\"");
 	if(pal.contains(QRegularExpression("^QString\\(\"%01\"\\).arg\\(.*\\.(mid|length|toInt|toStdString).*$"))==false)
 		{
 			if(pal.contains(QRegularExpression("^QString\\(\"%01\"\\)"))==true)
@@ -801,6 +804,9 @@ QString parseFileClass::optimizeOP(QString qline,bool *succeed)
 //		}
 
 	//if(qline=QString("")
+//errop<<pal<<"<<<<<<"<<Qt::endl;
+		pal.replace("\\\\\\\"","\\\"");
+//errop<<pal<<"<<<<<<"<<Qt::endl;
 	if(mainCompilerClass->verboseCompile==true && *succeed==true)
 		errop<<RED<<"Optimized "<<BLUE<<qline<<RED<<" to "<<CYAN<<pal<<NORMAL<<Qt::endl;
 

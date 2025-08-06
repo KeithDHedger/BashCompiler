@@ -500,11 +500,11 @@ QString commandsClass::optEchoLine(QString qline,bool preserve,bool escapes,bool
 	if(qline.contains("variables[\"")==false)
 		{
 			if(preserve==false && escapes==true)
-				tstr.replace(QRegularExpression("[[:space:]]+"), " ").replace("\\\\n","\\n").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
+				tstr.replace(replaceWhiteSpace," ").replace("\\\\n","\\n").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
 			else if(preserve==true && escapes==true)
 				tstr.replace("\\\\n","\\n").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
 			else if(preserve==false && escapes==false)
-				tstr.replace(QRegularExpression("[[:space:]]+"), " ").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
+				tstr.replace(replaceWhiteSpace," ").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
 			return(tstr);
 		}
 
@@ -518,11 +518,11 @@ QString commandsClass::optEchoLine(QString qline,bool preserve,bool escapes,bool
 		}
 
 	if(preserve==false && escapes==true)
-		tstr=start+tstr+dne+".replace(QRegularExpression(\"[[:space:]]+\"), \" \")"+replaces;
+		tstr=start+tstr+dne+".replace(replaceWhite, \" \")"+replaces;
 	else if(preserve==true && escapes==true)
 		tstr=start+tstr+dne+replaces;
 	else if(preserve==false && escapes==false)
-		tstr=tstr=start+tstr+dne+".replace(QRegularExpression(\"[[:space:]]+\"), \" \")";
+		tstr=tstr=start+tstr+dne+".replace(replaceWhite, \" \")";
 	//else if(preserve==true && escapes==false)
 	//	tstr="QString("+tstr+").replace(\"\\\\n\",\"\\\\\\n\").replace(\"\\\\t\",\"\\\\\\t\")";
 

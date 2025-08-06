@@ -47,8 +47,7 @@ bool compilerClass::openBashFile(QString filepath)
 void compilerClass::writeCFile(void)
 {
 	QString specialvars="QString exitstatus;\n";
-	QString globalvars="QTextStream outop(stdout);\nQHash<QString,QString> variables;\nQVector<QString> dirstack;\nchar **gargv;\n";
-	QString headers="#include <QTextStream>\n#include <QHash>\n#include <QRegularExpression>\n#include <QDir>\n#include <QProcessEnvironment>\n\n";
+	QString globalvars="QTextStream outop(stdout);\nQHash<QString,QString> variables;\nQVector<QString> dirstack;\nQRegularExpression replaceWhite(\"[[:space:]]+\");\nchar **gargv;\n";	QString headers="#include <QTextStream>\n#include <QHash>\n#include <QRegularExpression>\n#include <QDir>\n#include <QProcessEnvironment>\n\n";
 	QString functions="\n\
 QString procsub(QString proc)\n\
 {\n\
