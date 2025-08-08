@@ -37,7 +37,7 @@ You MUST use "-gt, -ge ... etc for numeric comparisons.
 All numerical expression **MUST** be enclosed by $(())  
 ######
 'eval' is NOT supported and almost certainly will never be, not because of any supposed "eval=evil" but simply it would need the compiler available at runtime and probably a JIT compiler.  
-When using redirect to a file or pipe with echo  you **MUST** precede the '>' or '|' with a space.  
+When using redirect to a file or pipe with echo  you **MUST** surround the '>', '>>' or '|' with at least one space/tab.  
 When using -e/-n with echo you **MUST** use individual switches eg -n -e AND NOT -ne.  
 When using loops ( eg for ((x=0;x<n;x=x++)) ) the control loop is **READ ONLY**, you shouldn't really programatically alter the control loop anyway, if you do need to you should use a 'while' loop.  
   

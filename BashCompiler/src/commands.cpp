@@ -72,6 +72,95 @@ QString commandsClass::makeFunction(QString qline)
 	return(retstr);
 }
 
+QString commandsClass::makeBASHCliLine(QString qline)
+{
+	QString	data=qline;
+	QString	varname="";
+	QString	whatin;
+	QString	formatstr="";
+	QString	argstr="";
+	int		j=0;
+	int		formatcnt=1;
+
+	if(isInFunction==false)
+		whatin="gargv";
+	else
+		whatin="fv";
+
+	while(j<data.length())
+		{
+			if(data.at(j).toLatin1()=='\'')
+				{
+					formatstr+="'";
+					j++;
+					while(data.at(j).toLatin1()!='\'')
+						{
+							formatstr+=data.at(j);
+							j++;
+						}
+					formatstr+="'";
+					j++;
+					continue;
+				}
+			if(data.at(j).toLatin1()=='"')
+				{
+					formatstr+="\\\"";
+					j++;
+					continue;
+				}
+
+			if(data.at(j).toLatin1()=='$')
+				{
+					if((data.at(j+1).isNumber()) || (data.at(j+1).toLatin1()=='{' && data.at(j+2).isNumber()))
+						{
+							if(data.at(j+1).toLatin1()=='{')
+								j++;
+							argstr+=".arg("+whatin+"["+data.at(j+1)+"])";
+							formatstr+="%"+QString::number(formatcnt++);
+
+							j+=2;
+							if(data.at(j).toLatin1()=='}')
+								j++;
+							continue;
+						}
+					varname="variables[\"";
+					j++;
+
+					if(data.at(j).toLatin1()=='{')
+						{
+							j++;
+							while(data.at(j).toLatin1()!='}')
+								{
+									varname+=data.at(j).toLatin1();
+									j++;
+								}
+							varname+="\"]";
+							formatstr+="%"+QString::number(formatcnt++);
+							argstr+=".arg("+varname+")";
+							varname="";
+							j++;
+							continue;
+						}
+					else
+						{
+							while(j<data.length() && data.at(j).toLatin1()!=' ' && data.at(j).toLatin1()!='"' && data.at(j).toLatin1()!='\t')
+								{
+									varname+=data.at(j).toLatin1();
+									j++;
+								}
+							varname+="\"]";
+							formatstr+="%"+QString::number(formatcnt++);
+							argstr+=".arg("+varname+")";
+							continue;
+						}
+				}
+			formatstr+=data.at(j);
+			j++;
+		}
+
+	return("QString(\""+formatstr+"\")"+argstr);
+}
+
 QString commandsClass::makeExternalCommand(QString qline)
 {
 	QString	formatstr="";
@@ -83,17 +172,8 @@ QString commandsClass::makeExternalCommand(QString qline)
 	if(qline.isEmpty()==true)
 		return("");
 
-	tstr=qline;
-	tstr=tstr.replace("\"","\\\"");
-	tstr=tstr.replace(QRegularExpression("\\${*([[:alpha:]][[:alnum:]_]*)}*"),"\"+variables[\"\\1\"]+\"");
-
-	if(isInFunction==true)
-		tstr=tstr.replace(QRegularExpression("\\${*([[0-9]]*)}*"),"\"+QString(fv[\"\\1\"])+\"");
-	else
-		tstr=tstr.replace(QRegularExpression("\\${*([[0-9]]*)}*"),"\"+QString(gargv[\\1])+\"");
-
-	retstr="exitstatus=QString::number(WEXITSTATUS(system(QString(\""+tstr+"\").toStdString().c_str())));\nfflush(NULL)";
-	return(retstr);
+	tstr=this->makeBASHCliLine(qline);
+	return("procsub2("+tstr+")");
 }
 
 QString commandsClass::makeFunctionDefine(QString qline)
@@ -548,7 +628,11 @@ QString commandsClass::makeEcho(QString qline)
 
 	pfl.preserveWhitespace=true;
 
-	re.setPattern("[[:space:]]*echo[[:space:]]*(-.\\s*)?(-.?\\s*)?[[:space:]]*(.*)([[:space:]]>+|\\|)(.*)");
+	re.setPattern("[.^\\|]*( \\| ).*$");
+	if(qline.contains(re)==true)
+		return("");
+
+	re.setPattern("[[:space:]]*echo[[:space:]]*(-.\\s*)?(-.?\\s*)?[[:space:]]*(.*)([[:space:]]+>+[[:space:]]+)(.*)");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
@@ -779,6 +863,6 @@ QString commandsClass::makeRead(QString qline)
 	else
 		tstr="REPLY";
 
-	retstr=QString("variables[\""+tstr+"\"]=procsub(\"%1;echo ${"+tstr+"}\")").arg(pfl.lineToBashCLIString(qline));
+	retstr=QString("variables[\""+tstr+"\"]=procsubcheat(\"%1;echo ${"+tstr+"}\")").arg(pfl.lineToBashCLIString(qline));
 	return(retstr);
 }

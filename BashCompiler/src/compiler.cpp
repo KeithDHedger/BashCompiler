@@ -47,8 +47,77 @@ bool compilerClass::openBashFile(QString filepath)
 void compilerClass::writeCFile(void)
 {
 	QString specialvars="QString exitstatus;\n";
-	QString globalvars="QTextStream outop(stdout);\nQHash<QString,QString> variables;\nQVector<QString> dirstack;\nQRegularExpression replaceWhite(\"[[:space:]]+\");\nchar **gargv;\n";	QString headers="#include <QTextStream>\n#include <QHash>\n#include <QRegularExpression>\n#include <QDir>\n#include <QProcessEnvironment>\n\n";
+	QString globalvars="QTextStream outop(stdout);\nQHash<QString,QString> variables;\nQVector<QString> dirstack;\nQRegularExpression replaceWhite(\"[[:space:]]+\");\nQProcess pipeProc;\nQProcess comProc;\nint exitnum=-1;\nchar **gargv;\n";
+	QString headers="#include <QTextStream>\n#include <QHash>\n#include <QRegularExpression>\n#include <QDir>\n#include <QProcessEnvironment>\n#include <QProcess>\n\n";
+
 	QString functions="\n\
+QString procsub(QString procin)\n\
+{\n\
+QStringList proc;\n\
+\n\
+proc<<\"-c\"<<procin;\n\
+pipeProc.start(\""+shellPath+"\",proc);\n\
+if(!pipeProc.waitForStarted())\n\
+return(\"\");\n\
+pipeProc.waitForFinished(-1);\n\
+QString data=pipeProc.readAll();\n\
+\n\
+if(data.isEmpty()==false)\n\
+{\n\
+if(data.at(data.length()-1)=='\\n')\n\
+data.resize(data.length()-1);\n\
+}\n\
+//exitnum=pipeProc.exitCode();\n\
+exitstatus=QString::number(pipeProc.exitCode());\n\
+return(data);\n\
+}\n\
+\n\
+void procsub2(QString procin)\n\
+{\n\
+exitstatus=QString::number(comProc.execute(\""+shellPath+"\",QStringList()<<\"-c\"<<procin));\n\
+}\n\
+QString loadEnvironment(bool capture,QHash<QString, QString> fv)\n\
+{\n\
+QProcessEnvironment env=QProcessEnvironment::systemEnvironment();\n\
+QStringList paths_list=env.toStringList();\n\
+for(int j=0;j<paths_list.size();j++)\n\
+{\n\
+if(paths_list.at(j).startsWith(\"BASH_FUNC_\")==false)\n\
+{\n\
+QStringList parts=paths_list.at(j).split(\"=\");\n\
+variables[parts.at(0)]=parts.at(1);\
+}\n\
+}\n\
+return(\"\");\n\
+}\n\
+QString procsubcheat(QString proc)\n\
+{\n\
+FILE *fp;\n\
+int exitnum=-1;\n\
+char *buffer=(char*)alloca(1024);\n\
+QString retstr=\"\";\n\
+\n\
+//outop<<proc<<Qt::endl;\n\
+\n\
+fp=popen(proc.toStdString().c_str(),\"r\");\n\
+if(fp!=NULL)\n\
+{\n\
+buffer[0]=0;\n\
+while(fgets(buffer,1024,fp))\n\
+retstr+=buffer;\n\
+if(retstr.isEmpty()==false)\n\
+{\n\
+if(retstr.at(retstr.length()-1)=='\\n')\n\
+retstr.resize(retstr.length()-1);\n\
+}\n\
+exitnum=pclose(fp)/256;\n\
+exitstatus=QString::number(exitnum);\n\
+}\n\
+return(retstr);\n\
+};\n\
+\n";
+
+	QString functionsX="\n\
 QString procsub(QString proc)\n\
 {\n\
 FILE *fp;\n\
@@ -129,6 +198,7 @@ return(\"\");\n\
 			command=QString("g++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast '%1' -o '%2'").arg(foldername+"/"+filename+".cpp").arg(foldername+"/"+filename);
 			errop<<"Compiling using command:\n"<<command<<"\n..."<<Qt::endl;
 			system(command.toStdString().c_str());
+			//procsub2(command);
 		}
 }
 
@@ -171,10 +241,11 @@ void compilerClass::parseSingleLine(QString qline)
 			return;
 		}
 	else
-	{
+		{
 	//	lines=this->splitLines(this->rawLine);
-		lines=this->splitLines(line);
-}
+			lines=this->splitLines(line);
+		}
+
 	for(int j=0;j<lines.count();j++)
 		{
 			doignore=false;
@@ -400,12 +471,15 @@ QStringList compilerClass::splitLines(QString qline)
 									inquotespos+=2;
 									continue;
 								}
+							
 							if(tstr.at(inquotespos).toLatin1()=='\'')
 								inquotes=false;
 							inquotespos++;
 						}
 					pos=inquotespos;
+					continue;
 				}
+			
 			if(tstr.at(pos).toLatin1()=='"')
 				{
 					pos++;
@@ -423,6 +497,7 @@ QStringList compilerClass::splitLines(QString qline)
 							inquotespos++;
 						}
 					pos=inquotespos;
+					continue;
 				}
 
 			if((pos<tstr.length()-1) && (tstr.at(pos).toLatin1()=='(') && (tstr.at(pos+1).toLatin1()=='('))

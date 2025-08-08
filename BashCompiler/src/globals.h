@@ -29,6 +29,7 @@
 #include <QVector>
 #include <QTextStream>
 #include <QDate>
+#include <QProcess>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -93,5 +94,6 @@ extern QVector<QString>	caseVariable;
 extern bool				firstCasecompare;
 extern QString			fullCompileHere;
 extern QString			useQT;
+extern QString			shellPath;
 
 #endif
