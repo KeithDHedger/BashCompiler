@@ -1,3 +1,9 @@
+0.3.2
+Fixed select using a command substitution.
+Added pipe and select example.
+Added 'select' ( N.B for now needs BASH to be installed ).
+SHELL env var now respected when running external commands, defaults to /bin/bash if not set.
+
 0.3.1
 Fixed running external apps with pipes.
 Parsing tweaks.

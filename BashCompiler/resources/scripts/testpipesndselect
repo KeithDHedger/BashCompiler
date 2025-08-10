@@ -1,0 +1,60 @@
+#!/bin/bash
+
+avar="123 456 789"
+bvar="12345678901234567890"
+
+#piped commands
+echo "abc.123.def.098 ${avar}${bvar}\"${0}\"${1} $0" | sed 's/123/X X X/g' |awk '{print $1 $2 $NF}'
+echo $0 $1 $bvar ${avar}
+
+echo "abc.123.def.098 ${avar}${bvar}\"${0}\" ${1} $0"
+
+echo $SHELL
+ls ${HOME}
+
+#select from command sub
+selectargs="$(ls /usr/bin |grep -i find)"
+select argfind in ${selectargs}
+do
+break
+done
+echo $argfind
+
+#select from direct command sub
+selectargsfrom="/usr/bin"
+select argfind in $(ls $selectargsfrom |grep -i cc)
+do
+break
+done
+echo $argfind
+
+read -p "ok u mugs "
+echo $REPLY
+
+#nested select
+select arg in 123 456 cancel
+do
+select arg2 in abc def ghi cancel
+do
+break
+done
+break
+done
+
+
+selectargs="a1 b2 c3 d4 done"
+select arg3 in ${selectargs}
+do
+break
+done
+
+cnt=0
+while [ $cnt -lt 10 ];
+do
+echo $cnt
+cnt=$((cnt + 2))
+done
+
+echo $arg $arg2 $arg3
+
+

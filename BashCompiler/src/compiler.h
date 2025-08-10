@@ -47,6 +47,7 @@ class compilerClass
 
 	private:
 		QStringList		splitLines(QString qline);
+		bool				skipDo=false;
 };
 
 #endif

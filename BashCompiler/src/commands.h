@@ -59,6 +59,7 @@ class commandsClass
 		QString	makeRead(QString qline);
 		QString	makeCase(QString qline);
 		QString	makeCaseCompareStatement(QString qline);
+		QString makeSelect(QString qline);
 
 //functions
 		QString	makeFunction(QString qline);

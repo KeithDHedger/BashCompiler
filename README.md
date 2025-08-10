@@ -64,6 +64,8 @@ read -p "run this command ? [N/y] " ans1 ans2
 echo $ans2
 N.B. extra variables supplied ( ie ans1 ) will 'swallow' input.
 
+Running an external command requires a shell this is taken from ${SHELL} or defaults to /bin/bash if SHELL is not set.
+For the moment read and select use /bin/bash to run, this will change soon.
 ````  
 
 ######
@@ -87,6 +89,7 @@ Which will compile the final application 'saferdd' in /PATH/TO/OUTPUT, intermedi
 ######
 ### Done ( mostly! )
 
+select
 read
 cd
 case.  
@@ -118,7 +121,6 @@ Functions.
 ### To do ( loads! ) in no particular order.  
 
 C style assign/for etc.  
-read.  
 arrays.  
 regex.  
 Backgrounding ( '&' ).  

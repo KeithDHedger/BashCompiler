@@ -866,3 +866,23 @@ QString commandsClass::makeRead(QString qline)
 	retstr=QString("variables[\""+tstr+"\"]=procsubcheat(\"%1;echo ${"+tstr+"}\")").arg(pfl.lineToBashCLIString(qline));
 	return(retstr);
 }
+
+QString commandsClass::makeSelect(QString qline)
+{
+	QString					retstr="";
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+	parseFileClass			pfl;
+
+	re.setPattern("^[[:space:]]*select[[:space:]]*([[:alpha:][:alnum:]_]*)[[:space:]]*in[[:space:]]*(.*)");
+	match=re.match(qline);
+	if(match.hasMatch())
+		{
+			retstr="while(true)\n{\n";
+			//retstr+="variables[\""+match.captured(1).trimmed()+"\"]=procsubcheat(QString(\"select "+match.captured(1).trimmed()+" in "+match.captured(2).trimmed()+";do break;done;echo $"+match.captured(1).trimmed()+"\"));\n";
+			//retstr+="variables[\""+match.captured(1).trimmed()+"\"]=procsubcheat(QString(\"select "+match.captured(1).trimmed()+" in "+pfl.lineToBashCLIString(match.captured(2).trimmed())+";do break;done;echo $"+match.captured(1).trimmed()+"\"));\n";
+			retstr+="variables[\""+match.captured(1).trimmed()+"\"]=procsubcheat(QString(\"select "+match.captured(1).trimmed()+" in "+pfl.lineToBashCLIString(match.captured(2).trimmed())+";do break;done;echo $"+match.captured(1).trimmed()+"\"));\n";
+		}
+
+	return(retstr);
+}

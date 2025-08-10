@@ -334,7 +334,7 @@ QString parseFileClass::lineToBashCLIString(QString qline)
 	tstr=qline;
 	tstr.replace("\"","\\\"");
 	tstr.replace("\\\\\"","\\\\\\\"");
-	tstr=tstr.replace(QRegularExpression("\\$\\{*([[:alpha:]][[:alnum:]_]*)\\}*"),"\"+variables[\"\\1\"]+\"");
+	tstr=tstr.replace(QRegularExpression("\\$\\{*([[:alpha:]][[:alnum:]_]*)\\}*"),"\"+variables[\"\\1\"].replace(replaceWhite, \" \")+\"");
 	if(isInFunction==true)
 		tstr=tstr.replace(QRegularExpression("\\${*([[0-9]]*)}*"),"\"+QString(fv[\"\\1\"])+\"");
 	else
