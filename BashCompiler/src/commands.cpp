@@ -879,8 +879,6 @@ QString commandsClass::makeSelect(QString qline)
 	if(match.hasMatch())
 		{
 			retstr="while(true)\n{\n";
-			//retstr+="variables[\""+match.captured(1).trimmed()+"\"]=procsubcheat(QString(\"select "+match.captured(1).trimmed()+" in "+match.captured(2).trimmed()+";do break;done;echo $"+match.captured(1).trimmed()+"\"));\n";
-			//retstr+="variables[\""+match.captured(1).trimmed()+"\"]=procsubcheat(QString(\"select "+match.captured(1).trimmed()+" in "+pfl.lineToBashCLIString(match.captured(2).trimmed())+";do break;done;echo $"+match.captured(1).trimmed()+"\"));\n";
 			retstr+="variables[\""+match.captured(1).trimmed()+"\"]=procsubcheat(QString(\"select "+match.captured(1).trimmed()+" in "+pfl.lineToBashCLIString(match.captured(2).trimmed())+";do break;done;echo $"+match.captured(1).trimmed()+"\"));\n";
 		}
 
