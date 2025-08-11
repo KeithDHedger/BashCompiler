@@ -235,7 +235,7 @@ void compilerClass::parseSingleLine(QString qline)
 								cCode<<"//"+QString("Line %0: }\n").arg(currentLine);
 						}
 
-					fCode<<"	if(capture==true)\nreturn(retstr.trimmed());\n";
+					fCode<<"if(capture==true)\nreturn(retstr.trimmed());\n";
 					fCode<<"else\n{\nif(file.isOpen()==true)\nfile.close();}\n\nreturn(0);\n}\n";
 					isInFunction=false;
 					return;
@@ -373,6 +373,7 @@ void compilerClass::parseSingleLine(QString qline)
 													lineend="";
 												}
 										}
+									errop<<lines.at(j)<<Qt::endl;
 									if(retstr.isEmpty()==true)
 										retstr=commands.makeExternalCommand(lines.at(j));
 								}

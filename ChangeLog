@@ -1,4 +1,5 @@
 0.3.2
+Fixed external commands in functions.
 Fixed select using a command substitution.
 Added pipe and select example.
 Added 'select' ( N.B for now needs BASH to be installed ).

@@ -41,7 +41,6 @@ done
 break
 done
 
-
 selectargs="a1 b2 c3 d4 done"
 select arg3 in ${selectargs}
 do
