@@ -124,7 +124,7 @@ return(retstr);\n\
 		functions+=fCode.at(j);
 
 //write code
-	cCode.prepend("int main(int argc, char **argv)\n{\ngargv=argv;\nloadEnvironment(false,{});\nvariables[\"SHELL\"]=(getenv(\"SHELL\")!=NULL && strlen(getenv(\"SHELL\"))>0) ? (getenv(\"SHELL\")) : (\"/bin/bash\");\n");
+	cCode.prepend("\nint main(int argc, char **argv)\n{\ngargv=argv;\nloadEnvironment(false,{});\nvariables[\"SHELL\"]=(getenv(\"SHELL\")!=NULL && strlen(getenv(\"SHELL\"))>0) ? (getenv(\"SHELL\")) : (\"/bin/bash\");\n");
 
 	cCode.prepend(functions);
 	cCode.prepend(globalvars);
@@ -202,7 +202,6 @@ void compilerClass::parseSingleLine(QString qline)
 		}
 	else
 		{
-	//	lines=this->splitLines(this->rawLine);
 			lines=this->splitLines(line);
 		}
 

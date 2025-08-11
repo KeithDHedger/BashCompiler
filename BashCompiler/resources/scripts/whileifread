@@ -15,6 +15,7 @@ done
 
 ls -1 /usr|grep -i bin
 
+#alter to suit
 file="/home/keithhedger/.bashrc"
 
 while read
@@ -31,6 +32,7 @@ cnt=$((cnt -1 ))
 echo $cnt
 done<   <(cat /media/LinuxData/Development64/Projects/BashCompiler/BashCompiler/sources)
 
+#alter to suit
 file="/media/MediaStore/Music/Flacs/Music/Abba/Gold"
 echo $file
 #extra spaces in input to done ignored
@@ -39,6 +41,7 @@ echo "$REPLY"
 echo ${REPLY%.*}
 done<    <(ls -1 $file)
 
+#alter to suit
 file="/home/keithhedger/Backgrounds"
 echo $file
 while read;do

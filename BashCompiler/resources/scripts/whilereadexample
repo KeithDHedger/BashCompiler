@@ -1,0 +1,39 @@
+#!/bin/bash
+
+printDestDirs ()
+{
+	echo $1 $2 $3
+	mount |grep -i "\(${1}\|${2}\|${3}\)" |grep -v '\(/sys/\|\s/\s\)'
+}
+
+#read cat /etc/fstab
+echo "Using cat /etc/fstab"
+while read
+	do
+		echo "${REPLY}"
+	done< <(cat /etc/fstab)
+
+#read /etc/shells
+echo
+echo "Using /etc/shells"
+while read
+	do
+		echo "${REPLY}"
+	done < /etc/shells
+
+#read from function
+echo
+echo "Using printDestDirs media sd nvme"
+while read
+	do
+		echo "${REPLY}"
+	done< <(printDestDirs media sd nvme)
+
+#read from function
+echo
+echo "Using printDestDirs"
+while read
+	do
+		echo "${REPLY}"
+	done< <(printDestDirs)
+echo

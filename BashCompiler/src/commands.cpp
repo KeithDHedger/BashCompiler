@@ -116,7 +116,10 @@ QString commandsClass::makeBASHCliLine(QString qline)
 						{
 							if(data.at(j+1).toLatin1()=='{')
 								j++;
-							argstr+=".arg("+whatin+"["+data.at(j+1)+"])";
+							if(whatin=="gargv")
+								argstr+=".arg("+whatin+"["+data.at(j+1)+"])";
+							else
+								argstr+=".arg("+whatin+"[\""+data.at(j+1)+"\"])";
 							formatstr+="%"+QString::number(formatcnt++);
 
 							j+=2;
@@ -398,7 +401,9 @@ QString commandsClass::makeDone(QString qline)
 	QString					retstr="";
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
+	QRegularExpressionMatch	match2;
 	parseFileClass			pfl;
+
 
 	if((isInFor.isEmpty()==false) && (isInFor.back()==true))
 		{
@@ -412,6 +417,46 @@ QString commandsClass::makeDone(QString qline)
 				{
 					int matchnum=3;
 					QString doacat="";
+
+					if(match.captured(matchnum).trimmed().isEmpty()==false)
+						{
+							QString tstr="";
+							re.setPattern("^[[:space:]]*([[:alnum:]_]+)[[:space:]]*(.*)$");
+							match2=re.match(match.captured(matchnum).trimmed());
+
+							if(match2.hasMatch())
+								{
+									for(int j=0;j<functionNames.count();j++)
+										{
+											if(match2.captured(1).trimmed().compare(functionNames.at(j).trimmed())==0)
+												{
+													parseFileClass	pfl;
+													parseFileClass	pfl1;
+													QString varstr="{";
+													tstr=match2.captured(2).trimmed();
+													pfl.parseLine(tstr);
+													int argcnt=1;
+													for(int kk=0;kk<pfl.lineParts.count();kk++)
+														{
+															pfl1.parseLine(pfl.lineParts.at(kk).data);
+															tstr=pfl1.parseExprString(false);
+															tstr.replace("\"\"\"+","");
+															tstr.replace("+\"\"\"","");
+															varstr+=QString("{\"%1\",").arg(argcnt++)+tstr+"},";
+														}
+													varstr+="}";
+													retstr=match2.captured(1).trimmed()+"(true,"+varstr+")";
+													if(isInFunction==true)
+														fCode.insert(whileReadLine.last(),"QString proc=\"/usr/bin/echo \\\"\"+"+retstr+"+\"\\\"|cat -\";\n");
+													else
+														cCode.insert(whileReadLine.last(),"QString proc=\"/usr/bin/echo \\\"\"+"+retstr+"+\"\\\"|cat -\";\n");
+													whileReadLine.pop_back();
+													return("}\n}\n");
+												}
+										}
+								}
+						}
+
 					if(match.captured(matchnum).trimmed().isEmpty()==true)
 						{
 							matchnum=4;
