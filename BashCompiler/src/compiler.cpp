@@ -160,7 +160,6 @@ return(retstr);\n\
 			command=QString("g++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast '%1' -o '%2'").arg(foldername+"/"+filename+".cpp").arg(foldername+"/"+filename);
 			errop<<"Compiling using command:\n"<<command<<"\n..."<<Qt::endl;
 			system(command.toStdString().c_str());
-			//procsub2(command);
 		}
 }
 
@@ -373,7 +372,6 @@ void compilerClass::parseSingleLine(QString qline)
 													lineend="";
 												}
 										}
-									errop<<lines.at(j)<<Qt::endl;
 									if(retstr.isEmpty()==true)
 										retstr=commands.makeExternalCommand(lines.at(j));
 								}

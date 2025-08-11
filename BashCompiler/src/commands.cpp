@@ -87,12 +87,10 @@ QString commandsClass::makeBASHCliLine(QString qline)
 	else
 		whatin="fv";
 
-	errop<<data<<Qt::endl;
 	while(j<data.length())
 		{
 			if(data.at(j).toLatin1()=='\'')
 				{
-				errop<<data.at(j).toLatin1();
 					formatstr+="'";
 					j++;
 					while(data.at(j).toLatin1()!='\'')
@@ -104,7 +102,7 @@ QString commandsClass::makeBASHCliLine(QString qline)
 					j++;
 					continue;
 				}
-errop<<""<<Qt::endl;
+
 			if(data.at(j).toLatin1()=='"')
 				{
 					formatstr+="\\\"";
@@ -811,9 +809,8 @@ QString commandsClass::makeCase(QString qline)
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
 	parseFileClass			pfl;
-errop<<"000000000"<<Qt::endl;
+
 	re.setPattern("^[[:space:]]*?(case)[[:space:]]+(.*)[[:space:]]+in[[:space:]]*$");
-	//re.setPattern("(.*)\\)[[:space:]]*$");
 	match=re.match(qline);
 	if(match.hasMatch())
 		{
