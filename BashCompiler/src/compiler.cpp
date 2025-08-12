@@ -66,7 +66,7 @@ variables[parts.at(0)]=parts.at(1);\
 return(\"\");\n\
 }\n\
 \n\
-QString procsub(QString procin)\n\
+QString procSub(QString procin)\n\
 {\n\
 QStringList proc;\n\
 \n\
@@ -86,12 +86,12 @@ exitstatus=QString::number(pipeProc.exitCode());\n\
 return(data);\n\
 }\n\
 \n\
-void procsub2(QString procin)\n\
+void procSubDiscardOP(QString procin)\n\
 {\n\
 exitstatus=QString::number(comProc.execute(variables[\"SHELL\"],QStringList()<<\"-c\"<<procin));\n\
 }\n\
 \n\
-QString procsubcheat(QString proc)\n\
+QString procSubCheat(QString proc)\n\
 {\n\
 FILE *fp;\n\
 int exitnum=-1;\n\
@@ -133,33 +133,65 @@ return(retstr);\n\
 	cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast /PATH/TO/THIS/FILE -o APPNAME\nOptional:\nastyle -A7 --indent=tab /PATH/TO/THIS/FILE\nstrip ./a.out\nCreated on %2\n*/\n").arg(this->argv[1]).arg(QDate::currentDate().toString()));
 	cCode<<"\nreturn(0);\n}\n";
 
-	if(fullCompileHere.isEmpty()==true)
+	if((fullCompileHere.isEmpty()==true) && (compileHere.isEmpty()==true))
 		{
 			for(int j=0;j<cCode.size();j++)
 				QTextStream(stdout)<<cCode.at(j);
 		}
 	else
 		{
-			QFileInfo	fi(fullCompileHere);
-			QString		filename=fi.fileName();
-			QString		foldername=fi.dir().absolutePath();
-			QFile		file(foldername+"/"+filename+".cpp");
-			QString		command;
-
-			QDir().mkpath(foldername);
-			if(!file.open(QIODevice::WriteOnly))
+			if(compileHere.isEmpty()==false)
 				{
-					qDebug()<<"Failed to open file";
-					exit(100);
-				}
+					QFileInfo	fi(compileHere);
+					QString		filename=fi.fileName();
+					QString		foldername=fi.dir().absolutePath();
+					QFile		file(foldername+"/"+filename+".cpp");
+					QString		command;
 
-			QTextStream	out(&file);
-			for(int j=0;j<cCode.size();j++)
-				out<<cCode.at(j);
-			file.close();
-			command=QString("g++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast '%1' -o '%2'").arg(foldername+"/"+filename+".cpp").arg(foldername+"/"+filename);
-			errop<<"Compiling using command:\n"<<command<<"\n..."<<Qt::endl;
-			system(command.toStdString().c_str());
+					QDir().mkpath(foldername);
+					if(!file.open(QIODevice::WriteOnly))
+						{
+							qDebug()<<"Failed to open file";
+							exit(100);
+						}
+
+					QTextStream	out(&file);
+					for(int j=0;j<cCode.size();j++)
+						out<<cCode.at(j);
+					file.close();
+					command=QString("g++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast '%1' -o '%2'").arg(foldername+"/"+filename+".cpp").arg(foldername+"/"+filename);
+					errop<<"Compiling using command:\n"<<command<<"\n..."<<Qt::endl;
+					system(command.toStdString().c_str());
+				}
+			else
+				{
+					QString		outfilename;
+					QFile		file;
+					QString		fullpath;
+					QString		command;
+					QProcess		proc;
+					QTextStream	out(&file);
+
+					outfilename=QFileInfo(this->mainBashFile.fileName()).baseName();
+					QDir().mkpath(fullCompileHere);
+					fullpath=fullCompileHere+"/"+outfilename;
+					file.setFileName(fullCompileHere+"/"+outfilename+".cpp");
+					if(!file.open(QIODevice::WriteOnly))
+						{
+							qDebug()<<"Failed to open file";
+							exit(100);
+						}
+
+					for(int j=0;j<cCode.size();j++)
+						out<<cCode.at(j);
+					file.close();
+					proc.execute(QString("/bin/sh"),QStringList()<<"-c"<<prettyCommand+" "+fullpath+".cpp");
+					proc.execute(QString("/bin/sh"),QStringList()<<"-c"<<"rm &>/dev/null "+fullpath+".cpp.orig");
+					
+					command=QString("g++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast '%1' -o '%2'").arg(fullpath+".cpp").arg(fullpath);
+					errop<<"Compiling using command:\n"<<command<<"\n..."<<Qt::endl;
+					proc.execute(QString("/bin/sh"),QStringList()<<"-c"<<command);
+				}
 		}
 }
 

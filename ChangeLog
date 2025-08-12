@@ -1,3 +1,7 @@
+0.3.3
+Can now compilewith qt5 or qt6, see README.
+Added '-C' option, see --help.
+
 0.3.2
 Can now read output of functions in a while read loop, see example whilereadexample.
 Fixed external commands in functions.

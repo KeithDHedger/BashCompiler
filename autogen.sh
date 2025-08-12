@@ -8,6 +8,15 @@ aclocal
 autoheader
 touch NEWS README AUTHORS ChangeLog
 automake --add-missing --copy
-autoconf
+
+case $USEQTVERSION in
+	"5")
+		autoconf configure.qt5.ac > ./configure
+		chmod +x ./configure
+		;;
+	*)
+		autoconf
+		;;
+esac
 ./configure $@
 

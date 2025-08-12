@@ -436,9 +436,9 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 							break;
 
 						if(isnumber==true)
-							parts<<"procsub(\""+tstr+"\").toInt(nullptr,0)";
+							parts<<"procSub(\""+tstr+"\").toInt(nullptr,0)";
 						else
-							parts<<"procsub(\""+tstr+"\")";
+							parts<<"procSub(\""+tstr+"\")";
 						if(argcnt<10)
 							outfmt+="%0"+ QString::number(argcnt++);
 						else

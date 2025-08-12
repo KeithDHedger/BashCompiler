@@ -178,9 +178,9 @@ QString commandsClass::makeExternalCommand(QString qline)
 
 	tstr=this->makeBASHCliLine(qline);
 	if(isInFunction==true)
-		return("ss<<procsub("+tstr+")<<Qt::endl");
+		return("ss<<procSub("+tstr+")<<Qt::endl");
 	else
-		return("procsub2("+tstr+")");
+		return("procSubDiscardOP("+tstr+")");
 }
 
 QString commandsClass::makeFunctionDefine(QString qline)
@@ -913,7 +913,7 @@ QString commandsClass::makeRead(QString qline)
 	else
 		tstr="REPLY";
 
-	retstr=QString("variables[\""+tstr+"\"]=procsubcheat(\"%1;echo ${"+tstr+"}\")").arg(pfl.lineToBashCLIString(qline));
+	retstr=QString("variables[\""+tstr+"\"]=procSubCheat(\"%1;echo ${"+tstr+"}\")").arg(pfl.lineToBashCLIString(qline));
 	return(retstr);
 }
 
@@ -929,7 +929,7 @@ QString commandsClass::makeSelect(QString qline)
 	if(match.hasMatch())
 		{
 			retstr="while(true)\n{\n";
-			retstr+="variables[\""+match.captured(1).trimmed()+"\"]=procsubcheat(QString(\"select "+match.captured(1).trimmed()+" in "+pfl.lineToBashCLIString(match.captured(2).trimmed())+";do break;done;echo $"+match.captured(1).trimmed()+"\"));\n";
+			retstr+="variables[\""+match.captured(1).trimmed()+"\"]=procSubCheat(QString(\"select "+match.captured(1).trimmed()+" in "+pfl.lineToBashCLIString(match.captured(2).trimmed())+";do break;done;echo $"+match.captured(1).trimmed()+"\"));\n";
 		}
 
 	return(retstr);

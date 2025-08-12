@@ -10,6 +10,9 @@ Main use is for simpler but time consuming scripts, eg recursing through a music
 ### Compile with:
 ````console
 ./autogen.sh --prefix=/usr
+Or to compile with Qt5 instead of the default Qt6
+USEQTVERSION=5 ./autogen.sh --prefix=/usr
+
 make
 sudo make install ( optional ).
 

@@ -30,6 +30,7 @@
 #include <QTextStream>
 #include <QDate>
 #include <QProcess>
+#include <QDebug>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -93,6 +94,8 @@ extern QVector<bool>		isInFor;
 extern QVector<QString>	caseVariable;
 extern bool				firstCasecompare;
 extern QString			fullCompileHere;
+extern QString			compileHere;
 extern QString			useQT;
+extern QString			prettyCommand;
 
 #endif

@@ -3,7 +3,7 @@
 printDestDirs ()
 {
 	echo $1 $2 $3
-	mount |grep -i "\(${1}\|${2}\|${3}\)" |grep -v '\(/sys/\|\s/\s\)'
+	mount |grep -i "\(${1}\|${2}\|${3}\)" | grep -v '\(/gvfs\|/sys\)'
 }
 
 #read cat /etc/fstab
