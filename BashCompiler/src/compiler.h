@@ -35,6 +35,7 @@ class compilerClass
 
 		bool				verboseCompile=false;
 		bool				verboseCCode=false;
+		bool				lowercaseName=false;
 		bool				noCodeOP=false;
 		int				argc=0;
 		char				**argv=NULL;

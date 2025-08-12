@@ -33,6 +33,7 @@ Options can also be put in a config file at ~/.config/bashcompiler.rc eg:
 verbose-ccode true
 use-qt5 true
 full-compile /tmp
+lowercase-name true
 
 Command line options will overide these.
 

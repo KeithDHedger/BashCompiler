@@ -795,18 +795,7 @@ QString parseFileClass::optimizeOP(QString qline,bool *succeed)
 					*succeed=true;
 				}
 		}
-//	if(pal.contains(QRegularExpression("QString\\(\"%01\"\\)\\.arg\\(variables\\[\"[[:alnum:]]+\"\\]\\).toInt\\(\\)$"))==true)
-//		{
-//		errop<<">>>>"<<pal<<Qt::endl;
-//			pal.replace(QRegularExpression("QString\\(\"%01\"\\)\\.arg\\((variables\\[\"[[:alnum:]]+\"\\])\\).toInt\\(\\)$"),"\\1.toInt()");
-//			*succeed=true;
-//		errop<<pal<<"<<<<<<"<<Qt::endl;
-//		}
 
-	//if(qline=QString("")
-//errop<<pal<<"<<<<<<"<<Qt::endl;
-		pal.replace("\\\\\\\"","\\\"");
-//errop<<pal<<"<<<<<<"<<Qt::endl;
 	if(mainCompilerClass->verboseCompile==true && *succeed==true)
 		errop<<RED<<"Optimized "<<BLUE<<qline<<RED<<" to "<<CYAN<<pal<<NORMAL<<Qt::endl;
 

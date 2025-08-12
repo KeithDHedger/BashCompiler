@@ -187,8 +187,10 @@ return(retstr);\n\
 					file.close();
 					proc.execute(QString("/bin/sh"),QStringList()<<"-c"<<prettyCommand+" "+fullpath+".cpp");
 					proc.execute(QString("/bin/sh"),QStringList()<<"-c"<<"rm &>/dev/null "+fullpath+".cpp.orig");
-					
-					command=QString("g++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast '%1' -o '%2'").arg(fullpath+".cpp").arg(fullpath);
+					if(this->lowercaseName==true)
+						command=QString("g++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast '%1' -o '%2'").arg(fullpath+".cpp").arg(fullpath.toLower());
+					else
+						command=QString("g++ -Wall $(pkg-config --cflags --libs "+useQT+" ) -fPIC  -Ofast '%1' -o '%2'").arg(fullpath+".cpp").arg(fullpath);
 					errop<<"Compiling using command:\n"<<command<<"\n..."<<Qt::endl;
 					proc.execute(QString("/bin/sh"),QStringList()<<"-c"<<command);
 				}

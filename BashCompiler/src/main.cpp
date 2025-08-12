@@ -49,6 +49,7 @@ int main(int argc,char **argv)
 			{"verbose-ccode",optional_argument,NULL,'V'},
 			{"compile",required_argument,NULL,'c'},
 			{"full-compile",required_argument,NULL,'C'},
+			{"lowercase-name",optional_argument,NULL,'l'},
 			{"use-qt5",optional_argument,NULL,'5'},
 			{"syntax-check",optional_argument,NULL,'s'},
 			{0,0,0,0}
@@ -63,6 +64,7 @@ int main(int argc,char **argv)
 			{prefs.LFSTK_hashFromKey("verbose-ccode"),{TYPEBOOL,"verbose-ccode","Add BASH source lines to C Code ( optional 1/true or 0/false )","",false,0}},
 			{prefs.LFSTK_hashFromKey("compile"),{TYPESTRING,"compile","Compile script then compile code to STRING_ARG ( where STRING_ARG is fullpath to final application )\n\tAll intermediate directories are created if needed","",false,0}},
 			{prefs.LFSTK_hashFromKey("full-compile"),{TYPESTRING,"full-compile","Compile script then compile code to folder STRING_ARG ( where STRING_ARG is fullpath to final application folder)\n\tFinal app name is taken from input file\n\tAll intermediate directories are created if needed\n\tIf 'astyle' is installed it will be used to 'pretty up' the outputed cpp file","",false,0}},
+			{prefs.LFSTK_hashFromKey("lowercase-name"),{TYPEBOOL,"lowercase-name","Lower case the app name when using full-compile ( optional 1/true or 0/false )","",false,0}},
 			{prefs.LFSTK_hashFromKey("use-qt5"),{TYPEBOOL,"use-qt5","Use qt5 for final compile instead of qt6 ( optional 1/true or 0/false )","",false,0}},
 			{prefs.LFSTK_hashFromKey("syntax-check"),{TYPEBOOL,"syntax-check","Just Check syntax ( use shellcheck if installed  else use bash -n )","",false,0}},
 		};
@@ -105,6 +107,7 @@ int main(int argc,char **argv)
 		{
 			mainCompilerClass->verboseCompile=prefs.LFSTK_getBool("verbose-compile");
 			mainCompilerClass->verboseCCode=prefs.LFSTK_getBool("verbose-ccode");
+			mainCompilerClass->lowercaseName=prefs.LFSTK_getBool("lowercase-name");
 			mainCompilerClass->parseFile();
 			mainCompilerClass->writeCFile();
 		}
