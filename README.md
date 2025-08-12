@@ -28,7 +28,16 @@ bashcompiler -V /PATH/TO/BASHSCRIPT -c /PATH/TO/FINAL/APP
 
 All intermediate folders are created if need when using the -c switch.
 
+Options can also be put in a config file at ~/.config/bashcompiler.rc eg:
+
+verbose-ccode true
+use-qt5 true
+full-compile /tmp
+
+Command line options will overide these.
+
 ````
+
 
 The bashcompiler executable can be installed or run directly from the BashCompiler/app folder, or just copy it somewhere convienient.  
 There are a number of examples in BashCompiler/resources/scripts.  
