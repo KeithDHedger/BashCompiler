@@ -43,7 +43,7 @@ bool parseFileClass::parseLine(QString qline)
 
 	this->bashCommand=EXTERNALCOMMAND;
 //check for assign
-	re.setPattern("^([[:alnum:]_]+)=(.*)");
+	re.setPattern("^([[:alpha:]][[:alnum:]_\\[\\]]*)=(.*)");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
@@ -175,7 +175,7 @@ QString parseFileClass::parseVar(QString line)
 	if(retcode.isEmpty()==false)
 		return(retcode);
 
-	re.setPattern("\\$\\{\\#?([[:alnum:]_]+)(:-|##?|%%?|:|//?|,,?|\\^\\^?)(.*)}");
+	re.setPattern("\\$\\{\\#?([[:alpha:]][[:alnum:]_\\[\\]]*)(:-|##?|%%?|:|//?|,,?|\\^\\^?)(.*)}");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
@@ -311,7 +311,9 @@ QString parseFileClass::parseVar(QString line)
 						}
 				}
 		}
-	re.setPattern("\\$\\{#([[:alnum:]_]*)\\}");
+
+	//re.setPattern("\\$\\{#([[:alnum:]_]*)\\}");
+	re.setPattern("\\$\\{#([[:alpha:]][[:alnum:]_\\[\\]]*)\\}");
 	match=re.match(line);
 	if(match.hasMatch())
 		{
@@ -319,10 +321,21 @@ QString parseFileClass::parseVar(QString line)
 			retcode="variables[\""+varname+"\"].length()";
 			return(retcode);
 		}
+	
+//	re.setPattern("\\$\\{([[:alnum:]_\\[\\]]*)\\}");
+//	match=re.match(line);
+//	if(match.hasMatch())
+//		{
+//			varname=match.captured(1).trimmed();
+//			retcode="variables[\""+varname+"\"].length()";
+//			return(retcode);
+//		}
+
 
 	retcode=line;
 	retcode.replace(QRegularExpression("^\\$\\{*|\\}*$"),0);
-	retcode.replace(QRegularExpression("([[:alnum:]_]+)"),"variables[\"\\1\"]");
+//	retcode.replace(QRegularExpression("([[:alnum:]_]+)"),"variables[\"\\1\"]");
+	retcode.replace(QRegularExpression("([[:alpha:]][[:alnum:]_\\[\\]]*)"),"variables[\"\\1\"]");
 	return(retcode);
 }
 
@@ -334,7 +347,8 @@ QString parseFileClass::lineToBashCLIString(QString qline)
 	tstr=qline;
 	tstr.replace("\"","\\\"");
 	tstr.replace("\\\\\"","\\\\\\\"");
-	tstr=tstr.replace(QRegularExpression("\\$\\{*([[:alpha:]][[:alnum:]_]*)\\}*"),"\"+variables[\"\\1\"].replace(replaceWhite, \" \")+\"");
+	//tstr=tstr.replace(QRegularExpression("\\$\\{*([[:alpha:]][[:alnum:]_]*)\\}*"),"\"+variables[\"\\1\"].replace(replaceWhite, \" \")+\"");
+	tstr=tstr.replace(QRegularExpression("\\$\\{*([[:alpha:]][[:alnum:]_]*)\\}*"),"\"+variables[\"\\1\"]+\"");
 	if(isInFunction==true)
 		tstr=tstr.replace(QRegularExpression("\\${*([[0-9]]*)}*"),"\"+QString(fv[\"\\1\"])+\"");
 	else
@@ -365,7 +379,8 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 						break;
 					case DOUBLEQUOTESTRING:
 						tstr=this->lineParts.at(j).data;
-						tstr.replace(QRegularExpression("\\$\\{*([[:alnum:]_]+)\\}*"),"\"+variables[\"\\1\"]+\"");
+						//tstr.replace(QRegularExpression("\\$\\{*([[:alnum:]_]+)\\}*"),"\"+variables[\"\\1\"]+\"");
+						tstr.replace(QRegularExpression("\\$\\{*([[:alpha:][:alnum:]_\\[\\]]+)\\}*"),"\"+variables[\"\\1\"]+\"");
 						outfmt+=tstr;
 						break;
 					case VARIABLEINCURLYS:
@@ -375,13 +390,16 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 						else
 							outfmt+="%"+ QString::number(argcnt++);
 						break;
+//					case SQUAREBRACKETS:
+//						errop<<"SQUAREBRACKETS"<<Qt::endl;
+//						break;
 					case BRACKETS:						
 						if((this->lineParts.at(j).data.at(2)=='('))
 							{
 								tstr=this->lineParts.at(j).data;
 								tstr.replace(QRegularExpression("^\\$\\(*|\\)*$"),"");
 								tstr.replace(QRegularExpression("\\$\\{*|\\}*"),"");
-								tstr.replace(QRegularExpression("\\b([[:alpha:]][[:alnum:]_]*)\\b"),"variables[\"\\1\"].toInt(nullptr,0)");
+								tstr.replace(QRegularExpression("\\b([[:alpha:]][[:alnum:]_\\[\\]]*)\\b"),"variables[\"\\1\"].toInt(nullptr,0)");
 								tstr=tstr.trimmed();
 								parts<<tstr;
 								if(argcnt<10)
@@ -395,7 +413,7 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 						tstr=this->lineToBashCLIString(tstr);
 						tstr.replace("\\\\\"","\\\"");
 //call a bash function and assign
-						re.setPattern("^[[:space:]]*([[:alnum:]_]+)[[:space:]]*(.*)$");
+						re.setPattern("^[[:space:]]*([[:alpha:][:alnum:]_\\[\\]]+)[[:space:]]*(.*)$");
 						match=re.match(tstr);
 						if(match.hasMatch())
 							{
@@ -434,11 +452,10 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 
 						if(doabreak==true)
 							break;
-
 						if(isnumber==true)
-							parts<<"procSub(\""+tstr+"\").toInt(nullptr,0)";
+							parts<<"runExternalCommands(\""+tstr+"\",true,\"\",false).toInt(nullptr,0)";
 						else
-							parts<<"procSub(\""+tstr+"\")";
+							parts<<"runExternalCommands(\""+tstr+"\",true,\"\",false)";
 						if(argcnt<10)
 							outfmt+="%0"+ QString::number(argcnt++);
 						else
@@ -614,6 +631,7 @@ void parseFileClass::parseDollar(QString line)
 							return;
 						}
 					dollardata+=line.at(this->linePosition);
+
 					this->linePosition++;
 				}
 			this->lineParts.append({dollardata,dtype});
@@ -621,7 +639,7 @@ void parseFileClass::parseDollar(QString line)
 			return;
 		}
 
-	while(this->linePosition<line.length() && (line.at(this->linePosition).isSpace()==false))
+	while(this->linePosition<line.length() && ((line.at(this->linePosition).isSpace()==false) || (line.at(this->linePosition).toLatin1()=='[') || (line.at(this->linePosition).toLatin1()==']')))
 		dollardata+=line.at(this->linePosition++);
 	this->lineParts.append({dollardata,dtype});
 }
@@ -756,11 +774,11 @@ QString parseFileClass::parseOutputString(QString qline)
 					continue;
 				}
 
-			if(line.at(this->linePosition).toLatin1()=='[')
-				{
-					this->parseSquareBraces(line);
-					continue;
-				}
+//			if(line.at(this->linePosition).toLatin1()=='[')
+//				{
+//					this->parseSquareBraces(line);
+//					continue;
+//				}
 
 			this->currentPart+=line.at(this->linePosition);
 			this->linePosition++;

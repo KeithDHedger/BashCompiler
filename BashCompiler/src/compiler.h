@@ -48,6 +48,8 @@ class compilerClass
 
 	private:
 		QStringList		splitLines(QString qline);
+		bool				outToCode(QString qline,QString lineend,QString brokenline,bool doignore,bool justsay);
+
 		bool				skipDo=false;
 };
 

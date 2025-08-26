@@ -1,3 +1,15 @@
+0.4.0
+Added '==' to comparisons ( BASH only ).
+Added extra info to verbose code.
+Fixed line splitting AGAIN!
+Fixed external command string parsing.
+Fixed done keyword.
+Fixed case keyword.
+Capture exit code of last command in pipe.
+Better piping of external commands.
+Switched to wordexp to parse cli strings.
+Speed improvements.
+
 0.3.3
 Extra OP options.
 Updated help and README.

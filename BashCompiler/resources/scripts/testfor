@@ -1,0 +1,37 @@
+#!/bin/bash -e
+
+foo ( )
+{
+	echo "in foo"
+}
+
+foo
+
+one=$1 
+echo $one
+echo ${one}
+echo ${one,,}
+file=${1}
+echo $file
+echo ${file,,}
+echo ${file^^}
+file=${one,,}
+echo ${one,,}
+echo ${1}
+echo ${file}
+file=$1
+echo ${file}
+echo ${file,,}
+
+name=${file}
+echo $name
+echo ${name}
+
+for (( j=0;j<10;j++))
+do
+	for ((k=100;k<200;k+=10))
+		do
+			echo "j=$j k=$k"
+			#((k+=10))
+		done
+done

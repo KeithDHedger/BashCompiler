@@ -1,0 +1,37 @@
+#!/bin/bash -e
+
+
+data="on"
+data2="e"
+test="on"
+
+echo ${data}${data2}
+
+case "${data}${data2}" in
+${test}f)
+	echo "match one from test"
+	;;
+ton*)
+	echo "match on"
+	;;
+on*)
+	echo "match one"
+	case "${data2}" in
+		"e")
+		echo "match one data2=e"
+		;;
+		*)
+		echo "nothing"
+		;;
+	esac
+	;;
+"1")
+	echo "match 1"
+	;;
+"two")
+	echo "match two"
+	;;
+*)
+	echo "defalt"
+	;;
+esac

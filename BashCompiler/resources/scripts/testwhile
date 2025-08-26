@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+while read
+	do
+		echo $REPLY
+	done< /etc/fstab
+	
+
+while read
+	do
+		echo $REPLY
+	done< <(cat /etc/man.conf)
+	

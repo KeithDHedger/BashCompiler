@@ -1,6 +1,6 @@
 #
 #
-AC_INIT([BashCompiler],[0.3.2],[PROJ],[BashCompiler])
+AC_INIT([BashCompiler],[0.4.0],[PROJ],[BashCompiler])
 
 AC_CONFIG_HEADERS([config.h])
 AC_PROG_CXX

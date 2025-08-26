@@ -56,7 +56,7 @@ When using loops ( eg for ((x=0;x<n;x=x++)) ) the control loop is **READ ONLY**,
   
 When using ${foo^^} be aware that BASH mistakenly uppercases any embedded '\n' to '\N'.  
 
-Positional paramaters should be assigned to a variable BEFORE string slicing eg: 
+Positional paramaters should be assigned to a variable **BEFORE** string slicing eg: 
 ```` console
 file=${1}
 echo ${file^^}
@@ -77,8 +77,10 @@ read -p "run this command ? [N/y] " ans1 ans2
 echo $ans2
 N.B. extra variables supplied ( ie ans1 ) will 'swallow' input.
 
-Running an external command requires a shell this is taken from ${SHELL} or defaults to /bin/bash if SHELL is not set.
-For the moment read and select use /bin/bash to run, this will change soon.
+Only stdout is redirectable to a file for now.
+Pipelines of commands may ONLY redirect the LAST command to a file, if you need to do fancy redirects or redirect stderr then wrap in a shell command eg:
+/bin/sh -c "ls /tmpl 2>/tmp/log|ls / &>>/tmp/log"
+
 ````  
 
 ######

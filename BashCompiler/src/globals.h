@@ -40,6 +40,11 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <wordexp.h>
+
+//#include <sys/types.h>
+//#include <sys/stat.h>
+//#include <fcntl.h>
 
 #include "config.h"
 #include "LFSTKPrefsClass.h"
@@ -67,8 +72,8 @@ static const char	*GREEN="\e[1;32m";
 static const char	*CYAN="\e[1;36m";
 static const char	*BLUE="\e[1;34m";
 static const char* typeText[]={"UNKNOWN","WHITESPACE","DOUBLEQUOTESTRING","SINGLEQUOTSTRING","COMMAND","VARIABLE","VARIABLEINCURLYS","BRACKETS","SQUAREBRACKETS","STRINGDATA","VARNAME","SKIPLINE"};
-static const char*	bashmath[]={"-gt ","-lt ","-eq ","-ne ","-le ","-ge "," != "," < "," > "," = ",NULL};
-static const char*	cmath[]={">","<","==","!=","<=",">=","!=","<",">","==",NULL};
+static const char*	bashmath[]={"-gt ","-lt ","-eq ","-ne ","-le ","-ge "," != "," < "," > "," = "," == ",NULL};
+static const char*	cmath[]={">","<","==","!=","<=",">=","!=","<",">","==","==",NULL};
 static QTextStream	errop(stderr);
 static QTextStream	outop(stdout);
 static QRegularExpression replaceWhiteSpace("[[:space:]]+");
@@ -95,7 +100,29 @@ extern QVector<QString>	caseVariable;
 extern bool				firstCasecompare;
 extern QString			fullCompileHere;
 extern QString			compileHere;
-extern QString			useQT;
+extern QString			useQTVersion;
 extern QString			prettyCommand;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+
+static void DB_showCode(void)
+{
+	errop<<"\nFunction code:"<<Qt::endl;
+	for(int cc=0;cc<fCode.size();cc++)
+		errop<<fCode.at(cc);
+	errop<<"\nMain code:"<<Qt::endl;
+	for(int cc=0;cc<cCode.size();cc++)
+		errop<<cCode.at(cc);
+	errop<<""<<Qt::endl;
+}
+
+static void DB_printLines(QStringList lines)
+{
+	for(int j=0;j<lines.size();j++)
+		errop<<"Line "<<j<<": "<<lines.at(j)<<Qt::endl;
+}
+
+#pragma GCC diagnostic pop
 
 #endif

@@ -1,0 +1,66 @@
+#!/bin/bash -e
+
+SAYTRUE="true"
+ALBUM="Tubular Bells"
+CURRENTALBUM="Tubular Bells"
+if [[ "X${ALBUM}" = "X${CURRENTALBUM}" ]];then
+echo "true"
+else
+echo "false"
+fi
+
+ALBUM=10200
+CURRENTALBUM=1030
+
+if [[ "${ALBUM}" -lt ${CURRENTALBUM} ]];then
+echo "true"
+else
+echo "false"
+fi
+
+#lexical NOT numerical
+if [[ "${ALBUM}" < ${CURRENTALBUM} ]];then
+echo "true"
+else
+echo "false"
+fi
+
+echo $SAYTRUE
+echo "12345 abcd "
+echo "12345 abcd ${SAYTRUE}"
+echo ${#}
+if [[ ${ALBUM}${CURRENTALBUM} = ${ALBUM}${CURRENTALBUM} ]];then
+echo $SAYTRUE
+fi
+
+xxx="qqq${ALBUM}${CURRENTALBUM}xxx"
+echo $xxx
+
+foo ()
+{
+	echo  -n "${#}"
+	echo  -n "$1"
+	echo  ">>>"
+	echo ""
+	echo  "${2}"
+	echo  "${#2}"
+}
+
+echo "-------------------"
+foo abc 123456
+echo
+echo "-------------------"
+avar=$(foo 12345 abcdef)
+echo "$avar"
+sbar=100
+sbar="${sbar}"
+
+if [[ 100 -eq 100 ]];then
+echo "$sbar"
+fi
+
+if [[ $sbar -eq 100 ]];then
+echo "$sbar"
+fi
+
+sbar="${sbar}"

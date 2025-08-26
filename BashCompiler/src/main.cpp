@@ -34,7 +34,7 @@ QVector<bool>	isInFor;
 QVector<QString>	caseVariable;
 QString			compileHere="";
 QString			fullCompileHere="";
-QString			useQT="Qt6Core";
+QString			useQTVersion="Qt6Core";
 QString			prettyCommand="astyle -A7 --indent=tab";
 bool				firstCasecompare=false;
 
@@ -98,7 +98,7 @@ int main(int argc,char **argv)
 		fullCompileHere=prefs.LFSTK_getString("full-compile").c_str();
 
 	if(prefs.LFSTK_getBool("use-qt5")==true)
-		useQT="Qt5Core";
+		useQTVersion="Qt5Core";
 
 	mainCommandsClass=new commandsClass();
 	mainCompilerClass=new compilerClass(argc,argv);

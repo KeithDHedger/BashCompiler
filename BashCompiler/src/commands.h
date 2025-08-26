@@ -67,9 +67,10 @@ class commandsClass
 
 //here docs
 		QString	makeHereDoc(QString qline);
+		QString makeBASHCliLine(QString qline);
 	private:
 		QString	optEchoLine(QString qline,bool preserve,bool escapes,bool force);
-		QString makeBASHCliLine(QString qline);
+		QString simpleSub(QString qline);
 };
 
 #endif
