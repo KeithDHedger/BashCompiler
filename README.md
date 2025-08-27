@@ -130,12 +130,14 @@ Process substitution, see example 5.
 if/then/else/fi, see 'To do', see example 6.  
 while/do/done, see 'To do', see example 7.  
 $? see example 7.  
-While read;do ... done see example whileifread.
-pushd/popd, No switches allowed ie no manipulating the stack ( yet! ) also does not op dir changes ( same as eg pushd /usr >/dev/null ).
-printf, optional '-v VARNAME' FORMATSTR STR1 ... STRN, format string is ignored ( except if it ends with '\n' ) but MUST be present ( for now! ).
+While read;do ... done see example whileifread.  
+pushd/popd, No switches allowed ie no manipulating the stack ( yet! ) also does not op dir changes ( same as eg pushd /usr >/dev/null ).  
+printf, optional '-v VARNAME' FORMATSTR STR1 ... STRN, format string is ignored ( except if it ends with '\n' ) but MUST be present ( for now! ).  
+  
 ######
 
-### Ongoing in no particular order. 
+### Ongoing in no particular order.
+printf   
 select  
 read  
 for loops.  
