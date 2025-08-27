@@ -49,6 +49,8 @@ There are a number of examples in BashCompiler/resources/scripts.
 BASH is weakly typed so you **MUST** use "=, ==, <, or >" for string comparisons.  
 You MUST use "-gt, -ge ... etc for numeric comparisons.  
 All numerical expression **MUST** be enclosed by $(())  
+When doing maths using the '$(( n + d ))' format **NOTE** that the opening and closing brackets **MUST** be seperated by at least one space.  
+
 ######
 'eval' is NOT supported and almost certainly will never be, not because of any supposed "eval=evil" but simply it would need the compiler available at runtime and probably a JIT compiler.  
 When using redirect to a file or pipe with echo  you **MUST** surround the '>', '>>' or '|' with at least one space/tab.  
