@@ -1,0 +1,60 @@
+#!/bin/bash -e
+
+#©keithhedger Wed 3 Apr 14:13:44 BST 2019 kdhedger68713@gmail.com
+
+spaces="    "
+for ((i=0;i<2;i++))
+	do
+		for ((k=0;k<16;k++))
+			do
+				widnum=${#k}
+				wid=$(( 4 - widnum ))
+				numspaces=${spaces:0:$wid}
+				if [ $i -eq 0 ];then
+					echo -e -n "\e[37m\e[48;5;${k}m${k}${numspaces}"
+				else
+					echo -e -n "\e[30m\e[48;5;${k}m${k}${numspaces}"
+				fi
+			done
+		echo -e "\e[0m"
+	done
+
+echo -e "\e[0m"
+for ((k=0;k<6;k++))
+	do
+		for ((i=0;i<2;i++))
+			do
+				for ((j=0;j<36;j++))
+					do
+						num=$(( (j + 16) + (k * 36) ))
+						widnum=${#num}
+						wid=$(( 4 - widnum ))
+						numspaces=${spaces:0:$wid}
+						if [ $i -eq 0 ];then
+							echo -e -n "\e[37m\e[48;5;${num}m${num}${numspaces}"
+						else
+							echo -e -n "\e[30m\e[48;5;${num}m${num}${numspaces}"
+						fi
+					done
+				echo -e "\e[0m"
+			done
+	done
+
+echo -e "\e[0m"
+for ((i=0;i<2;i++))
+	do
+		for ((k=232;k<256;k++))
+			do
+				widnum=${#k}
+				wid=$(( 4 - widnum ))
+				numspaces=${spaces:0:$wid}
+				if [ $i -eq 0 ];then
+					echo -e -n "\e[37m\e[48;5;${k}m${k}${numspaces}"
+				else
+					echo -e -n "\e[30m\e[48;5;${k}m${k}${numspaces}"
+				fi
+			done
+		echo -e "\e[0m"
+	done
+
+echo -e "\e[0m"
