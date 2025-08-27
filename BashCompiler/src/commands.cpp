@@ -976,9 +976,10 @@ QString commandsClass::makeSelect(QString qline)
 	match=re.match(qline);
 	if(match.hasMatch())
 		{
+			
+			
 			QString xx=pfl.lineToBashCLIString(match.captured(2).trimmed());
 			xx.replace(QRegularExpression("\"]\\+\"$"),"\"].replace(replaceWhite, \" \")+\"");
-			
 			retstr="while(true)\n{\n";
 			retstr+="variables[\""+match.captured(1).trimmed()+"\"]=procSubCheat(QString(\"select "+match.captured(1).trimmed()+" in "+xx+";do break;done;echo $"+match.captured(1).trimmed()+"\"));\n";
 		}

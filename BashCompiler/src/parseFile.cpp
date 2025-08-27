@@ -69,6 +69,12 @@ bool parseFileClass::parseLine(QString qline)
 
 	while(this->linePosition<line.length())
 		{
+			if(line.at(this->linePosition).toLatin1()=='\'')
+				{
+					this->parseSingleQuoteString(line);
+					continue;
+				}
+
 		//skip escaped quote
 			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='\\') && (line.at(this->linePosition+2).toLatin1()=='"'))
 				{
@@ -343,18 +349,82 @@ QString parseFileClass::lineToBashCLIString(QString qline)
 {
 	QString	newline=qline;
 	QString	tstr="";
+	QString	xx="";
+	int		cnt=0;
+	bool		flag=false;
+	QString	varname="";
 
 	tstr=qline;
 	tstr.replace("\"","\\\"");
 	tstr.replace("\\\\\"","\\\\\\\"");
 	//tstr=tstr.replace(QRegularExpression("\\$\\{*([[:alpha:]][[:alnum:]_]*)\\}*"),"\"+variables[\"\\1\"].replace(replaceWhite, \" \")+\"");
-	tstr=tstr.replace(QRegularExpression("\\$\\{*([[:alpha:]][[:alnum:]_]*)\\}*"),"\"+variables[\"\\1\"]+\"");
 	if(isInFunction==true)
 		tstr=tstr.replace(QRegularExpression("\\${*([[0-9]]*)}*"),"\"+QString(fv[\"\\1\"])+\"");
 	else
 		tstr=tstr.replace(QRegularExpression("\\${*([[0-9]]*)}*"),"\"+QString(gargv[\\1])+\"");
 
-	return(tstr);
+
+	while(cnt<tstr.length())
+		{
+			if(cnt<tstr.length() && tstr.at(cnt).toLatin1()=='$')
+				{
+					cnt++;
+					if(cnt>0 && cnt<tstr.length() && tstr.at(cnt-1).toLatin1()!='\\')
+						{
+							flag=true;
+							varname="";
+							if(tstr.at(cnt).toLatin1()=='{')
+								cnt ++;
+							while(flag==true && cnt<tstr.length())
+								{
+									if(cnt<tstr.length() && tstr.at(cnt).toLatin1()=='\\')
+										{
+											cnt++;
+											continue;
+										}
+									if(cnt<tstr.length() && (tstr.at(cnt).toLatin1()=='}' || tstr.at(cnt).toLatin1()==' ' || tstr.at(cnt).toLatin1()=='"'))
+										{
+											if(tstr.at(cnt).toLatin1()=='}')
+												cnt++;
+											if(cnt<tstr.length() && tstr.at(cnt).toLatin1()=='"')
+												cnt--;
+											flag=false;
+											continue;
+										}
+									else
+										{
+											varname+=tstr.at(cnt).toLatin1();
+											cnt++;
+										}
+								}
+							xx+="\"+variables[\""+varname+"\"]+\"";
+							continue;
+						}
+					else
+						{
+							xx+=tstr.at(cnt).toLatin1();
+							cnt++;
+							continue;
+						}
+				}
+
+			if(tstr.at(cnt).toLatin1()=='\'')
+				{
+					xx+="'";
+					cnt++;
+					while(tstr.at(cnt).toLatin1()!='\'')
+						{
+							xx+=tstr.at(cnt).toLatin1();
+							cnt++;
+						}
+					xx+="'";
+					cnt++;
+					continue;
+				}
+			xx+=tstr.at(cnt).toLatin1();
+			cnt++;
+		}
+	return(xx);
 }
 
 QString parseFileClass::parseExprString(bool isnumexpr)
@@ -369,6 +439,7 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 	int						argcnt=1;
 	QString					outfmt="QString(\"";
 
+
 	for(int j=0;j<this->lineParts.count();j++)
 		{
 			doabreak=false;
@@ -376,6 +447,10 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 				{
 					case STRINGDATA:
 						outfmt+=this->lineParts.at(j).data;
+						break;
+					case SINGLEQUOTSTRING:
+						tstr=this->lineParts.at(j).data;
+						outfmt+=tstr;
 						break;
 					case DOUBLEQUOTESTRING:
 						tstr=this->lineParts.at(j).data;
@@ -393,7 +468,7 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 //					case SQUAREBRACKETS:
 //						errop<<"SQUAREBRACKETS"<<Qt::endl;
 //						break;
-					case BRACKETS:						
+					case BRACKETS:	
 						if((this->lineParts.at(j).data.at(2)=='('))
 							{
 								tstr=this->lineParts.at(j).data;
@@ -556,6 +631,34 @@ QString parseFileClass::setSpecialDollars(QString dollar)
 	return("");
 }
 
+void parseFileClass::parseSingleQuoteString(QString line)
+{
+	QString	strdata="'";
+
+	this->linePosition++;
+
+	if(this->currentPart.isEmpty()==false)
+		{
+			this->lineParts.append({this->currentPart,STRINGDATA});
+			this->currentPart="";
+		}
+
+	while(this->linePosition<line.length())
+		{
+			if((line.at(this->linePosition).toLatin1()=='\'') && (line.at(this->linePosition-1).toLatin1()=='\\'))
+				{
+					strdata+=line.at(this->linePosition++);
+				}
+			else if((line.at(this->linePosition).toLatin1()=='\'') && (line.at(this->linePosition-1).toLatin1()!='\\'))
+				break;
+
+			strdata+=line.at(this->linePosition++);
+		}
+	strdata+="'";
+	this->lineParts.append({strdata,SINGLEQUOTSTRING});
+	this->linePosition++;
+}
+
 void parseFileClass::parseString(QString line)
 {
 	QString	strdata="\"";
@@ -635,7 +738,7 @@ void parseFileClass::parseDollar(QString line)
 					this->linePosition++;
 				}
 			this->lineParts.append({dollardata,dtype});
-			this->linePosition++;
+		this->linePosition++;
 			return;
 		}
 
@@ -732,11 +835,8 @@ QString parseFileClass::parseOutputString(QString qline)
 					continue;
 				}
 		//skip escaped e
-			//if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='\\') && (line.at(this->linePosition+2).toLatin1()=='e'))
 			if((line.at(this->linePosition).toLatin1()=='\\') && (line.at(this->linePosition+1).toLatin1()=='e'))
 				{
-		//errop<<"skip escaped e"<<Qt::endl;
-		//errop<<"0"<<line.at(this->linePosition).toLatin1()<<"1"<<line.at(this->linePosition+1).toLatin1()<<"2"<<line.at(this->linePosition+2).toLatin1()<<Qt::endl;
 					this->currentPart+="\\e"+QString(line.at(this->linePosition+2));
 					this->linePosition+=3;
 					continue;

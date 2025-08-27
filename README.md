@@ -1,6 +1,8 @@
 # Bash Compiler
 ######
-Just started so lots to do.
+Just started so lots to do.  
+Please read the Caveates section first.
+
 ######
 Doesn't use AI, or obfuscation, outputs compileable C++ code.  
 You should check the script first by running it in bash.  
@@ -38,7 +40,6 @@ lowercase-name true
 Command line options will overide these.
 
 ````
-
 
 The bashcompiler executable can be installed or run directly from the BashCompiler/app folder, or just copy it somewhere convienient.  
 There are a number of examples in BashCompiler/resources/scripts.  
@@ -80,6 +81,9 @@ N.B. extra variables supplied ( ie ans1 ) will 'swallow' input.
 Only stdout is redirectable to a file for now.
 Pipelines of commands may ONLY redirect the LAST command to a file, if you need to do fancy redirects or redirect stderr then wrap in a shell command eg:
 /bin/sh -c "ls /tmpl 2>/tmp/log|ls / &>>/tmp/log"
+
+Creating menus with 'select' is BASH only and will ( for now ) run a seperate shell to run the command at runtime.
+See the testpipesndselect example.
 
 ````  
 
@@ -127,6 +131,8 @@ printf, optional '-v VARNAME' FORMATSTR STR1 ... STRN, format string is ignored 
 ######
 
 ### Ongoing in no particular order. 
+select  
+read  
 for loops.  
 String slicing. see example stringslice.  
 Add options to bashcompiler.  

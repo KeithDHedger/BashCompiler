@@ -55,6 +55,8 @@ class parseFileClass
 		void					parseDollar(QString line);
 		void					parseWhitespace(QString line);
 		void					parseQuotedString(QString line);
+		void					parseSingleQuoteString(QString line);
+
 };
 
 #endif

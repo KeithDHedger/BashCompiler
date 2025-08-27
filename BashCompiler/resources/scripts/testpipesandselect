@@ -20,9 +20,12 @@ break
 done
 echo $argfind
 
-#select from direct command sub
+#select from direct command sub TODO!!
 selectargsfrom="/usr/bin"
-select argfind in $(ls $selectargsfrom |grep -i cc)
+selectargsfrom=$(ls $selectargsfrom | grep -i cc)
+#this will error:
+#select argfind in $(ls $selectargsfrom | grep -i cc)
+select argfind in $selectargsfrom
 do
 break
 done

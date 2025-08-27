@@ -1,4 +1,6 @@
 0.4.0
+Fixed select.
+Fixed '$' in single quotes in pipe.
 Added '==' to comparisons ( BASH only ).
 Added extra info to verbose code.
 Fixed line splitting AGAIN!
