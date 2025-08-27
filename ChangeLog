@@ -1,4 +1,5 @@
 0.4.0
+Added Show256Cols to examples.
 Fixed select.
 Fixed '$' in single quotes in pipe.
 Added '==' to comparisons ( BASH only ).
