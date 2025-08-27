@@ -42,10 +42,6 @@
 #include <iostream>
 #include <wordexp.h>
 
-//#include <sys/types.h>
-//#include <sys/stat.h>
-//#include <fcntl.h>
-
 #include "config.h"
 #include "LFSTKPrefsClass.h"
 
@@ -61,7 +57,6 @@ struct lineData
 	QString		data;
 	parseDataType		typeHint;
 };
-
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -87,17 +82,17 @@ static QRegularExpression replaceWhiteSpace("[[:space:]]+");
 extern commandsClass		*mainCommandsClass;
 extern compilerClass		*mainCompilerClass;
 
-extern QString			bashOptsAtStart;
-extern QVector<QString>	functionNames;
+extern bool				firstCasecompare;
 extern bool				isInFunction;
 
+extern QString			bashOptsAtStart;
+extern QVector<QString>	functionNames;
 extern QVector<int>		whileReadLine;
 extern QVector<QString>	cCode;
 extern QVector<QString>	fCode;
 extern QVector<QString>	forVariable;
 extern QVector<bool>		isInFor;
 extern QVector<QString>	caseVariable;
-extern bool				firstCasecompare;
 extern QString			fullCompileHere;
 extern QString			compileHere;
 extern QString			useQTVersion;

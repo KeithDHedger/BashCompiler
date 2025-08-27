@@ -724,11 +724,6 @@ QStringList compilerClass::splitLines(QString qline)
 
 			if(tstr.at(pos).toLatin1()==';')
 				{
-					//if((tstr.length()>pos) && (tstr.at(pos+1).toLatin1()==';'))
-//						{
-//							pos+=2;
-//							continue;
-//						}
 					lines<<tstr.left(pos);
 					tstr=tstr.mid(pos+1);
 					pos=0;

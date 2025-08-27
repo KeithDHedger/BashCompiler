@@ -256,7 +256,6 @@ QString commandsClass::makeFunctionDefine(QString qline)
 			retstr="QString "+match.captured(1).trimmed()+"(bool capture,QHash<QString, QString> fv)\n{\nQString retstr;\nQTextStream ss;\nQFile file;\n";
 			retstr+="if(capture==true)\nss.setString(&retstr, QIODevice::WriteOnly);\nelse\n";
 			retstr+="{\nfile.open(stdout, QIODevice::WriteOnly);\nss.setDevice(&file);\n}";
-
 			functionNames<<match.captured(1).trimmed();
 		}
 	return(retstr);
@@ -462,7 +461,6 @@ QString commandsClass::makeDone(QString qline)
 	QRegularExpressionMatch	match2;
 	parseFileClass			pfl;
 
-
 	if((isInFor.isEmpty()==false) && (isInFor.back()==true))
 		{
 			retstr="}\n";
@@ -642,7 +640,6 @@ QString commandsClass::makePrintf(QString qline)
 					newvar=pfl.parseOutputString(match.captured(2).trimmed());
 					tstr=match.captured(3).trimmed();
 					re.setPattern("[[:space:]]*\"?(%[[:alnum:]_]+)\"?[[:space:]]+(.*)");
-				//	re.setPattern("[[:space:]]*\"?(%[[:alpha:]][[:alnum:]_\\[\\]]*)\"?[[:space:]]+(.*)");
 					match=re.match(tstr);
 					if(match.hasMatch())
 						{
@@ -712,8 +709,6 @@ QString commandsClass::optEchoLine(QString qline,bool preserve,bool escapes,bool
 		tstr=start+tstr+dne+replaces;
 	else if(preserve==false && escapes==false)
 		tstr=tstr=start+tstr+dne+".replace(replaceWhite, \" \")";
-	//else if(preserve==true && escapes==false)
-	//	tstr="QString("+tstr+").replace(\"\\\\n\",\"\\\\\\n\").replace(\"\\\\t\",\"\\\\\\t\")";
 	return(tstr);
 }
 

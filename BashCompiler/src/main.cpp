@@ -23,9 +23,11 @@
 commandsClass	*mainCommandsClass=NULL;
 compilerClass	*mainCompilerClass=NULL;
 
+bool				isInFunction;
+bool				firstCasecompare=false;
+
 QString			bashOptsAtStart="";//TODO//for later
 QVector<QString>	functionNames;
-bool				isInFunction;
 QVector<int>		whileReadLine;
 QVector<QString>	cCode;
 QVector<QString>	fCode;
@@ -36,7 +38,6 @@ QString			compileHere="";
 QString			fullCompileHere="";
 QString			useQTVersion="Qt6Core";
 QString			prettyCommand="astyle -A7 --indent=tab";
-bool				firstCasecompare=false;
 
 int main(int argc,char **argv)
 {

@@ -85,6 +85,9 @@ Pipelines of commands may ONLY redirect the LAST command to a file, if you need 
 Creating menus with 'select' is BASH only and will ( for now ) run a seperate shell to run the command at runtime.
 See the testpipesndselect example.
 
+printf, optional '-v VARNAME' FORMATSTR STR1 ... STRN, format string is ignored ( except if it ends with '\n' ) but MUST be present ( for now! ).
+For full printf functionality use the external printf ( probably /usr/bin/printf ).
+
 ````  
 
 ######
