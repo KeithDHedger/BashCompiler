@@ -83,7 +83,7 @@ QString commandsClass::makeBASHCliLine(QString qline)
 	int		formatcnt=1;
 
 	if(isInFunction==false)
-		whatin="gargv";
+		whatin="_BC_gargv";
 	else
 		whatin="fv";
 
@@ -95,7 +95,12 @@ QString commandsClass::makeBASHCliLine(QString qline)
 					j++;
 					while(data.at(j).toLatin1()!='\'')
 						{
-							formatstr+=data.at(j);
+							if(data.at(j).toLatin1()=='"')
+								{
+									formatstr+="\\\"";
+								}
+							else
+								formatstr+=data.at(j);
 							j++;
 						}
 					formatstr+="'";
@@ -116,7 +121,7 @@ QString commandsClass::makeBASHCliLine(QString qline)
 						{
 							if(data.at(j+1).toLatin1()=='{')
 								j++;
-							if(whatin=="gargv")
+							if(whatin=="_BC_gargv")
 								argstr+=".arg("+whatin+"["+data.at(j+1)+"])";
 							else
 								argstr+=".arg("+whatin+"[\""+data.at(j+1)+"\"])";
@@ -127,7 +132,7 @@ QString commandsClass::makeBASHCliLine(QString qline)
 								j++;
 							continue;
 						}
-					varname="variables[\"";
+					varname="_BC_variables[\"";
 					j++;
 
 					if(data.at(j).toLatin1()=='{')
@@ -147,7 +152,8 @@ QString commandsClass::makeBASHCliLine(QString qline)
 						}
 					else
 						{
-							while(j<data.length() && data.at(j).toLatin1()!=' ' && data.at(j).toLatin1()!='"' && data.at(j).toLatin1()!='\t')
+						//	while(j<data.length() && data.at(j).toLatin1()!=' ' && data.at(j).toLatin1()!='"' && data.at(j).toLatin1()!='\t' && data.at(j).toLatin1()!='|' && data.at(j).toLatin1()!='$' && data.at(j).toLatin1()!='\'')
+							while(j<data.length() && data.at(j).toLatin1()!=' ' && data.at(j).toLatin1()!='"' && data.at(j).toLatin1()!='\t' && data.at(j).toLatin1()!='|' && data.at(j).toLatin1()!='$')
 								{
 									varname+=data.at(j).toLatin1();
 									j++;
@@ -232,11 +238,13 @@ QString commandsClass::makeExternalCommand(QString qline)
 		}
 
 	tstr=this->makeBASHCliLine(line);
+	outto.replace(QRegularExpression(R"RX(^"|"$)RX"),"");
+	outto="\""+outto+"\"";
 
 	if(isInFunction==true)
-		return("ss<<runExternalCommands("+tstr+",true,"+outto+","+append+")<<Qt::endl");
+		return("ss<<_BC_runExternalCommands("+tstr+",true,"+outto+","+append+")<<Qt::endl");
 	else
-		return("runExternalCommands("+tstr+",false,"+outto+","+append+")");
+		return("_BC_runExternalCommands("+tstr+",false,"+outto+","+append+")");
 
 	return("");
 }
@@ -379,9 +387,9 @@ QString commandsClass::makeWhileRead(QString qline)
 					retstr+="fp=popen(proc.toStdString().c_str(),\"r\");\n";
 					retstr+="QTextStream	inpop(fp);\n";
 					if(match.captured(2).trimmed().isEmpty()==true)
-						retstr+="while(inpop.readLineInto(&variables[\"REPLY\"]))\n";
+						retstr+="while(inpop.readLineInto(&_BC_variables[\"REPLY\"]))\n";
 					else
-						retstr+="while(inpop.readLineInto(&variables[\""+match.captured(2).trimmed()+"\"]))\n";
+						retstr+="while(inpop.readLineInto(&_BC_variables[\""+match.captured(2).trimmed()+"\"]))\n";
 				}
 			else
 				{
@@ -391,9 +399,9 @@ QString commandsClass::makeWhileRead(QString qline)
 					retstr+="fp=popen(proc.toStdString().c_str(),\"r\");\n";
 					retstr+="QTextStream	inpop(fp);\n";
 					if(match.captured(2).trimmed().isEmpty()==true)
-						retstr+="while(inpop.readLineInto(&variables[\"REPLY\"]))\n";
+						retstr+="while(inpop.readLineInto(&_BC_variables[\"REPLY\"]))\n";
 					else
-						retstr+="while(inpop.readLineInto(&variables[\""+match.captured(2).trimmed()+"\"]))\n";
+						retstr+="while(inpop.readLineInto(&_BC_variables[\""+match.captured(2).trimmed()+"\"]))\n";
 				}
 			return(retstr);
 		}
@@ -552,7 +560,7 @@ QString commandsClass::makePopd(QString qline)
 	re.setPattern("^[[:space:]]*?(popd)[[:space:]]*.*");
 	match=re.match(line);
 	if(match.hasMatch())
-		tstr="if(dirstack.isEmpty()==false) QDir::setCurrent(dirstack.takeLast())";
+		tstr="if(_BC_dirStack.isEmpty()==false) QDir::setCurrent(_BC_dirStack.takeLast())";
 	return(tstr);
 }
 
@@ -568,7 +576,7 @@ QString commandsClass::makeExport(QString qline)
 	match=re.match(line);
 	if(match.hasMatch())
 		{
-			tstr=QString("setenv(\"%1\",%2.toStdString().c_str(),1)").arg(match.captured(2).trimmed()).arg("variables[\""+match.captured(2).trimmed()+"\"]");
+			tstr=QString("setenv(\"%1\",%2.toStdString().c_str(),1)").arg(match.captured(2).trimmed()).arg("_BC_variables[\""+match.captured(2).trimmed()+"\"]");
 		}
 	return(tstr);
 }
@@ -614,7 +622,7 @@ QString commandsClass::makePushd(QString qline)
 			tstr.remove(QRegularExpression("[[:space:]&123][[:space:]]*>[[:space:]]*.*$"));
 			pfl.parseLine(tstr);
 			tstr=pfl.parseExprString(false);
-			tstr="dirstack<<QDir::currentPath();\nQDir::setCurrent("+tstr+")";
+			tstr="_BC_dirStack<<QDir::currentPath();\nQDir::setCurrent("+tstr+")";
 		}
 	return(tstr);
 }
@@ -644,7 +652,7 @@ QString commandsClass::makePrintf(QString qline)
 					if(match.hasMatch())
 						{
 							tstr2=pfl.parseOutputString(match.captured(2).trimmed());
-							tstr="variables["+newvar+"]="+tstr2;
+							tstr="_BC_variables["+newvar+"]="+tstr2;
 						}
 					return(tstr);
 				}
@@ -653,7 +661,7 @@ QString commandsClass::makePrintf(QString qline)
 					tstr=pfl.parseOutputString(match.captured(3).trimmed());
 					if(match.captured(2).trimmed().endsWith("\\n\"")==true)//TODO//horrible hack!
 						tstr+="<<Qt::endl";
-					tstr="outop<<"+tstr;
+					tstr="_BC_outOP<<"+tstr;
 					return(tstr);
 				}
 		}
@@ -664,12 +672,18 @@ QString commandsClass::makeAssign(QString qline)
 {
 	QString			pal;
 	QString			retstr;
+	QString			line=qline;
 	parseFileClass	pfl;
 	bool				ok;
 
-	pfl.parseLine(qline);
+	line.replace(QRegularExpression("(?<!\")~(?!\")"),"_BC_variables[\"HOME\"]");
+	pfl.parseLine(line);
+
 	pal=pfl.parseExprString(false);
+	//pal=pfl.reentrantParseVar(pal);
+	//DB_printParts(pfl.lineParts);
 	pal.replace(QRegularExpression("\\\\([[:alpha:]])"),"\\1");
+	pal.replace(QRegularExpression("\"(_BC_variables\\[\"[[:alpha:][:alnum:]_]*\"\\])\""),"\\1");
 	retstr=pfl.optimizeOP(pal,&ok);
 
 	return(retstr);
@@ -683,14 +697,14 @@ QString commandsClass::optEchoLine(QString qline,bool preserve,bool escapes,bool
 	QString start="QString(";
 	QString dne=")";
 
-	if(qline.contains("variables[\"")==false)
+	if(qline.contains("_BC_variables[\"")==false)
 		{
 			if(preserve==false && escapes==true)
-				tstr.replace(replaceWhiteSpace," ").replace("\\\\n","\\n").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
+				tstr.replace(_BC_replaceWhiteSpace," ").replace("\\\\n","\\n").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
 			else if(preserve==true && escapes==true)
 				tstr.replace("\\\\n","\\n").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
 			else if(preserve==false && escapes==false)
-				tstr.replace(replaceWhiteSpace," ").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
+				tstr.replace(_BC_replaceWhiteSpace," ").replace("\\\\t","\\t").replace("\\\\e","\\e").replace("\\\\r","\\r");
 			return(tstr);
 		}
 
@@ -704,12 +718,26 @@ QString commandsClass::optEchoLine(QString qline,bool preserve,bool escapes,bool
 		}
 
 	if(preserve==false && escapes==true)
-		tstr=start+tstr+dne+".replace(replaceWhite, \" \")"+replaces;
+		tstr=start+tstr+dne+".replace(_BC_replaceWhite, \" \").trimmed()"+replaces;
 	else if(preserve==true && escapes==true)
 		tstr=start+tstr+dne+replaces;
 	else if(preserve==false && escapes==false)
-		tstr=tstr=start+tstr+dne+".replace(replaceWhite, \" \")";
+		tstr=tstr=start+tstr+dne+".replace(_BC_replaceWhite, \" \").trimmed()";
 	return(tstr);
+}
+
+bool commandsClass::containsPipeOutsideQuotes(const QString &text)
+{
+	QRegularExpression regex(R"RX("([^"]*)"|([^"|]*)|(\|))RX");
+	QRegularExpressionMatchIterator it=regex.globalMatch(text);
+
+	while (it.hasNext())
+		{
+			QRegularExpressionMatch match = it.next();
+			if (match.captured(3) == "|")
+				return(true);
+		}
+	return(false);
 }
 
 QString commandsClass::makeEcho(QString qline)
@@ -731,8 +759,7 @@ QString commandsClass::makeEcho(QString qline)
 
 	pfl.preserveWhitespace=true;
 
-	re.setPattern("[.^\\|]*( \\| ).*$");
-	if(qline.contains(re)==true)
+	if(this->containsPipeOutsideQuotes(line)==true)
 		return("");
 
 	re.setPattern("[[:space:]]*echo[[:space:]]*(-.\\s*)?(-.?\\s*)?[[:space:]]*(.*)([[:space:]]+>+[[:space:]]+)(.*)");
@@ -783,14 +810,14 @@ QString commandsClass::makeEcho(QString qline)
 			if(emptyEcho==false)
 				{
 					if(isInFunction==false)
-						tstr="outop<<"+tstr+"<<"+outendl;
+						tstr="_BC_outOP<<"+tstr+"<<"+outendl;
 					else
 						tstr="ss<<"+tstr+"<<"+outendl;
 				}
 			else
 				{
 					if(isInFunction==false)
-						tstr="outop<<"+outendl;
+						tstr="_BC_outOP<<"+outendl;
 					else
 						tstr="ss<<"+outendl;
 				}
@@ -868,7 +895,7 @@ QString commandsClass::makeHereDoc(QString qline)
 			data.replace(";","\\\\;");
 			data.replace("\n","\\n");
 			data.replace("\t","\\t");
-			data.replace(QRegularExpression("([^\\\\])\\$\\{?([[:alpha:][:alnum:]_]*)}?"),"\\1\"+variables[\"\\2\"]+\"");
+			data.replace(QRegularExpression("([^\\\\])\\$\\{?([[:alpha:][:alnum:]_]*)}?"),"\\1\"+_BC_variables[\"\\2\"]+\"");
 			data.replace("\\$","\\\\$");
 
 			procstr="echo -e \\\""+data+"\\\"";
@@ -956,7 +983,7 @@ QString commandsClass::makeRead(QString qline)
 	else
 		tstr="REPLY";
 
-	retstr=QString("variables[\""+tstr+"\"]=procSubCheat(\"%1;echo ${"+tstr+"}\")").arg(pfl.lineToBashCLIString(qline));
+	retstr=QString("_BC_variables[\""+tstr+"\"]=_BC_procSubCheat(\"%1;echo ${"+tstr+"}\")").arg(pfl.lineToBashCLIString(qline));
 	return(retstr);
 }
 
@@ -965,19 +992,23 @@ QString commandsClass::makeSelect(QString qline)
 	QString					retstr="";
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
-	parseFileClass			pfl;
+	QString					repstr="";
 
 	re.setPattern("^[[:space:]]*select[[:space:]]*([[:alpha:][:alnum:]_]*)[[:space:]]*in[[:space:]]*(.*)");
 	match=re.match(qline);
 	if(match.hasMatch())
 		{
-			
-			
-			QString xx=pfl.lineToBashCLIString(match.captured(2).trimmed());
-			xx.replace(QRegularExpression("\"]\\+\"$"),"\"].replace(replaceWhite, \" \")+\"");
-			retstr="while(true)\n{\n";
-			retstr+="variables[\""+match.captured(1).trimmed()+"\"]=procSubCheat(QString(\"select "+match.captured(1).trimmed()+" in "+xx+";do break;done;echo $"+match.captured(1).trimmed()+"\"));\n";
+			retstr=match.captured(2).trimmed().replace("~","${HOME}");
+			retstr=this->makeAssign("data="+retstr);
+			if(retstr.startsWith("QString("))
+				repstr=".replace(\"\\n\",\" \")";
+			else
+				{
+					retstr="QString("+retstr;
+					repstr=").replace(\"\\n\",\" \")";
+				}
+			retstr="while(true)\n{\n_BC_variables[\""+match.captured(1).trimmed()+"\"]=_BC_procSubCheat(QString(\"select "+match.captured(1).trimmed()+" in \"+"+retstr+""+repstr+"+\"";
+			retstr+=";do break;done;echo $"+match.captured(1).trimmed()+"\"));";
 		}
-
 	return(retstr);
 }

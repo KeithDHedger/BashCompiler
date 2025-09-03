@@ -17,7 +17,7 @@ FIND="abc"
 echo $HASTACK
 NEEDLE=${HASTACK/"abc"/"XYZ"}
 echo $NEEDLE
-NEEDLE=${HASTACK//"abc"/XYZ}
+NEEDLE=${HASTACK//"abc"/"XYZ"}
 echo $NEEDLE
 NEEDLE=${HASTACK//"abc"/$PART}
 echo $NEEDLE

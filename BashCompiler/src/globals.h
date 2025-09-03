@@ -70,8 +70,8 @@ static const char* typeText[]={"UNKNOWN","WHITESPACE","DOUBLEQUOTESTRING","SINGL
 static const char*	bashmath[]={"-gt ","-lt ","-eq ","-ne ","-le ","-ge "," != "," < "," > "," = "," == ",NULL};
 static const char*	cmath[]={">","<","==","!=","<=",">=","!=","<",">","==","==",NULL};
 static QTextStream	errop(stderr);
-static QTextStream	outop(stdout);
-static QRegularExpression replaceWhiteSpace("[[:space:]]+");
+static QTextStream	_BC_outOP(stdout);
+static QRegularExpression _BC_replaceWhiteSpace("[[:space:]]+");
 
 #pragma GCC diagnostic pop
 
@@ -116,6 +116,12 @@ static void DB_printLines(QStringList lines)
 {
 	for(int j=0;j<lines.size();j++)
 		errop<<"Line "<<j<<": "<<lines.at(j)<<Qt::endl;
+}
+
+static void DB_printParts(QVector<lineData> lineparts)
+{
+	for(int j=0;j<lineparts.size();j++)
+		errop<<"Part "<<j<<": Type :"<<typeText[lineparts.at(j).typeHint]<<" Data >"<<lineparts.at(j).data<<"<"<<Qt::endl;
 }
 
 #pragma GCC diagnostic pop

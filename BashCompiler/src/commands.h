@@ -71,6 +71,8 @@ class commandsClass
 	private:
 		QString	optEchoLine(QString qline,bool preserve,bool escapes,bool force);
 		QString simpleSub(QString qline);
+
+		bool		containsPipeOutsideQuotes(const QString &text);
 };
 
 #endif

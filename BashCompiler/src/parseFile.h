@@ -42,21 +42,24 @@ class parseFileClass
 		QString				cleanVar(QString line);
 		QString				parseOutputString(QString qline);
 		QString				globToRX(QString glob,bool greedy);
+		QString				optimizeOP(QString qline,bool *succeed);
 		bool					parseLine(QString line);
 
-		QString				optimizeOP(QString qline,bool *succeed);
-
 	private:
+		QString				parseVarNew(QString qline);
+		QString				reentrantParseVar(QString qline);
+		QString				setSpecialDollars(QString dollar);
 		int					currentLine=0;
 
-		QString				setSpecialDollars(QString dollar);
+		QString				numberToString(QString qline);
+		QString				checkParam(QString qline);
+
 		void 				parseString(QString qline);
 		void					parseSquareBraces(QString line);
 		void					parseDollar(QString line);
 		void					parseWhitespace(QString line);
 		void					parseQuotedString(QString line);
 		void					parseSingleQuoteString(QString line);
-
 };
 
 #endif

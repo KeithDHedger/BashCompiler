@@ -53,11 +53,10 @@ X=$(dirname "${APATH}")
 echo $X
 echo "<<<<<<<<<<<<<<<<<<<<<"
 #//SUFFIX=".flac"
-echo $(basename "/media/MediaStore/Music/Flacs/Music/Abba/Gold/\"01 Dancing Queen.flac\"" ".flac" )
-echo $(basename '/media/MediaStore/Music/Flacs/Music/Abba/Gold/'"01 Dancing Queen.flac" ".flac" )
+echo $(basename "/media/MediaStore/Music/Flacs/Music/Abba/Gold/01 Dancing Queen.flac" ".flac" )
 echo ">>>>>>>>>>>>>>>>>>>>>>>>>"
 
-echo $(basename "/tmp/a \"test\" file" ".txt")
+echo $(basename "/tmp/a "test" file" ".txt")
 basename "/tmp/a 'test' file" ".txt"
 #outop<<QString("%1").arg(procsub("basename  '"+APATH+"' \".flac\""))<<Qt::endl;
 echo $(basename "${APATH}" ".flac")

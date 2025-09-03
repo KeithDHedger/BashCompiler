@@ -1,0 +1,31 @@
+#!/bin/bash
+
+file="/usr/share/"
+file2="pixmaps"
+
+x=$(ls -1 ${file}${file2} | sort)
+echo $x
+x=$(ls -1 $file$file2|sort)
+echo $x
+
+x=$(ls -1 $file$file2)
+echo $x
+
+ls -1 $file$file2
+
+ls ~
+file=~
+file2="/Desktop"
+x=$(ls -1 $file)
+echo $x
+
+x=$(ls -1 $file$file2)
+echo $x
+
+ls $file$file2
+ls ${file}${file2}
+ls "${file}${file2}"
+
+file="~"
+echo $file
+ls "$file"

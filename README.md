@@ -56,6 +56,7 @@ When doing maths using the '$(( n + d ))' format **NOTE** that the opening and c
 When using redirect to a file or pipe with echo  you **MUST** surround the '>', '>>' or '|' with at least one space/tab.  
 When using -e/-n with echo you **MUST** use individual switches eg -n -e AND NOT -ne.  
 When using loops ( eg for ((x=0;x<n;x=x++)) ) the control loop is **READ ONLY**, you shouldn't really programatically alter the control loop anyway, if you do need to you should use a 'while' loop.  
+Variables and functions should **NOT** start with "\_BC\_" this is reserved for the compiler.  
   
 When using ${foo^^} be aware that BASH mistakenly uppercases any embedded '\n' to '\N'.  
 
@@ -78,7 +79,7 @@ echo $REPLY
 
 read -p "run this command ? [N/y] " ans1 ans2
 echo $ans2
-N.B. extra variables supplied ( ie ans1 ) will 'swallow' input.
+N.B. extra _BC_variables supplied ( ie ans1 ) will 'swallow' input.
 
 Only stdout is redirectable to a file for now.
 Pipelines of commands may ONLY redirect the LAST command to a file, if you need to do fancy redirects or redirect stderr then wrap in a shell command eg:
@@ -89,6 +90,16 @@ See the testpipesndselect example.
 
 printf, optional '-v VARNAME' FORMATSTR STR1 ... STRN, format string is ignored ( except if it ends with '\n' ) but MUST be present ( for now! ).
 For full printf functionality use the external printf ( probably /usr/bin/printf ).
+
+Defaults MUST be in quotes so:
+WRITEBYTES=${WRITEBYTES:-"128M"}
+And NOT
+WRITEBYTES=${WRITEBYTES:-128M}
+The same goes for string slicing eg
+echo ${FOO//"bar"/"baz"}
+And NOT
+echo ${FOO//bar/baz}
+
 
 ````  
 
@@ -118,7 +129,7 @@ read
 cd
 case.  
 simple 'here' doc.
-env variables.
+env _BC_variables.
 Command redirection.  
 Variable assignment.  
 export.  

@@ -7,7 +7,7 @@ for ((i=0;i<2;i++))
 	do
 		for ((k=0;k<16;k++))
 			do
-				widnum=${#k}
+				widnum=${#kkk}
 				wid=$(( 4 - widnum ))
 				numspaces=${spaces:0:$wid}
 				if [ $i -eq 0 ];then

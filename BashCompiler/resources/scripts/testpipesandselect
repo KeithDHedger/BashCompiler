@@ -20,24 +20,21 @@ break
 done
 echo $argfind
 
-#select from direct command sub TODO!!
+#select from direct command sub
 selectargsfrom="/usr/bin"
-selectargsfrom=$(ls $selectargsfrom | grep -i cc)
-#this will error:
-#select argfind in $(ls $selectargsfrom | grep -i cc)
-select argfind in $selectargsfrom
+select argfind in $(ls $selectargsfrom | grep -i cc)
 do
 break
 done
 echo $argfind
 
-read -p "ok u mugs "
+read -p "ok yuse guys! "
 echo $REPLY
 
 #nested select
-select arg in 123 456 cancel
+select arg in 123 456 789
 do
-select arg2 in abc def ghi cancel
+select arg2 in $arg abc def ghi cancel
 do
 break
 done
@@ -45,7 +42,7 @@ break
 done
 
 selectargs="a1 b2 c3 d4 done"
-select arg3 in ${selectargs}
+select arg3 in $(ls ~) ${selectargs}
 do
 break
 done

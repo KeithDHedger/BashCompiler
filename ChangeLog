@@ -1,4 +1,23 @@
 0.4.0
+Redone select arg in ...
+Code clean.
+Better parsing of external piped commands.
+Reserved "_BC_" for variables and functions.
+Done ${variable#}.
+Done ${variable##}.
+Done ${variable%}.
+Done ${variable%%}.
+Added ${!foo}.
+Done ${variable^^}.
+Done ${variable^}.
+Done ${variable,,}.
+Done ${variable,}.
+Done ${variable//xx/zz}.
+Done ${variable/xx/zz}.
+Done ${#variable}.
+Done ${string:position:length}/${string:position}
+Started re-entrant variable parsing.
+Fixed white space preserving in echo.
 Added Show256Cols to examples.
 Fixed select.
 Fixed '$' in single quotes in pipe.
@@ -45,7 +64,7 @@ Redone some examples.
 Added variable default eg ST=noxfer;STATUS=${STATUS:-"$ST"}.
 Added file tests efdhxrw, and negate (!).
 Done read.
-Fixed assigning curses escape codes to variables.
+Fixed assigning curses escape codes to _BC_variables.
 Added $#.
 Fixed splitting lines on 'do'.
 
@@ -63,7 +82,7 @@ Fixed more escapes.
 Code clean.
 Fixed proccess substitution that doesn't return a trailing newline.
 Done redirect to file/pipe for echo.
-Done importing BASH environment variables at startup.
+Done importing BASH environment _BC_variables at startup.
 Done 'Exit'.
 Removed ">=" and "<=" from string tests, ( not available in BASH ).
 Fixed "!=" in test;
@@ -73,7 +92,7 @@ Added '-n' option to echo.
 Started rewrite and clean.
 
 0.2.0
-Quoted variables when feeding external commands to while read loop.
+Quoted _BC_variables when feeding external commands to while read loop.
 Done printf ( optional -v to set variable ).
 Added access to $0-$9 as global args to app.
 Done pushd/popd.
@@ -85,7 +104,7 @@ Fixed do/done/fi/else
 Done while.
 Done ${string#substring}/${string##substring}/${string%substring}/${string%%substring}.
 Fixed $?.
-Moved to qhash to hold variables
+Moved to qhash to hold _BC_variables
 Fixed quotes in process substitution.
 Done ${string:position:len} Extract substring from $string at $position with.
 Done ${string:position} Extract $length characters substring from $string at $position [zero-indexed, first character is at position 0].

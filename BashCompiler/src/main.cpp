@@ -82,14 +82,14 @@ int main(int argc,char **argv)
 
 	if(prefs.LFSTK_getBool("syntax-check")==true)
 		{
-			int exitstatus;
+			int retcode;
 			QString checkstr=QString("shellcheck \"%1\" 2>/dev/null||bash -n \"%1\"").arg(prefs.cliArgs.at(0).c_str());
-			exitstatus=QProcess::execute(getenv("SHELL"),QStringList()<<"-c"<<checkstr);
-			if(exitstatus!=0)
-				qDebug()<<"Error "<<exitstatus;
+			retcode=QProcess::execute(getenv("SHELL"),QStringList()<<"-c"<<checkstr);
+			if(retcode!=0)
+				qDebug()<<"Error "<<retcode;
 			else
 				qDebug()<<"No errors found";
-			exit(exitstatus);
+			exit(retcode);
 		}
 
 	if(prefs.LFSTK_getString("compile").length()>0)

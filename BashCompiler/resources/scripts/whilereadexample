@@ -4,7 +4,7 @@ printDestDirs ()
 {
 	echo $1 $2 $3
 	#/bin/bash -c time mount |grep -i "\(${1}\|${2}\|${3}\)" | grep -v '\(/gvfs\|/sys\)'
-	mount |grep -i "\(${1}\|${2}\|${3}\)" | grep -v '\(/gvfs\|/sys\)'
+	mount|grep -i "\(${1}\|${2}\|${3}\)"|grep -v '\(/gvfs\|/sys\)'
 }
 
 #read cat /etc/fstab

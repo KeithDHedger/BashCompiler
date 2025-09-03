@@ -46,14 +46,14 @@ bool compilerClass::openBashFile(QString filepath)
 
 void compilerClass::writeCFile(void)
 {
-	QString specialvars="QString exitstatus;\n";
+	QString specialvars="QString _BC_exitStatus;\n";
 
-	QString globalvars="QTextStream outop(stdout);\nQHash<QString,QString> variables;\nQVector<QString> dirstack;\nQRegularExpression replaceWhite(\"[[:space:]]+\");\nQProcess pipeProc;\nQProcess comProc;\n\nint exitnum=-1;\nchar **gargv;\nwordexp_t commandsvar[MAXARGS];\nchar buffer[BUFFER_SIZE];\n";
+	QString globalvars="QTextStream _BC_outOP(stdout);\nQHash<QString,QString> _BC_variables;\nQVector<QString> _BC_dirStack;\nQRegularExpression _BC_replaceWhite(\"[[:space:]]+\");\nQProcess _BC_pipeProc;\nQProcess _BC_comProc;\n\nint _BC_exitnum=-1;\nchar **_BC_gargv;\nwordexp_t _BC_commandsVar[MAXARGS];\nchar _BC_buffer[BUFFER_SIZE];\n";
 
 	QString headers="#include <QTextStream>\n#include <QHash>\n#include <QRegularExpression>\n#include <QDir>\n#include <QProcessEnvironment>\n#include <QProcess>\n#include <wordexp.h>\n#include <sys/wait.h>\n#include <unistd.h>\n#include <fcntl.h>\n\n#define MAXARGS 50\n#define BUFFER_SIZE 4096\n\n";
 
 	QString functions="\n\
-QString loadEnvironment(bool capture,QHash<QString, QString> fv)\n\
+QString _BC_loadEnvironment(bool capture,QHash<QString, QString> fv)\n\
 {\n\
 QProcessEnvironment env=QProcessEnvironment::systemEnvironment();\n\
 QStringList paths_list=env.toStringList();\n\
@@ -62,43 +62,43 @@ for(int j=0;j<paths_list.size();j++)\n\
 if(paths_list.at(j).startsWith(\"BASH_FUNC_\")==false)\n\
 {\n\
 QStringList parts=paths_list.at(j).split(\"=\");\n\
-variables[parts.at(0)]=parts.at(1);\
+_BC_variables[parts.at(0)]=parts.at(1);\
 }\n\
 }\n\
 return(\"\");\n\
 }\n\
 \n\
-QString procSubCheat(QString proc)\n\
+QString _BC_procSubCheat(QString proc)\n\
 {\n\
 FILE *fp;\n\
-int exitnum=-1;\n\
-char *buffer=(char*)alloca(1024);\n\
+int _BC_exitnum=-1;\n\
+char *_BC_buffer=(char*)alloca(1024);\n\
 QString retstr=\"\";\n\
 \n\
-//outop<<proc<<Qt::endl;\n\
+//_BC_outOP<<proc<<Qt::endl;\n\
 \n\
-retstr=variables[\"SHELL\"]+\" -c '\"+proc+\"'\";\n\
+retstr=_BC_variables[\"SHELL\"]+\" -c '\"+proc+\"'\";\n\
 fp=popen(retstr.toStdString().c_str(),\"r\");\n\
 retstr=\"\";\n\
 if(fp!=NULL)\n\
 {\n\
-buffer[0]=0;\n\
-while(fgets(buffer,1024,fp))\n\
-retstr+=buffer;\n\
+_BC_buffer[0]=0;\n\
+while(fgets(_BC_buffer,1024,fp))\n\
+retstr+=_BC_buffer;\n\
 if(retstr.isEmpty()==false)\n\
 {\n\
 if(retstr.at(retstr.length()-1)=='\\n')\n\
 retstr.resize(retstr.length()-1);\n\
 }\n\
-exitnum=pclose(fp)/256;\n\
-exitstatus=QString::number(exitnum);\n\
+_BC_exitnum=pclose(fp)/256;\n\
+_BC_exitStatus=QString::number(_BC_exitnum);\n\
 }\n\
 return(retstr);\n\
 };\n\
 \n\
-QString runExternalCommands(QString str,bool capture,QString tofile,bool append)\n\
+QString _BC_runExternalCommands(QString str,bool capture,QString tofile,bool append)\n\
 {\n\
-//outop<<str<<Qt::endl;\n\
+//_BC_outOP<<str<<Qt::endl;\n\
 QString dataout=\"\";\n\
 int slen;\n\
 char *data=NULL;\n\
@@ -127,7 +127,8 @@ int pipe_position=-1;\n\
 for(int i=0;data[i]!=\'\\0\';i++)\n\
 {\n\
 if(data[i]==\'\\\'\')\n\
-i+=2;\n\
+//i+=2;\n\
+i++;\n\
 if(data[i]==\'|\')\n\
 {\n\
 inquote=false;\n\
@@ -156,7 +157,7 @@ break;\n\
 }\n\
 if(pipe_position != -1)\n\
 data[pipe_position] = \'\\0\';\n\
-if((wordexpret=wordexp(data,&commandsvar[comnum],0))==0)\n\
+if((wordexpret=wordexp(data,&_BC_commandsVar[comnum],0))==0)\n\
 comnum++;\n\
 else\n\
 {\n\
@@ -215,7 +216,7 @@ dup(filefd);\n\
 for(int j=0;j<2*(comnum);j++)\n\
 close(pipe_fds[j]);\n\
 \n\
-execvp(commandsvar[i].we_wordv[0],commandsvar[i].we_wordv);\n\
+execvp(_BC_commandsVar[i].we_wordv[0],_BC_commandsVar[i].we_wordv);\n\
 perror(\"execlp\");\n\
 exit(EXIT_FAILURE);\n\
 }\n\
@@ -232,20 +233,20 @@ dataout=\"\";\n\
 FILE* file=fdopen(pipefdslast[0],\"r\");\n\
 if(file!=NULL)\n\
 {\n\
-while(fgets(buffer,BUFFER_SIZE-1,file))\n\
+while(fgets(_BC_buffer,BUFFER_SIZE-1,file))\n\
 {\n\
-dataout.append(buffer);\n\
-buffer[0]=0;\n\
+dataout.append(_BC_buffer);\n\
+_BC_buffer[0]=0;\n\
 }\n\
 fclose(file);\n\
 }\n\
 close(pipefdslast[0]);\n\
 }\n\
 waitpid(pid[comnum],&wstatus,0);\n\
-exitstatus=QString::number(WEXITSTATUS(wstatus));\n\
+_BC_exitStatus=QString::number(WEXITSTATUS(wstatus));\n\
 \n\
 for(int j=0;j<comnum;j++)\n\
-wordfree(&commandsvar[j]);\n\
+wordfree(&_BC_commandsVar[j]);\n\
 if(filefd>0)\n\
 close(filefd);\n\
 if(capture==true)\n\
@@ -258,7 +259,7 @@ return(\"\");\n\
 		functions+=fCode.at(j);
 
 //write code
-	cCode.prepend("\nint main(int argc, char **argv)\n{\ngargv=argv;\nloadEnvironment(false,{});\nvariables[\"SHELL\"]=(getenv(\"SHELL\")!=NULL && strlen(getenv(\"SHELL\"))>0) ? (getenv(\"SHELL\")) : (\"/bin/bash\");\n");
+	cCode.prepend("\nint main(int argc, char **argv)\n{\n_BC_gargv=argv;\n_BC_loadEnvironment(false,{});\n_BC_variables[\"SHELL\"]=(getenv(\"SHELL\")!=NULL && strlen(getenv(\"SHELL\"))>0) ? (getenv(\"SHELL\")) : (\"/bin/bash\");\n");
 
 	cCode.prepend(functions);
 	cCode.prepend(globalvars);
@@ -440,7 +441,7 @@ void compilerClass::parseSingleLine(QString qline)
 									retstr=commands.makeAssign(lines.at(j));
 									if(retstr.isEmpty()==false)
 										{
-											retstr="variables[\""+match.captured(1).trimmed()+"\"]="+retstr;
+											retstr="_BC_variables[\""+match.captured(1).trimmed()+"\"]="+retstr;
 											QString tstr=retstr;
 											tstr=tstr.replace(QRegularExpression("\\\\\\\\\\\\\"\"\\+"),"\\\"\"+");
 											tstr=tstr.replace(QRegularExpression("\\+\"\\\\\\\\\\\\\"\""),"+\"\\\"\"");								
@@ -541,7 +542,7 @@ void compilerClass::parseSingleLine(QString qline)
 											else
 												{
 													if((isInFor.isEmpty()==false) && (isInFor.back()==true))
-														retstr="{\nvariables[\""+forVariable.back()+"\"].setNum("+forVariable.back()+");\n";
+														retstr="{\n_BC_variables[\""+forVariable.back()+"\"].setNum("+forVariable.back()+");\n";
 													else
 														retstr="{\n";
 												}
@@ -572,7 +573,7 @@ void compilerClass::parseSingleLine(QString qline)
 					else
 						{
 								retstr=commands.makeBASHCliLine(lines.at(j));
-								retstr="exitstatus=QString::number(WEXITSTATUS(system("+retstr+".toStdString().c_str())))";
+								retstr="_BC_exitStatus=QString::number(WEXITSTATUS(system("+retstr+".toStdString().c_str())))";
 								this->outToCode(retstr,lineend,lines.at(j),doignore,false);
 						}
 				}
@@ -622,7 +623,7 @@ void compilerClass::parseFile(void)
 	QString					lineend;
 
 	commandsClass			commands;
-	functionNames<<"loadEnvironment";
+	functionNames<<"_BC_loadEnvironment";
 
 	while(!this->mainBashFile.atEnd())
 		{

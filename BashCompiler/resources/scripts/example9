@@ -6,7 +6,7 @@ makePage ()
 while [[ $cnt -gt 0 ]]
 do
 	echo $cnt
-	cnt=$((cnt-2))
+	cnt=$(( cnt-2 ))
 done
 #cnt=8
 echo "$cnt"
