@@ -1,19 +1,197 @@
-.\" bashcompiler
-.TH "bashcompiler" "1" "0.0.0" "K.D.Hedger" "User Commands"
+.TH "BASHCOMPILER" "1" "0.4.1" "K. D. Hedger" "User Commands"
 .SH "NAME"
-bashcompiler \- manual page for bashcompiler 0.0.0
-.SH "SYNOPSIS"
-.B bashcompiler
+BashCompiler
+.br
+
 .SH "DESCRIPTION"
-A GUI programme.
+Simple BASH compiler
+.br
 
+Doesn't use AI, or obfuscation, outputs compileable C++ code ( Qt6 or Qt5 ).
+.br
+You should check the script first by running it in bash.  
+.br
+No syntax checking ( that's BASH's job ).  
+.br
+Main use is for simpler but time consuming scripts, eg recursing through a music collection.
+.br
 
-.SH "EXAMPLES"
-.LP 
-	does somithing
-.IP 
-bashcompiler
-.LP 
+The bashcompiler executable can be installed or run directly from the BashCompiler/app folder, or just copy it somewhere convienient.  
+.br
+There are a number of examples in BashCompiler/resources/scripts.  
+.br
+.SH "USAGE"
+Usage: BashCompiler [[OPT 0]...[OPT N]] Input File
+.br
 
-.SH "REPORTING BUGS"
-Report bugs to kdhedger@yahoo.co.uk
+bashcompiler -V /PATH/TO/BASHSCRIPT >/tmp/x.cpp
+.br
+g++ -Wall $(pkg-config --cflags --libs Qt5Core ) -fPIC  -Ofast /tmp/x.cpp -o APPNAME
+.br
+
+Or:
+.br
+bashcompiler -V /PATH/TO/BASHSCRIPT -c /PATH/TO/FINAL/APP
+.br
+
+All intermediate folders are created if need when using the -c switch.
+.br
+
+Options can also be put in a config file at ~/.config/bashcompiler.rc eg:
+.br
+
+verbose-ccode true
+.br
+use-qt5 true
+.br
+full-compile /tmp
+.br
+lowercase-name true
+.br
+
+Command line options will overide these.
+.br
+.SH "CAVEATES"
+BASH is weakly typed so you \fBMUST\fR use "=, ==, <, or >" for string comparisons.
+.br
+You \fBMUST\fR use "-gt, -ge ... etc for numeric comparisons.
+.br
+All numerical expression **MUST** be enclosed by $(())
+.br
+When doing maths using the '$(( n + d ))' format \fBNOTE\fR that the opening and closing brackets \fBMUST\fR be seperated by at least one space.
+.br
+
+'eval' is NOT supported and almost certainly will never be, not because of any supposed "eval=evil" but simply it would need the compiler available at runtime and probably a JIT compiler.
+.br
+When using redirect to a file or pipe with echo  you \fBMUST\fR surround the '>', '>>' or '|' with at least one space/tab.
+.br
+When using -e/-n with echo you \fBMUST\fR use individual switches eg -n -e \fBAND NOT\fR -ne.
+.br
+When using loops ( eg for ((x=0;x<n;x=x++)) ) the control loop is \fBREAD ONLY\fR, you shouldn't really programatically alter the control loop anyway, if you do need to you should use a 'while' loop.
+.br
+Variables and functions should \fBNOT\fR start with "\_BC\_" this is reserved for the compiler.
+.br
+
+When using ${foo^^} be aware that \fBBASH\fR mistakenly uppercases any embedded '\n' to '\N'.
+.br
+
+Positional paramaters should be assigned to a variable **BEFORE** string slicing eg:
+.br
+
+file=${1}
+.br
+echo ${file^^}
+.br
+AND NOT
+.br
+echo ${1^^}
+.br
+
+echo ${#1}
+.br
+Is OK
+.br
+
+read ( not read while ) will only use the LAST variable given the default REPLY is used if no variable given.  
+.br
+Eg:
+.br
+
+read -p "run this command ? [N/y] "
+.br
+echo $REPLY
+.br
+
+read -p "run this command ? [N/y] " ans1 ans2
+.br
+echo $ans2
+.br
+\fBN.B.\fR extra variables supplied ( ie ans1 ) will 'swallow' input.
+.br
+
+Only stdout is redirectable to a file for now.
+.br
+Pipelines of commands may ONLY redirect the LAST command to a file, if you need to do fancy redirects or redirect stderr then wrap in a shell command eg:
+.br
+/bin/sh -c "ls /tmpl 2>/tmp/log|ls / &amp;>>/tmp/log"
+.br
+
+Creating menus with 'select' is \fBBASH\fR only and will ( for now ) run a seperate shell to run the command at runtime.
+.br
+See the testpipesndselect example.
+.br
+
+printf, optional '-v VARNAME' FORMATSTR STR1 ... STRN, format string is ignored ( except if it ends with '\n' ) but \fBMUST\fR be present ( for now! ).
+.br
+For full printf functionality use the external printf ( probably /usr/bin/printf ).
+.br
+
+Defaults MUST be in quotes so:
+.br
+WRITEBYTES=${WRITEBYTES:-"128M"}
+.br
+And NOT
+.br
+WRITEBYTES=${WRITEBYTES:-128M}
+.br
+The same goes for string slicing eg
+.br
+echo ${FOO//"bar"/"baz"}
+.br
+And \fBNOT\fR
+.br
+echo ${FOO//bar/baz}
+.br
+
+Be careful of quotes eg use this:
+.br
+echo "The login/password is \"${RESULT}\""
+.br
+Not this:
+.br
+echo "The login/password is \""$RESULT"\""
+.br
+.SH "OPTIONS"
+\fB-v, --verbose-compile\fR [BOOLEAN_ARG]
+.br
+	Verbose compile ( optional 1/true or 0/false )
+.br
+
+\fB-V, --verbose-ccode\fR [BOOLEAN_ARG]
+.br
+	Add BASH source lines to C Code ( optional 1/true or 0/false )
+.br
+
+\fB-c, --compile\fR STRING_ARG
+.br
+	Compile script then compile code to STRING_ARG ( where STRING_ARG is fullpath to final application ) All intermediate directories are created if needed
+.br
+
+\fB-C, --full-compile\fR STRING_ARG
+.br
+	Compile script then compile code to folder STRING_ARG ( where STRING_ARG is fullpath to final application folder) Final app name is taken from input file All intermediate directories are created if needed If 'astyle' is installed it will be used to 'pretty up' the outputed cpp file
+.br
+
+\fB-l, --lowercase-name\fR [BOOLEAN_ARG]
+.br
+	Lower case the app name when using full-compile ( optional 1/true or 0/false )
+.br
+
+\fB-5, --use-qt5\fR [BOOLEAN_ARG]
+.br
+	Use qt5 for final compile instead of qt6 ( optional 1/true or 0/false )
+.br
+
+\fB-s, --syntax-check\fR [BOOLEAN_ARG]
+.br
+	Just Check syntax ( use shellcheck if installed else use bash -n )
+.br
+.SH "AUTHORS"
+K.D.Hedger.
+.br
+
+Website:
+.br
+https://keithdhedger.github.io
+.br
+

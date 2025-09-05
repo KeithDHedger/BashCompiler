@@ -283,12 +283,12 @@ void LFSTK_prefsClass::printHelp(option longoptions[])
 	int				typeit;
 	std::string		desc;
 
-	fprintf(stderr,"%s %s\n",this->appName.c_str(),this->appVersion.c_str());
-	fprintf(stderr,"Usage:\n");
-	fprintf(stderr,"%s [[OPT 0]...[OPT N]] Input File\n",this->appName.c_str());
+	printf("%s %s\n",this->appName.c_str(),this->appVersion.c_str());
+	printf("Usage:\n");
+	printf("%s [[OPT 0]...[OPT N]] Input File\n",this->appName.c_str());
 	while(longoptions[cnt].name!=0)
 		{
-			fprintf(stderr,"-%c, --%s",longoptions[cnt].val,longoptions[cnt].name);
+			printf("-%c, --%s",longoptions[cnt].val,longoptions[cnt].name);
 			typeit=this->prefsMap.find(this->LFSTK_hashFromKey(longoptions[cnt].name))->second.type;
 			if(this->prefsMap.find(this->LFSTK_hashFromKey(longoptions[cnt].name))->second.description.length()>0)
 				desc="\n\t"+this->prefsMap.find(this->LFSTK_hashFromKey(longoptions[cnt].name))->second.description+"\n";
@@ -312,19 +312,19 @@ void LFSTK_prefsClass::printHelp(option longoptions[])
 			switch(typeit)
 				{
 					case -1:
-						fprintf(stderr," \t");
+						printf(" \t");
 						break;
 					case TYPESTRING:
-						fprintf(stderr," %sSTRING_ARG%s\t",ob,cb);
+						printf(" %sSTRING_ARG%s\t",ob,cb);
 						break;
 					case TYPEINT:
-						fprintf(stderr," %sINTEGER_ARG%s\t",ob,cb);
+						printf(" %sINTEGER_ARG%s\t",ob,cb);
 						break;
 					case TYPEBOOL:
-						fprintf(stderr," %sBOOLEAN_ARG%s\t",ob,cb);
+						printf(" %sBOOLEAN_ARG%s\t",ob,cb);
 						break;
 				}
-			fprintf(stderr," %s",desc.c_str());
+			printf(" %s",desc.c_str());
 			cnt++;
 		}
 }

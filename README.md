@@ -79,7 +79,7 @@ echo $REPLY
 
 read -p "run this command ? [N/y] " ans1 ans2
 echo $ans2
-N.B. extra _BC_variables supplied ( ie ans1 ) will 'swallow' input.
+N.B. extra variables supplied ( ie ans1 ) will 'swallow' input.
 
 Only stdout is redirectable to a file for now.
 Pipelines of commands may ONLY redirect the LAST command to a file, if you need to do fancy redirects or redirect stderr then wrap in a shell command eg:
