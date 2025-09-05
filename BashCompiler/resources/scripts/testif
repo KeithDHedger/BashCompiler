@@ -9,6 +9,12 @@ else
 echo "false"
 fi
 
+if [[ "${ALBUM,,}" = "${CURRENTALBUM^^}" ]];then
+echo "its true ${ALBUM,,} = ${CURRENTALBUM^^}"
+else
+echo "its false \${ALBUM,,} != \${CURRENTALBUM^^}"
+fi
+
 ALBUM=10200
 CURRENTALBUM=1030
 

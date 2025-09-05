@@ -100,6 +100,10 @@ echo ${FOO//"bar"/"baz"}
 And NOT
 echo ${FOO//bar/baz}
 
+Be careful of quotes eg use this:
+echo "The login/password is \"${RESULT}\""
+Not this:
+echo "The login/password is \""$RESULT"\""
 
 ````  
 

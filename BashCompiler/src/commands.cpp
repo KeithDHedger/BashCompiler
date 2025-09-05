@@ -410,53 +410,13 @@ QString commandsClass::makeWhileRead(QString qline)
 
 QString commandsClass::makeWhile(QString qline)
 {
-	QString					retstr="";
-	QString					tstr;
-	QString					line;
-	QRegularExpression		re;
-	QRegularExpressionMatch	match;
-	QString					leftstr;
-	QString					midstr;
-	QString					ritestr;
-	int						cnt=0;
-	bool						donumexpr=true;
-	parseFileClass			pfl;
-	parseFileClass			pfr;
+//use makeIf co they're the same practically
+	QString	retstr="";
+	QString	line=qline;
 
-	isInFor.push_back(false);
-	forVariable.push_back("");
-	line=qline;
-
-	while(bashmath[cnt]+=NULL)
-		tstr+=bashmath[cnt++]+QString("|");
-	tstr=tstr.left(tstr.length()-1);
-
-	re.setPattern("^[[:space:]]*(while)[[:space:]]*\\[+[[:space:]]*(.*)[[:space:]]*("+tstr+")[[:space:]]*([^]]+)[^;]\\]*;*(.*)");
-	match=re.match(line);
-	if((match.hasMatch()) && (match.captured(1).trimmed().compare("while")==0))
-		{
-			midstr=match.captured(3);
-			if(midstr.at(0)=='-')
-				donumexpr=true;
-			else
-				donumexpr=false;
-	
-			tstr=match.captured(2).trimmed();
-			pfl.parseLine(tstr);
-			leftstr=pfl.parseExprString(donumexpr);
-			tstr=match.captured(4).trimmed();
-			pfr.parseLine(tstr);
-			ritestr=pfr.parseExprString(donumexpr);
-
-			cnt=0;
-			while(bashmath[cnt]+=NULL)
-				{
-					if(midstr.compare(bashmath[cnt])==0)
-						midstr=cmath[cnt];
-					cnt++;		
-				}
-			retstr="while("+leftstr+midstr+ritestr+")\n";
-		}
+	line.replace(QRegularExpression(R"foo(^[[:space:]]*while)foo"),"if");
+	retstr=this->makeIf(line);
+	retstr.replace(QRegularExpression(R"foo(^[[:space:]]*if)foo"),"while");
 
 	return(retstr);
 }

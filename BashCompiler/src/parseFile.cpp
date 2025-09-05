@@ -732,6 +732,7 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 						outfmt+=tstr;
 						break;
 					case DOUBLEQUOTESTRING:
+					//errop<<"DOUBLEQUOTESTRING="<<this->lineParts.at(j).data<<Qt::endl;
 						tstr=this->lineParts.at(j).data;
 						tstr.replace(QRegularExpression("\\$\\{*([[:alpha:][:alnum:]_\\[\\]]+)\\}*"),"\"+_BC_variables[\"\\1\"]+\"");
 						outfmt+=tstr;
@@ -870,7 +871,6 @@ QString parseFileClass::setSpecialDollars(QString dollar)
 	QRegularExpression re;
 	QRegularExpressionMatch match;
 
-	//if(dollar.contains(QRegularExpression("[[:space:]]*\\$\\{?#\\}?")))
 	if(dollar.contains(QRegularExpression("[[:space:]]*\\$\\{#\\}|\\$#")))
 		{
 			if(isInFunction==false)
@@ -879,8 +879,7 @@ QString parseFileClass::setSpecialDollars(QString dollar)
 				return("QString::number(fv.size())");			
 		}
 
-	//re.setPattern("[[:space:]]*\\$\\{?(#)?([[:digit:]])}?|\\$\\{?(#)?([[:alpha:][:alnum:]_]*)}?");
-	re.setPattern(R"RX([[:space:]]*\$\{?(#)?([\?[:digit:]])}?|\$\{?(#)?([[:alpha:][:alnum:]_]*)}?)RX");
+	re.setPattern(R"RX([[:space:]]*\$\{?(#)?([\?\$[:digit:]])}?|\$\{?(#)?([[:alpha:][:alnum:]_]*)}?)RX");
 	match=re.match(dollar);
 	if(match.hasMatch())
 		{
@@ -892,6 +891,9 @@ QString parseFileClass::setSpecialDollars(QString dollar)
 			num=match.captured(2).trimmed().at(0).toLatin1();
 			switch(num.toLatin1())
 				{
+					case '$':
+						return("QString::number(getpid())");	
+						break;
 					case '?':
 						return("_BC_exitStatus");
 						break;
