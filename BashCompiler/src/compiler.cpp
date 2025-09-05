@@ -207,7 +207,7 @@ if(i<comnum-1)\n\
 dup2(pipe_fds[i*2+1],1);\n\
 else if(capture==true)\n\
 dup2(pipefdslast[1],STDOUT_FILENO);\n\
-else if(tofile!=NULL)\n\
+else if(tofile.isEmpty()==false)\n\
 {\n\
 close(STDOUT_FILENO);\n\
 dup(filefd);\n\
@@ -265,7 +265,7 @@ return(\"\");\n\
 	cCode.prepend(globalvars);
 	cCode.prepend(specialvars);
 	cCode.prepend(headers);
-	cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs "+useQTVersion+" ) -fPIC  -Ofast /PATH/TO/THIS/FILE -o APPNAME\nOptional:\nastyle -A7 --indent=tab /PATH/TO/THIS/FILE\nstrip ./a.out\nCreated on %2\n*/\n").arg(this->argv[1]).arg(QDate::currentDate().toString()));
+	cCode.prepend(QString("/*\nQt C++ file for %1\nCompile with:\ng++ -Wall $(pkg-config --cflags --libs "+useQTVersion+" ) -fPIC  -Ofast /PATH/TO/THIS/FILE -o APPNAME\nOptional:\nastyle -A7 --indent=tab /PATH/TO/THIS/FILE\nstrip ./APPNAME\nCreated on %2\n*/\n").arg(this->argv[1]).arg(QDate::currentDate().toString()));
 	cCode<<"\nreturn(0);\n}\n";
 
 	if((fullCompileHere.isEmpty()==true) && (compileHere.isEmpty()==true))
@@ -463,6 +463,8 @@ void compilerClass::parseSingleLine(QString qline)
 										retstr=commands.makeExit(lines.at(j));
 									if(match.captured(1).trimmed()=="export")
 										retstr=commands.makeExport(lines.at(j));
+									if(match.captured(1).trimmed()=="unset")
+										retstr=commands.makeUnset(lines.at(j));
 									if(match.captured(1).trimmed()=="cd")
 										retstr=commands.makeCD(lines.at(j));
 									if(match.captured(1).trimmed()=="read")
@@ -755,7 +757,7 @@ QStringList compilerClass::splitLines(QString qline)
 	lines<<tstr;
 	for(int j=0;j<lines.size();j++)
 		if(lines.at(j).isEmpty()==true)
-			lines.remove(j,1);
+			lines.removeAt(j);
 	//DB_printLines(lines);
 	return(lines);
 }

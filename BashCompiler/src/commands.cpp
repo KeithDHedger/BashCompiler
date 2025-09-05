@@ -524,6 +524,28 @@ QString commandsClass::makePopd(QString qline)
 	return(tstr);
 }
 
+QString commandsClass::makeUnset(QString qline)
+{
+	QString					tstr="";
+	QString					line=qline;
+	QRegularExpression		re;
+	QRegularExpressionMatch	match;
+
+	re.setPattern(R"RX(^[[:space:]]*?(unset)[[:space:]]+(.*))RX");
+	match=re.match(line);
+	if(match.hasMatch())
+		{
+			QStringList ss=match.captured(2).trimmed().split(" ",Qt::SkipEmptyParts);
+			for(int j=0;j<ss.size();j++)
+				{
+					tstr+="unsetenv(\""+ss.at(j)+"\");\n";
+					tstr+="_BC_variables.remove(\""+ss.at(j)+"\");\n";
+				}
+		}
+	tstr.remove(QRegularExpression(";\n$"));
+	return(tstr);
+}
+
 QString commandsClass::makeExport(QString qline)
 {
 	QString					tstr="";
@@ -532,12 +554,19 @@ QString commandsClass::makeExport(QString qline)
 	QRegularExpressionMatch	match;
 	parseFileClass			pfl;
 
-	re.setPattern("^[[:space:]]*?(export)[[:space:]]+(.*)");
+	re.setPattern(R"RX(^[[:space:]]*?(export)[[:space:]]+(.*))RX");
 	match=re.match(line);
+
 	if(match.hasMatch())
 		{
-			tstr=QString("setenv(\"%1\",%2.toStdString().c_str(),1)").arg(match.captured(2).trimmed()).arg("_BC_variables[\""+match.captured(2).trimmed()+"\"]");
+			QStringList ss=match.captured(2).trimmed().split(" ",Qt::SkipEmptyParts);
+			for(int j=0;j<ss.size();j++)
+				{
+					tstr+=QString("setenv(\"%1\",%2.toStdString().c_str(),1)").arg(ss.at(j).trimmed()).arg("_BC_variables[\""+ss.at(j).trimmed()+"\"]");
+					tstr+=";\n";
+				}
 		}
+	tstr.remove(QRegularExpression(";\n$"));
 	return(tstr);
 }
 

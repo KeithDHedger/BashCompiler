@@ -821,7 +821,7 @@ QString parseFileClass::parseExprString(bool isnumexpr)
 							{
 								if(tstr.startsWith("QString")==false)
 									tstr="\""+tstr+"\"";
-								parts<<"_BC_runExternalCommands("+tstr+",true,NULL,false)";
+								parts<<"_BC_runExternalCommands("+tstr+",true,\"\",false)";
 							/////parts<<"_BC_runExternalCommands("+tstr+",true,\"\",false)";
 							}
 						if(argcnt<10)

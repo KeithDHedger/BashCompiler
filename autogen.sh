@@ -1,5 +1,7 @@
 #!/bin/bash
 
+USEQTVERSION=${USEQTVERSION:-6}
+
 if [ -e ./remakesourcelist ];then
 	./remakesourcelist
 fi
@@ -15,7 +17,7 @@ case $USEQTVERSION in
 		chmod +x ./configure
 		;;
 	*)
-		autoconf
+		autoconf configure.ac > ./configure
 		;;
 esac
 ./configure $@

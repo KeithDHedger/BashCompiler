@@ -55,6 +55,8 @@ class commandsClass
 		QString	makePopd(QString qline);
 		QString	makeExit(QString qline);
 		QString	makeExport(QString qline);
+		QString	makeUnset(QString qline);
+
 		QString	makeCD(QString qline);
 		QString	makeRead(QString qline);
 		QString	makeCase(QString qline);

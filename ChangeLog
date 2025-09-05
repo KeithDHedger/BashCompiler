@@ -1,4 +1,10 @@
+0.4.1
+Fixed compile with qt6.
+Fixed autogen.sh script.
+Can now export/unset multiple variables at once eg 'unset foo bar'.
+
 0.4.0
+Added 'unset'.
 Fixed while ...
 Redone select arg in ...
 Code clean.
