@@ -113,7 +113,7 @@ Only stdout is redirectable to a file for now.
 .br
 Pipelines of commands may ONLY redirect the LAST command to a file, if you need to do fancy redirects or redirect stderr then wrap in a shell command eg:
 .br
-/bin/sh -c "ls /tmpl 2>/tmp/log|ls / &amp;>>/tmp/log"
+/bin/sh -c "ls /tmpl 2>/tmp/log|ls / &>>/tmp/log"
 .br
 
 Creating menus with 'select' is \fBBASH\fR only and will ( for now ) run a seperate shell to run the command at runtime.

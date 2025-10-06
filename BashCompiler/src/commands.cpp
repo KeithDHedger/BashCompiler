@@ -553,17 +553,36 @@ QString commandsClass::makeExport(QString qline)
 	QRegularExpression		re;
 	QRegularExpressionMatch	match;
 	parseFileClass			pfl;
-
-	re.setPattern(R"RX(^[[:space:]]*?(export)[[:space:]]+(.*))RX");
+	bool						success=false;
+	re.setPattern(R"RX(^[[:space:]]*?(export)[[:space:]]+(.*)=(.*))RX");
 	match=re.match(line);
-
 	if(match.hasMatch())
 		{
-			QStringList ss=match.captured(2).trimmed().split(" ",Qt::SkipEmptyParts);
-			for(int j=0;j<ss.size();j++)
+			tstr=pfl.reentrantParseVar(match.captured(3).trimmed());
+			tstr=tstr.replace(QRegularExpression("^[\"${]*|[}\"]*$"),"");
+			if(tstr.isEmpty()==true)
 				{
-					tstr+=QString("setenv(\"%1\",%2.toStdString().c_str(),1)").arg(ss.at(j).trimmed()).arg("_BC_variables[\""+ss.at(j).trimmed()+"\"]");
-					tstr+=";\n";
+					tstr=match.captured(3).trimmed();
+					tstr=QString("setenv(\"%1\",\"%2\",1)").arg(match.captured(2).trimmed()).arg(tstr);
+				}
+			else
+				{
+					tstr=QString("setenv(\"%1\",%2.toStdString().c_str(),1)").arg(match.captured(2).trimmed()).arg(tstr);
+				}
+			return(tstr);
+		}
+	else
+		{
+			re.setPattern(R"RX(^[[:space:]]*?(export)[[:space:]]+(.*))RX");
+			match=re.match(line);
+			if(match.hasMatch())
+				{
+					QStringList ss=match.captured(2).trimmed().split(" ",Qt::SkipEmptyParts);
+					for(int j=0;j<ss.size();j++)
+						{
+							tstr+=QString("setenv(\"%1\",%2.toStdString().c_str(),1)").arg(ss.at(j).trimmed()).arg("_BC_variables[\""+ss.at(j).trimmed()+"\"]");
+							tstr+=";\n";
+						}
 				}
 		}
 	tstr.remove(QRegularExpression(";\n$"));

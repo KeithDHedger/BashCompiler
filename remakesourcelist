@@ -1,6 +1,16 @@
 #|/bin/bash
 
 shopt -s nullglob
+
+QTVERSION=$(cat qtvers)
+if [[ $RECOMPILEHEADER -eq 1 ]];then
+	pushd BashCompiler/src
+		echo "Compiling headers ..."
+		echo g++ -c $(pkg-config --cflags Qt${QTVERSION}Core Qt${QTVERSION}Widgets Qt${QTVERSION}Gui ) -fPIC -x  c++-header qtincs.h -o qtincs.h.gch
+		g++ -c $(pkg-config --cflags Qt${QTVERSION}Core Qt${QTVERSION}Widgets Qt${QTVERSION}Gui ) -fPIC -x  c++-header qtincs.h -o qtincs.h.gch
+	popd
+fi
+
 cd "BashCompiler/src"
 csrclst=$(echo "../src/*.c" "../src/*.cpp")
 echo COMMONSRC = $csrclst > ../sources

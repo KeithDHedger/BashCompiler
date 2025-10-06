@@ -45,9 +45,9 @@ class parseFileClass
 		QString				optimizeOP(QString qline,bool *succeed);
 		bool					parseLine(QString line);
 
-	private:
 		QString				parseVarNew(QString qline);
 		QString				reentrantParseVar(QString qline);
+	private:
 		QString				setSpecialDollars(QString dollar);
 		int					currentLine=0;
 

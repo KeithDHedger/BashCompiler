@@ -1,4 +1,5 @@
 0.4.1
+Can now assign and export variable in one line ( eg: export MANWIDTH=2000 or export MANWIDTH=${width} ).
 Fixed compile with qt6.
 Fixed autogen.sh script.
 Can now export/unset multiple variables at once eg 'unset foo bar'.

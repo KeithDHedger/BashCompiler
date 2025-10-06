@@ -1,6 +1,7 @@
 #!/bin/bash
 
 USEQTVERSION=${USEQTVERSION:-6}
+echo "${USEQTVERSION}">qtvers
 
 if [ -e ./remakesourcelist ];then
 	./remakesourcelist
